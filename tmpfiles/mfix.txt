@@ -1,0 +1,186 @@
+一些说明:
+------------------------------------------------------------------------------------------
+专业词汇:
+MFIX-TFM (Two-Fluid Model):二流体模型
+MFIX-DEM (Discrete Element Model):离散元素模型
+MFIX-PIC (Multiphase Particle in Cell):单元格多相颗粒
+MFIX-Hybrid (Eulerian-Lagrangian-Eulerian):欧拉-拉格朗日-欧拉混合模式
+
+
+
+#1.下载并解压:
+===========================================================================================
+官网要求注册,我已经注册,但是并不能下载,让我有点不爽.
+最后扫描了一下网站,在这里找到了所有版本的下载地址: https://mfix.netl.doe.gov/download/mfix/
+此说明文档中我将以mfix-2015.2.tar.gz为例进行说明.其直达下载链接如下:
+https://mfix.netl.doe.gov/download/mfix/mfix-2015.2.tar.gz
+解压:tar -zxvf mfix-2015.2.tar.gz
+解压后得到目录mfix-2015,假设其绝对路径为:/root/Happy/over-school/mfix-build/mfix-2015.2
+
+#2.一点小技巧
+===========================================================================================
+打开~/.zshrc(我假设你用的是zsh,如果用的是bash,打开/etc/profile即可),在最末加入如下语句:
+MFIX=/root/Happy/over-school/mfix-build/mfix
+alias mkmfix=${MFIX}/model/configure_mfix
+然后退出并重新打开zsh即可.
+经过上面的设置,你便可以在任何地方使用mkmfix这个命令来生成makefile了.
+
+#3.安装编译工具
+===========================================================================================
+apt-get install gfortran build-essential autoconf gcc g++
+
+#4.编译mfix与postmfix
+===========================================================================================
+==>进入样例目录
+命令:cd mfix-2015.2/tcd mfix-2015.2/tutorials/fluidBed1
+说明:该目录下仅有一个mfix.dat,该文件是必须的,用于配置实验模拟数据.
+==>生成makefile
+命令:mkmfix FC=gfortran FCFLAGS='-g -O2'
+说明:命令执行成功后将会生成一个Makefile文件
+==>编译mfix
+命令:time make -j4
+说明:time是用来测试命令运行的时间,j是jobs的首字母缩写,-j指明并行编译,如果你的电脑是多核,便可支持多核编译,我这里选择4核编译.
+     选择并行数推荐为系统核心数目的二倍.开启四核编译大约用了372.84s,但是开启多核编译有可能导致
+     编译失败.编译成功后将会在当前目录下生成一个mfix文件.
+==>编译postmfix
+命令:make postmfix
+说明:当编译完mfix之后,只需make postmfix即可编译postmfix,上述命令执行成功后将会在当前目录下生成一个postmfix.
+#5.执行
+===========================================================================================
+mfix的执行方式有如下几种:
+1).串行执行(Serial Execution)
+   mfix运行后将信息输出到控制台上,只需要简单的执行步骤4中编译出来的mfix文件即可.
+2)共享内存并发执行(Shared memory parallel):
+  使用OpenMP(一个跨平台的多线程实现,也就是利用多线程来提高计算效率)所提供的指令来执行mfix,需
+  需要重新编译,生成makefile并编译的命令如下:
+  time mkmfix --smp FC=gfortran FCFLAGS='-g -O2' && make -j8
+  在执行mfix的时候可以用环境变量来指定所用的线程数目,比如执行线程数为4:export OMP_NUM_THREADS=4 
+  如果你没有明确指定,那么当你运行mfix之后将会提示你输入线程数目:
+  Enter the number of threads to be used for SMP: 4
+3)分布式内存并发执行(Distributed memory parallel):
+  较为复杂,此处不做讨论.
+
+
+mfix执行后的输出文件有如下几种:
+1).LOG,标准文本文件,运行时的日志信息.
+2).OUT,标准文本文件,回显输入文件的内容以及数字化表示的单元格分布.
+3).RES,二进制文件,用于重启.
+4).SPx,二进制文件,x代表一个数字,该文件用于暂时存储的模拟数据,用于后续处理.
+
+#5.数据可视化工具安装
+===========================================================================================
+安装ParaView和VisIt:
+===>下载:
+    ParaView下载地址(速度巨慢):http://www.paraview.org/download/
+    VisIt下载地址(速度凑合):https://wci.llnl.gov/simulation/computer-codes/visit/executables                           
+    有人制作好了一个镜像网站,地址为:http://fossies.org/linux/misc/,速度还行,可以去搜索下载.
+    不过你都可以到我的百度网盘下载:http://pan.baidu.com/s/1geh1bMz
+===>安装:
+    安装Visit:
+    tar -zxvf visit2_10_1.linux-x86_64-ubuntu14.tar.gz -C /opt/
+    可执行文件为:/opt/visit2_10_1.linux-x86_64/bin/visit
+    解压后将其添加到unity菜单项:
+    gvim /usr/share/applications/visit.desktop
+    添加如下内容:
+    [Desktop Entry]
+    Version=1.0
+    Encoding=UTF-8
+    Name=VisIt
+    Exec=/opt/visit2_10_1.linux-x86_64/bin/visit
+    Type=Application
+    Icon=/opt/visit2_10_1.linux-x86_64/2.10.1/linux-x86_64/resources/images/VisIt2.png
+
+    安装ParaView:
+    tar -zxvf ParaView-5.0.0-Qt4-OpenGL2-MPI-Linux-64bit.tar.gz -C /opt
+    gvim /usr/share/applications/paraview.desktop
+    添加如下内容:
+    [Desktop Entry]
+    Version=1.0
+    Encoding=UTF-8
+    Name=ParaView
+    Exec=/opt/ParaView-5.0.0-Qt4-OpenGL2-MPI-Linux-64bit/bin/paraview
+    Type=Application
+    Icon=/opt/ParaView-5.0.0-Qt4-OpenGL2-MPI-Linux-64bit/share/icons/hicolor/96x96/apps/paraview.png
+
+#6.数据提取
+===========================================================================================
+运行mfix:
+    这里使用第二种即SMP方式(当然使用第一种方式也无所谓了)运行,我大约用了40分钟.
+    生成的数据文件如下:
+    BUB01.LOG
+    BUB01.OUT
+    BUB01.RES
+    BUB01.SP1
+    BUB01.SP2
+    BUB01.SP3
+    BUB01.SP4
+    BUB01.SP5
+    BUB01.SP6
+    BUB01.SP7
+    BUB01.SP8
+    BUB01.SP9
+    BUB01.SPA
+    BUB01.SPB
+    EPgErr.log
+
+postmfix提取数据以及使用上述可视化软件查看数据,此处从略,可参看mfix帮助文档中的示例.
+
+#7.自动化处理
+===========================================================================================
+现在来回顾一下所做的事情:
+1)设计mfix.dat
+2)运行如下脚本,当数据生成后,弹窗显示计算时间并播放声音提示:
+#! /bin/bash
+#=========================================================================================
+#@1.Enable Aliases 
+shopt -s expand_aliases
+source /etc/profile
+#@2.Run Time[BEGIN]
+#begin time
+start=`date +%s`
+#@3.Produce Makfile and Compile mfix and postmfix 
+#@3.1 Serial Mode (uncomment the next line if you use this mode)
+#mkmfix FC=gfortran FCFLAGS='-g -O2' && make -j4 && make postmfix 
+#@3.2 SMP Mode
+mkmfix --smp FC=gfortran FCFLAGS='-g -O2' && make -j4 && make postmfix
+#@4.run mfix
+./mfix
+#@5.Run Time[END]
+end=`date +%s`
+#@6.Calcuate Time Consumed
+runtime=$((end-start))
+#@7.Message box to notify the user that task is done with playing notifcation sound!
+zenity \
+--info \
+--text="\n\n<span size=\"xx-large\">Time consumed is $runtime s.</span>\n\nGet your <b>Visual Data Now!</b>.\
+        \n\nBy Bugnofree 2016.03.18" \
+--title="Work is Done!" \
+--ok-label="OK" &
+paplay /opt/ishell/assets/done.ogg 
+#=========================================================================================
+3)将上述脚本保存为auto-mfix,放到/opt/ishell/下,修改权限:
+chmod +x auto-mfix
+然后将/opt/ishell/加入到环境变量(如果你用bash,请操作/etc/profile):
+gvim ~/.zshrc
+export PATH=${PATH}:/opt/ishell 
+这样,我们在任何目录下都可以使用auto-mfix来执行编译生成数据了.
+
+#测试数据
+打ParaView,File->Open,选择xxx.RES,然后选择Apply
+Filters > Alphabetical > Glyph
+Glyph Type选择为Sphere
+Scalar Mode选择为scalar
+
+
+#安装mfix-gui(简化编码方式)
+下载mfix-gui_release-0_1beta.tar.gz,新建文件夹mfix-gui,在该文件夹下解压,解压后你会看到一个mfixgui,
+其下有一个python文件startgui.py,使用命令python startgui.py即可启动.
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=MFIX-GUI
+Exec=python /root/Happy/over-school/mfix-build/mfix-gui/mfixgui/startgui.py
+Type=Application
+Icon=/root/Happy/over-school/mfix-build/mfix-gui/mfixgui/mfix-gui-icon.png
+
+2016-03-18 Fri 08:50 PM By Bugnofree

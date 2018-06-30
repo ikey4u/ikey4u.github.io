@@ -1,0 +1,154 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Reverse Integer</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+ 
+<!-- 代码高亮:不再使用 2016-06-16 Thu 02:27 PM -->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">-->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">-->
+<!--<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>-->
+<!--<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>-->
+<!--<script type="text/javascript">-->
+  <!--hljs.initHighlightingOnLoad();-->
+<!--</script>-->
+
+
+<!--MathJax数学公式-->
+<!-- 参考:https://mathjax-chinese-doc.readthedocs.io/en/latest/start.html#id5-->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!--数学公式示例:-->
+<!--When $a \ne 0$, there are two solutions to \(ax^2 + bx + c = 0\) and they are-->
+<!--$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$-->
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p> Reverse Integer|bugnofree|2017-01-15 Sun 11:28 PM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+<!--<br/><b>本文所涉及的文件(如果有的话)大部分可以通过文章末尾的链接下载.</b> <br/>-->
+<hr/>
+<!--文章正文-->
+<h3 class="titlebar">Reverse Integer</h3>
+<img src="problem.png"></img>
+<p>题目大意:反转一个整数,比如123反转后为321,-123反转后为-321.你需要注意的情况有:如果整数末尾有0该如何处理,如果溢出该怎么处理.</p>
+<h3 class="titlebar">Solution</h3>
+<pre id='vimCodeElement'>
+<span class="PreProc">#include </span><span class="String">&lt;iostream&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;string&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;algorithm&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;cmath&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;climits&gt;</span>
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+<span class="Type">class</span> Solution
+{
+<span class="Statement">public</span>:
+   <span class="Type">int</span> reverse(<span class="Type">int</span> x)
+   {
+       <span class="Comment">/*</span><span class="Comment"> INT_MAX=2147483647    INT_MIN=-2147483648 </span><span class="Comment">*/</span>
+       <span class="Comment">//x在使用log10时不能为0</span>
+       <span class="Statement">if</span>(x == <span class="Constant">0</span>) <span class="Statement">return</span> <span class="Constant">0</span>;
+       <span class="Comment">//符号位</span>
+       <span class="Type">int</span> sign = x &lt; <span class="Constant">0</span> ? -<span class="Constant">1</span> : <span class="Constant">1</span>;
+       <span class="Comment">//取x的绝对值:可能溢出</span>
+       <span class="Statement">if</span>(x * <span class="Constant">1.0</span> * sign &gt; <span class="Constant">INT_MAX</span>) <span class="Statement">return</span> <span class="Constant">0</span>;
+       x = x * sign;
+       <span class="Comment">//求位数:p进制整数k的位数为:floor(log_p(k))+1</span>
+       <span class="Comment">//可用用换底公式求:log_p(k)=log10(k)/log10(p)</span>
+       <span class="Type">int</span> k = log10(x * <span class="Constant">1.0</span>) + <span class="Constant">1</span>;
+       <span class="Type">double</span> rx = <span class="Constant">0</span> ;
+       <span class="Statement">for</span>(<span class="Type">int</span> i = k - <span class="Constant">1</span>;i &gt;= <span class="Constant">0</span>; --i)
+       {
+           <span class="Comment">//溢出判断</span>
+           <span class="Statement">if</span>(rx &gt; <span class="Constant">INT_MAX</span>) <span class="Statement">return</span> <span class="Constant">0</span>;
+           <span class="Type">int</span> d = x % <span class="Constant">10</span>;
+           x = (x - d) / <span class="Constant">10</span>;
+           rx += d * pow(<span class="Constant">10</span>,i);
+       }
+       <span class="Statement">return</span> sign * (<span class="Type">int</span>)(rx);
+   }
+};
+<span class="Comment">//=======================Driver===========================</span>
+<span class="Type">int</span> main()
+{
+    Solution sol;
+    <span class="Comment">//cout&lt;&lt;INT_MAX&lt;&lt;&quot;\t&quot;&lt;&lt;INT_MIN&lt;&lt;endl;</span>
+    <span class="Comment">//cout&lt;&lt;sol.reverse(0)&lt;&lt;endl;</span>
+    cout&lt;&lt;sol.reverse(-<span class="Constant">2147483648</span>)&lt;&lt;endl;
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+
+<span class="Comment">/*</span>
+<span class="Comment">===========complexity==============</span>
+<span class="Comment">Time Complexity:O(1) </span>
+<span class="Comment">Space Complexity:O(1)</span>
+<span class="Comment">===========makefile=================</span>
+<span class="Comment">all:</span>
+<span class="Comment">    @g++  solve.cpp -o   solve</span>
+<span class="Comment">    @./solve</span>
+<span class="Comment">clean:</span>
+<span class="Comment">    rm -f solve</span>
+<span class="Comment">    reset</span>
+<span class="Comment">===========leetcode accepted========</span>
+<span class="Comment">1032 / 1032 test cases passed.</span>
+<span class="Comment">Status: Accepted</span>
+<span class="Comment">Runtime: 9 ms</span>
+<span class="Comment">Submitted: 0 minutes ago</span>
+<span class="Comment">===========submission date=========</span>
+<span class="Comment">2017-01-15 Sun 11:25 PM</span>
+<span class="Comment">*/</span>
+</pre>
+<h3 class="titlebar">Analysis</h3>
+正如你所想的,这道题在思维上而言,是相当简单的.但是这题容易做对么,不那么容易.
+<p>这里主要的困难点是如何尽可能的想到所有的溢出情况.我的处理方式,比较简单粗暴,就是先取绝对值,用double类型来处理,
+然后看看是否超过了INT_MAX,如果溢出了,则返回零.返回的反转数也是用double存储,在没有溢出的情况下强制转化为int型,我提交了三次代码才AC掉,
+主要是可能溢出的地方考虑不周到.</p>
+<p>在使用C/C++提供的数学函数时,应注意边界条件,比如log10(x)这个函数,在数学上要求x&gt;0,那么编码的时候,理应考虑到这种"天然"限制条件的情况.</p>
+<p>这里我用了一个小技巧,就是用数学知识来快速求得一个整数的位数,对于进制为p,数值为k的整数,其包含的数位d可以用下面的式子计算:
+$$ d = \lfloor log_pk \rfloor + 1$$
+这个函数我在学习组合数学的时候做了笔记,所以记得很清楚,
+<a href="https://en.m.wikipedia.org/wiki/Floor_and_ceiling_functions" target="_blank">Wikipedia</a>上也有,我在此就简要的证明一下:
+$\forall n \in Z$,如389,共3位,我们知道,3位数的范围是100~999,若n为一个三位数,则$100\leq n \leq 999$,也即$10^2 \leq n < 10^3,\therefore 10^2-1 <  n \leq 10^3-1$,
+类似地,对于数n,若为d位,则有$10^{d-1} - 1 < n \leq 10^d-1$,因此$10^{d-1}  < n+1 \leq 10^d$,以10为底数,则$d-1 < log_{10}(n+1) \leq d$,于是$d=\lceil log_{10}(n+1) \rceil =
+\lfloor log_{10}(n) \rfloor +1$ </p>
+<p>代码应该是很好理解了,不再赘述.时间复杂度,由于整形最大不超过INT_MAX的数位,所以可以认为是O(1),空间复杂度O(1).</p>
+</body>
+
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>

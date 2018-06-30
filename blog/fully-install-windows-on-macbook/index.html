@@ -1,0 +1,153 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Fully Installing Windows On Macbook Air</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+<!-- 代码高亮 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">
+<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>
+<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>
+<script type="text/javascript">
+  hljs.initHighlightingOnLoad();
+</script>
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>在Macbook Air上完整安装Windows7|bugnofree|2016-03-22 周二 12:21 下午|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/><br/><br/>
+<p>
+<i>
+朋友因使用苹果的笔记本不习惯,让我帮助其安装一个Windows系统,本来他的笔记本就是双系统(Windows7以及Mac OS X),
+但是后来硬盘空间不用了,而又几乎不使用Mac OS X,于是让我帮他弄一下分区,把苹果盘抹了,然后腾出一个分区.
+我最初也不太清楚怎么弄,以为和windows下差不多,直接用PE把所有盘给抹了,然后用U盘安装系统,但是诡异的事情是:
+在Windows安装的第一个界面(就是选择语言的那个界面),卡住了,鼠标键盘根本不听使唤.经过一番周折(省略一万字),
+,得知原因是驱动不支持,之后手动安装驱动到系统镜像,终于搞定,写下此文以供他人参考.</p></i>
+<br/>
+<hr/>
+实验环境:<br/>
+Windows 7旗舰版(工作机)+Macbook Air 2013+Windows 7期间中文版纯净版镜像<br/>
+Intel(R)_USB_3.0_eXtensible_Host_Controller_Driver,下载链接: http://pan.baidu.com/s/1sk767q1 密码: qws9<br/>
+
+<br/>
+<h4 class="subtitle">刻录镜像到U盘</h4>
+使用软碟通(UltraISO)将你的系统镜像(ISO文件)刻录到U盘上(大于等于8GB),刻录完成后U盘目录如下图所:<br/>
+<br/><img src="0x01.png"></img><br/>
+<h4 class="subtitle">install.wim和boot.wim</h4>
+刻录完成后,你会看到U盘根目录下有个文件夹sources,里面有两个文件install.wim和boot.wim,这便是我们需要处理的对象.我假设你的U盘跟路径为H:\,
+则前面两者的绝对路径分别是H:\sources\install.wim和H:\sources\boot.wim.在下面的相关描述里,替换自己的即可.<br/>
+<h4 class="subtitle">驱动</h4>
+解压Intel(R)_USB_3.0_eXtensible_Host_Controller_Driver,其包含一个Drivers的目录,其树形结构描述如下:
+<pre style="border:none">
+<code>
+├─HCSwitch                                  
+│  └─Win7                                   
+│      ├─x64                                
+│      │      iusb3hcs.cat                  
+│      │      iusb3hcs.inf                  
+│      │      iusb3hcs.sys                  
+│      │      WdfCoInstaller01009.dll       
+│      │                                    
+│      └─x86                                
+│              iusb3hcs.cat                 
+│              iusb3hcs.inf                 
+│              iusb3hcs.sys                 
+│              WdfCoInstaller01009.dll      
+│                                           
+└─xHCI                                      
+    └─Win7                                  
+        ├─x64                               
+        │      iusb3hub.cat                 
+        │      iusb3hub.inf                 
+        │      IUsb3Hub.man                 
+        │      iusb3hub.sys                 
+        │      iusb3xhc.cat                 
+        │      iusb3xhc.inf                 
+        │      iusb3xhc.man                    
+        │      iusb3xhc.sys                 
+        │                                   
+        └─x86                               
+                iusb3hub.cat                
+                iusb3hub.inf                
+                IUsb3Hub.man                
+                iusb3hub.sys                
+                iusb3xhc.cat                
+                iusb3xhc.inf                
+                iusb3xhc.man                
+                iusb3xhc.sys                
+</code>
+</pre>
+我这里为64bit系统,因此我选择x64下的文件,即只需要HCSwitch\Win7\x64下的以及xHCI\x64下的所有文件,将它们放在C盘根目录下的usb3文件夹中.
+
+<h4 class="subtitle">刷入驱动</h4>
+打开命令行窗口,进入C盘根目录,使用命令mkdir image以及mkdir bootimage命令分别新建image和bootimage文件夹.<br/>
+向install.wim刷入驱动:
+<pre style="border:none">
+<code>
+dism /mount-wim /wimfile:H:\sources\install.wim /index:4 /mountdir:c:\image
+dism /image:c:\image /add-driver  /driver:C:\usb3 /recurse /forceunsigned
+</code>
+</pre>
+添加驱动成功后如下图所示:<br/>
+<br/><img src="0x02.png"></img><br/>
+向boot.wim刷入驱动:
+<pre style="border:none">
+<code>
+dism /mount-wim /wimfile:H:\sources\boot.wim /index:2 /mountdir:c:\bootimage
+dism /image:c:\bootimage /add-driver  /driver:C:\usb3 /recurse /forceunsigned
+</code>
+</pre>
+添加驱动成功后如下图所示:<br/>
+<br/><img src="0x03.png"></img><br/>
+最后写入镜像并卸载:
+<pre style="border:none">
+<code>
+dism /unmount-wim /mountdir:c:\image /commit
+dism /unmount-wim /mountdir:c:\bootimage /commit
+</code>
+</pre>
+如下图所示:<br/>
+<br/><img src="0x04.png"></img><br/>
+一切完成后,你就可以删除新建的那两个文件夹(image和bootimage)了,拔掉U盘,插入到macbook上,按住option键不松开,然后按下开机键.
+开机之后,选择你的U盘,接下来的就和正常的安装是一样的,键盘鼠标都是好使的.
+当你顺利安装完后,别忘了去苹果官网下载bootcapm驱动,安装完成后就可以愉快的玩耍了.
+
+
+<h4 class="subtitle">参考</h4>
+1.http://lixiaotao.blog.51cto.com/985722/1697879<br/>
+2.http://www.cnblogs.com/gangtienanzi/p/3421261.html<br/>
+</body>
+
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

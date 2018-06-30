@@ -1,0 +1,799 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>OpenWrt Configuration and Extend Storage</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+
+<!-- 代码高亮:不再使用 2016-06-16 Thu 02:27 PM -->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">-->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">-->
+<!--<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>-->
+<!--<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>-->
+<!--<script type="text/javascript">-->
+  <!--hljs.initHighlightingOnLoad();-->
+<!--</script>-->
+
+
+<!--数学公式-->
+    <!--MathJax路径:-->
+    <script type="text/javascript" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_CHTML">
+    </script>
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>OpenWrt配置以及U盘扩容|bugnofree|2016-07-08 Fri 11:54 PM|</p>
+		</ul>
+		</div>
+	</center>
+
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+Latest update: 2016-10-19 Wed 04:13 PM <br/>
+<a href="#sec0x00"><h3 class="subtitle">后续补充</h3></a>
+<br/>
+以下为正文目录<br/>
+<ul>
+    <li>
+    <a href="#sec0x01"><h3 class="subtitle">1.确定路由器的架构信息</h3></a>
+        <li> <a href="#sec0x01-1"><h4 class="subtitle">......1.1.路由器信息</h4></a> </li>
+        <li> <a href="#sec0x01-2"><h4 class="subtitle">......1.2.固件布局</h4></a> </li>
+    </li>
+    <li> <a href="#sec0x02"><h3 class="subtitle">2.Image Builder自定义固件</h3></a></li>
+    <li> <a href="#sec0x03"><h3 class="subtitle">3.U盘扩容</h3></a>
+        <li> <a href="#sec0x03-1"><h4 class="subtitle">......3.1.U盘分区</h4></a> </li>
+        <li> <a href="#sec0x03-2"><h4 class="subtitle">......3.2.设置交换分区</h4></a> </li>
+        <li> <a href="#sec0x03-3"><h4 class="subtitle">......3.3.自动挂载</h4></a> </li>
+    </li>
+    <li> <a href="#sec0x04"><h3 class="subtitle">4.修改源并安装图形界面</h3></a></li>
+    <li> <a href="#sec0x05"><h3 class="subtitle">5.无线打印机</h3></a></li>
+    <li> <a href="#sec0x06"><h3 class="subtitle">6.无线存储:挂载2TB硬盘</h3></a>
+        <li> <a href="#sec0x06-1"><h4 class="subtitle">......6.1.工具安装</h4></a> </li>
+        <li> <a href="#sec0x06-2"><h4 class="subtitle">......6.2.安装Samba服务并配置</h4></a> </li>
+    </li>
+    <li> <a href="#sec0x07"><h3 class="subtitle">7.系统备份</h3></a></li>
+    <li> <a href="#sec0x08"><h3 class="subtitle">8.OpenWrt的网络配置</h3></a>
+        <li> <a href="#sec0x08-1"><h4 class="subtitle">......8.1.无线网络的配置</h4></a> </li>
+        <li> <a href="#sec0x08-2"><h4 class="subtitle">......8.2.宽带连接的配置</h4></a> </li>
+    </li>
+    <li> <a href="#sec0x09"><h3 class="subtitle">9.其他可选安装</h3></a></li>
+    <li> <a href="#sec0x10"><h3 class="subtitle">10.OpenWrt命令总结</h3></a></li>
+    <li> <a href="#sec0x11"><h3 class="subtitle">11.ISSUES</h3></a></li>
+    <li> <a href="#sec0x12"><h3 class="subtitle">12.Updates 2017-09-20:WAN 口桥接</h3></a></li>
+</ul>
+<br/><b>本文所涉及的文件(如果有的话)大部分可以通过文章末尾的链接下载.</b> <br/>
+<a name="sec0x00"></a>
+<h3 class="titlebar">后续补充</h3>
+<h3 class="subtitle">搭建FTP服务器</h3>
+<pre>
+opkg update
+opkg install vsftpd
+
+===============配置匿名访问===============
+1.编辑vsftpd配置文件:
+$:vim /etc/vsftpd.conf
+userlist_enable=YES
+userlist_deny=NO
+userlist_file=/etc/vsftpd.users
+anonymous_enable=YES
+no_anon_password=YES
+anon_root=/mnt/cloud-storage/Public  #这里修改为你自己的ftp访问目录
+2.添加匿名用户到用户列表
+echo anonymous > /etc/vsftpd.users
+chown -R ftp:ftp /mnt/cloud-storage/Public/
+3.设置passwd文件
+vim /etc/passwd
+ftp:*:55:55:ftp:/mnt/cloud-storage/Public:/bin/false
+4.可选的一个步骤:
+chmod 755 /mnt/cloud-storage/Public/
+如果你的当前目录为samba服务器下的目录,那么你不需要执行这一步,否则会导致samba没有访问权限.
+5.vfstpd command:
+/etc/init.d/vsftpd start     (Start the service)
+/etc/init.d/vsftpd stop      (Stop the service)
+/etc/init.d/vsftpd restart   (Restart the service)
+/etc/init.d/vsftpd reload    (Reload configuration files (or restart if that fails))
+/etc/init.d/vsftpd enable    (Enable service autostart)
+/etc/init.d/vsftpd disable   (Disable service autostart)
+6.访问:浏览器里面输入ftp://your-router-ip即可.
+#参考:http://developersu.blogspot.com/2015/07/vsftpd-openwrt.html
+</pre>
+
+
+<a name="sec0x01"></a>
+<h3 class="titlebar">1.确定路由器的架构信息</h3>
+<a name="sec0x01-1"></a>
+<h3 class="subtitle">1.1路由器信息</h3>
+来<a href="https://wiki.openwrt.org/toh/start" target="_blank">这里</a>,里面一共有以下几栏:
+<pre>
+Brand(牌子)/Model(型号)/Versions(版本)/Current Release(当前发行版本)/Device Page(路由器设备描述页面)/Device Techdata(路由器技术细节)
+</pre>
+比如我的路由器牌子是TP-LINK,型号MR12U,版本为1.0,这些在路由器上写的都有.
+在BRAND里面输入TP-LINK,在Model里面输入MR12U,回车,稍等就会查询出来(如果有的话).
+然后可以单击Device Page或者Device Techdata里面的链接来查看路由器的固件信息,
+看Techdata比较方便,比如我的搜索结果如下所示:<br/>
+<br/><img src="0x01.png"></img><br/>
+单击Techdata进入如下界面:<br/>
+<br/><img src="0x02.png"></img><br/>
+如果只是下载安装的以及升级的固件,只需获取 Firmware OpenWrt Install URL和Firmware OpenWrt Upgrade URL即可.
+从这里可以知道我的路由器闪存为4M,目标平台为ar71xx,RAM为32MB,Bootloader为U-boot,模型为TL-MR12U.
+<a name="sec0x01-2"></a>
+<h3 class="subtitle">1.2固件布局</h3>
+固件布局可以使用如下命令查看:
+<pre>
+root@OpenWrt:~# dmesg  | grep -A 10 "MTD partitions"
+[    0.510000] Creating 5 MTD partitions on "spi0.0":
+[    0.520000] 0x000000000000-0x000000020000 : "u-boot"
+[    0.520000] 0x000000020000-0x00000013f64c : "kernel"
+[    0.530000] 0x00000013f64c-0x0000003f0000 : "rootfs"
+[    0.530000] mtd: device 2 (rootfs) set to be root filesystem
+[    0.540000] 1 squashfs-split partitions found on MTD device rootfs
+[    0.540000] 0x0000003a0000-0x0000003f0000 : "rootfs_data"
+[    0.550000] 0x0000003f0000-0x000000400000 : "art"
+[    0.550000] 0x000000020000-0x0000003f0000 : "firmware"
+[    0.600000] libphy: ag71xx_mdio: probed
+[    1.190000] ag71xx ag71xx.0: connected to PHY at ag71xx-mdio.1:04 [uid=004dd041, driver=Generic PHY]
+</pre>
+上面的地址范围指明了各个区域的地址范围,可以看到这些区域有些是嵌套的,路由器固件的布局可以参考下图:
+<img src="layout.png"></img>
+每个块的大小则可以通过如下命令查看:
+<pre>
+root@OpenWrt:~# cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00020000 00010000 "u-boot"
+mtd1: 0011f64c 00010000 "kernel"
+mtd2: 002b09b4 00010000 "rootfs"
+mtd3: 00050000 00010000 "rootfs_data"
+mtd4: 00010000 00010000 "art"
+mtd5: 003d0000 00010000 "firmware"
+</pre>
+<a name="sec0x02"></a>
+<h3 class="titlebar">2.Image Builder自定义固件</h3>
+这里我使用Image Builder来自定义固件,主要是刷入用于扩展路由空间的软件,因为一旦刷入原始OpenWrt固件,
+MR12U空间十分小,装其他软件十分困难,最初也是因为先刷入了OpenWrt镜像,最后无论如何都无法
+用OPKG安装需要的U盘扩展软件包,后来发现了可以使用Image Builder自定义固件,于是才有了此文,
+我们在使用该法将需要的软件包直接放到固件中,然后再刷入路由器,很漂亮的是,固件中加入
+软件包后,固件大小变化不大,不影响往路由器中刷固件.<br/>
+路由器的Target是ar71xx,到<a href="https://downloads.openwrt.org/chaos_calmer/15.05.1/" target="_blank">这里</a>,
+我们可以看到,有三个目录:generic,mikrotik以及nand.后两者暂时不太清楚,
+但是我们由Techdata可以知道应该选择generic目录,然后在generic下载ImageBuilder,
+下载完成后解压并进入ImageBuilder目录:
+<pre>
+cd ~/Downloads
+mkdir openwrt && cd openwrt
+wget http://downloads.openwrt.org/chaos_calmer/15.05.1/ar71xx/generic/OpenWrt-ImageBuilder-15.05.1-ar71xx-generic.Linux-x86_64.tar.bz2
+tar -jxvf OpenWrt-ImageBuilder-15.05.1-ar71xx-generic.Linux-x86_64.tar.bz2
+cd OpenWrt-ImageBuilder-15.05.1-ar71xx-generic.Linux-x86_64
+</pre>
+我们需要配置repositories.conf文件,指定源地址,该文件位于OpenWrt-ImageBuilder-15.05.1-ar71xx-generic.Linux-x86_64
+目录下面(顶层目录).打开repositories.conf,替换其中src/gz为如下行:
+<pre>
+src/gz ar71xx_base          http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/base
+src/gz ar71xx_luci          http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/luci
+src/gz ar71xx_management    http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/management
+src/gz ar71xx_packages      http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/packages
+src/gz ar71xx_routing       http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/routing
+src/gz ar71xx_telephony     http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/telephony
+</pre>
+Ubuntu需要安装如下工具:
+<pre>
+apt-get install subversion build-essential libncurses5-dev zlib1g-dev gawk git ccache gettext libssl-dev xsltproc wget
+</pre>
+生成自定义镜像的语法如下:
+<pre> make image PROFILE=XXX PACKAGES="pkg1 pkg2 pkg3 -pkg4 -pkg5 -pkg6" FILES=files/ </pre>
+其中PROFILE指定要编译的目标镜像,PACKAGES指明要嵌入的包,FILES指明要包含的文件目录.<br/>
+对于要编译的目标镜像(PROFILE)名称,可以使用make info来查看.这里我来查找我的MR12U型号路由器.
+<pre> make info | grep -B 3 -A 3 MR12U </pre>
+有用的输出如下:
+<pre>
+TLMR12U:
+	TP-LINK TL-MR12U
+	Packages: kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
+</pre>
+所以PROFILE名称即为TLMR12U.
+包我们就安装:
+<pre> kmod-fs-ext4  kmod-usb-storage kmod-usb-ohci e2fsprogs  block-mount </pre>
+包含目录没有.因此执行命令如下:
+<pre> make image PROFILE=TLMR12U PACKAGES="kmod-fs-ext4  kmod-usb-storage kmod-usb-ohci e2fsprogs  block-mount" </pre>
+编译生成的镜像存放在bin/architecture(其中architecture为你路由器的架构,比如我这里就为ar71xx)目录下面.<br/>
+我们可以看一下原有的镜像大小为:
+<pre>
+root@shell:~# ls -hl ~/Desktop/openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-factory.bin
+-rw-r--r-- 1 root root 3.8M Jul  8 01:09 /root/Desktop/openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-factory.bin
+</pre>
+编译生成的路由器镜像位于bin/ar71xx/目录下面:
+<pre>
+-rw-r--r-- 1 root root 3.8M Jul  8 01:10 openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-factory.bin
+-rw-r--r-- 1 root root 3.6M Jul  8 01:10 openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-sysupgrade.bin
+</pre>
+升级前先看一下kmod-fs-ext4确实没有安装上(便于前后对比):
+<pre>
+root@OpenWrt:~# opkg list-installed | grep "kmod-fs-ext4"
+</pre>
+在升级之前我们可以备份一些文件(这些是可选的):
+<pre>
+scp root@192.168.1.1:/etc/opkg.conf .
+scp root@192.168.1.1:/etc/config/network .
+scp root@192.168.1.1:/etc/config/wireless .
+</pre>
+进入OpenWrt来查看一下空间使用情况:
+<pre>
+root@OpenWrt:~# df -h
+Filesystem                Size      Used Available Use% Mounted on
+/dev/root                 2.0M      2.0M         0 100% /rom
+tmpfs                    13.7M    540.0K     13.2M   4% /tmp
+/dev/mtdblock3          640.0K    584.0K     56.0K  91% /overlay
+overlayfs:/overlay      640.0K    584.0K     56.0K  91% /
+tmpfs                   512.0K         0    512.0K   0% /dev
+</pre>
+tmp目录还有13.2M可用,我们使用这个目录.<br/>
+由于路由器原来已经被刷过OpenWrt了,所以我这里只需升级一下就可以了,如果你的是第一次刷,那么你需要使用的是
+openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-factory.bin.<br/>
+好的,现在将openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-sysupgrade.bin上传至OpenWrt的/tmp目录:
+<pre>
+cd bin/ar71xx/
+scp openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-sysupgrade.bin root@192.168.1.1:/tmp
+</pre>
+然后进入OpenWrt,开始升级:
+<pre>
+cd /tmp
+sysupgrade -v openwrt-15.05.1-ar71xx-generic-tl-mr12u-v1-squashfs-sysupgrade.bin.bin
+
+....
+Writing from <stdin> to firmware ...
+Appending jffs2 data from /tmp/sysupgrade.tgz to firmware...TRX header not found
+Error fixing up TRX header
+
+Upgrade completed
+Rebooting system...
+</pre>
+然后,稍等路由器重启之后就可以啦,再次连接上WIFI,
+先要通过telnet 192.168.1.1登陆,使用passwd root更改root密码,然后退出,
+使用ssh 192.168.1.1添加ssh安全登陆.然后我们验证一下:
+<pre>
+root@OpenWrt:~# opkg list-installed | grep "kmod-fs-ext4"
+kmod-fs-ext4 - 3.18.23-1
+</pre>
+啊哈,出现了kmod-fs-ext4,当然其他包肯定也是安装上去了,就不一一验证啦.<br/>
+
+<a name="sec0x03"></a>
+<h3 class="titlebar">3.U盘扩容</h3>
+<a name="sec0x03-1"></a>
+<h3 class="subtitle">3.1 U盘分区</h3>
+接着我们开始使用U盘扩展OpenWrt空间(我准备的是32GB的U盘):
+在电脑上使用GParted将U盘分成这么几个区(都是主分区):
+    1区(ext4格式)-安装系统软件:8GB(8192MB)
+    2区(linux-swap格式)-交换分区:2GB(2048MB)
+    3区(ext4格式)-存储数据:16GB(16384MB)
+    4区(NTFS格式)-保留区(作U盘使用):6GB(实际上小于6GB)
+如图下图所示.  <br/>
+<br/><img src="gparted.png"></img><br/>
+现在将U盘插入路由器上(我的路由器只有一个USB接口,不够使用,因此我用了一个HUB来扩展了USB接口数目,
+因此U盘实际插入到了HUB的一个接口上),进入OpenWrt,执行如下命令:
+<pre>
+root@OpenWrt:~# block info
+/dev/mtdblock2: UUID="bbef2f50-1aa1fca6-362a59aa-d0563462" VERSION="4.0" TYPE="squashfs"
+/dev/mtdblock3: TYPE="jffs2"
+/dev/sda1: UUID="f4ab0dc9-ee43-4eef-a17b-4bd3fb4c8019" NAME="EXT_JOURNAL" VERSION="1.0" TYPE="ext4"
+/dev/sda2: UUID="213caa21-3e74-443e-b57a-9560e9153ab7" VERSION="2" TYPE="swap"
+/dev/sda3: UUID="adbeb255-82d7-41aa-a8d2-e3b2bc32315d" NAME="EXT_JOURNAL" VERSION="1.0" TYPE="ext4"
+</pre>
+可以看到需要的三个分区都出来了. 接着把路由器上的东西都拷贝到第一个分区上去,这里为sda1:
+<pre>
+mount /dev/sda1 /mnt
+mkdir /tmp/router2usb
+mount --bind / /tmp/router2usb
+tar -C /tmp/router2usb -cvf - . | tar -C /mnt -xvf -
+sync
+umount /tmp/router2usb
+</pre>
+解释一下上面的命令:mount的bind选项用于将已经存在的目录绑定到一个新的目录下面,
+这样的话,你可以操作这个新的目录树,操作会立即在原有目录树下面生效.其基本的语法为:
+<pre> mount --bind /some/where /else/where </pre>
+其中<b>/some/where</b>是一个存在的目录,需要挂载到另一个存在的目录<b>/else/where</b>.
+在挂载完后,就可以通过<b>/else/where</b>进行访问原有目录树<b>/some/where</b>了.<br/>
+在将$router2usb$设置为根目录数后,使用tar命令先切换(-C)到router2usb目录,创建文件(cvf),
+并输出到标准输出(-,默认选项),然后管道命令(|)将标准输出重定向到标准输入,作为后续的命令输入,
+后面的-xvf从标准输入(-,注意这里又变成标准输入了)解压到/mnt目录.<br/>
+使用sync命令同步后,就完成了将路由器转移到U盘分区.<br/>
+这样做有一个好处,什么时候,路由器系统不小心搞废了,拔掉U盘,路由器就从原有固件启动了,不影响使用.<br/>
+<a name="sec0x03-2"></a>
+<h3 class="subtitle">3.2 设置交换分区</h3>
+<pre>
+mkswap /dev/sda2
+swapon /dev/sda2
+</pre>
+<a name="sec0x03-3"></a>
+<h3 class="subtitle">3.3 自动挂载</h3>
+再修改fstab以便自动挂载分区,首先将当前挂载情况写到fstab中:
+<pre>
+block detect > /etc/config/fstab
+</pre>
+使用vi修改,修改完成后如下:
+<pre>
+config 'global'
+	option	anon_swap	'0'
+	option	anon_mount	'0'
+	option	auto_swap	'1'
+	option	auto_mount	'1'
+	option	delay_root	'5'
+	option	check_fs	'0'
+#挂载sda1到根目录
+config 'mount'
+	option	target	'/'
+	option	uuid	'f4ab0dc9-ee43-4eef-a17b-4bd3fb4c8019'
+	option	enabled	'1'
+#挂载交换分区
+config 'swap'
+	option	device	'/dev/sda2'
+	option	enabled	'1'
+#挂载数据区
+config 'mount'
+	option	target	'/mnt/sda3'
+	option	uuid	'adbeb255-82d7-41aa-a8d2-e3b2bc32315d'
+	option	enabled	'1'
+</pre>
+在OpenWrt中输入reboot命令重启路由器.重启之后进入路由器看一下有木有成功:
+<pre>
+root@OpenWrt:~# df -h
+Filesystem                Size      Used Available Use% Mounted on
+rootfs                    7.7G     26.5M      7.3G   0% /
+/dev/root                 2.5M      2.5M         0 100% /rom
+tmpfs                    14.0M     80.0K     13.9M   1% /tmp
+/dev/sda1                 7.7G     26.5M      7.3G   0% /
+tmpfs                   512.0K         0    512.0K   0% /dev
+/dev/sda3                15.6G     44.0M     14.8G   0% /mnt/sda3
+</pre>
+哈哈,rootfs是7.7GB咯~如果没有挂载成功,请检查一下上面fstab中挂载到根目录的磁盘uuid是否为你目的磁盘uuid.
+
+
+<a name="sec0x04"></a>
+<h3 class="titlebar">4.修改源并安装图形界面</h3>
+使用vi打开/etc/opkg.conf修改源内容如下:
+<pre>
+dest root /
+dest ram /tmp
+lists_dir ext /var/opkg-lists
+option overlay_root /overlay
+option check_signature 1
+#中科大源列表(使用https会失败)
+src/gz ar71xx_base          http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/base
+src/gz ar71xx_luci          http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/luci
+src/gz ar71xx_management    http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/management
+src/gz ar71xx_packages      http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/packages
+src/gz ar71xx_routing       http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/routing
+src/gz ar71xx_telephony     http://openwrt.mirrors.ustc.edu.cn/chaos_calmer/15.05.1/ar71xx/generic/packages/telephony
+</pre>
+更新,安装WEB界面并启动:
+<pre>
+opkg update
+opkg install luci
+#如果你想安装中文语言包,那么使用命令:
+opkg install luci luci-i18n-base-zh-cn
+#对于其他语言包,你可以使用opkg list | grep luci 然后慢慢找你所需的语言包...
+#启动:
+/etc/init.d/uhttpd enable
+/etc/init.d/uhttpd start
+</pre>
+在浏览器中访问:192.168.1.1,如下图所示,输入账户密码登陆:<br/>
+<br/><img src="0x03.png"></img> <br/>
+最好自己备份一下配置文件:
+<pre>
+System->Backup/Flash Firmware-Backup/Restore->Generate archive
+</pre>
+<a name="sec0x05"></a>
+<h3 class="titlebar">5.无线打印机</h3>
+<p>这一块儿我已经鼓捣了好久,主要是尝试过的是cups,p910nd以及USB over IP(usbip),但是很不幸,
+每一个都是让我抓狂到不行,花费了大量时间解决各种问题,但是最终还是无法正常打印.</p>
+<p>但又很幸运的是,我发现了VirtualHere这个东西.到virtualhere.com下载对应客户端.</p>
+对于Linux:<br/>
+<p>
+OpenWrt上运行vhusbdmips,Linux上运行vhuit64.<br/>
+在OpenWrt中加入开机启动,<b>vim /etc/rc.local</b>
+在<b>exit 0</b>之前加入<b>/opt/vhusbdmips -b</b>,这里我将vhusbdmips放在了/opt目录下面,
+你需要根据自身情况做出修改.</p>
+使用方法很简单,为了方便使用,可以在/opt/下面建立一个wifiprinter脚本:
+<pre>
+#! /bin/bash
+/opt/ishell/virtual-here/vhuit64 &
+</pre>
+在linux上运行该vhuit64客户端,界面如下:<br/>
+<img src="0x04.png"></img>
+你可以看到显示了三个设备,一个是我的希捷硬盘,一个是打印机,双击打印机,然后会显示In use by you.
+这个时候你的打印机就通过无线USB连接到你电脑上了.你可以很方便的进行无线打印了.
+需要说明的是,该软件并非免费软件,限制版本一次只能使用一个USB口.但是目前足够我使用了.
+如果以后真的有需要,我会考虑买一个License.我来动手破解是可能的,但是我更希望能够做一个消费者,来支持开发的持续进行.
+
+<a name="sec0x06"></a>
+<h3 class="titlebar">无线存储:挂载 2TB 硬盘</h3>
+<a name="sec0x06-1"></a>
+<h4 class="subtitle">工具安装</h4>
+<pre>
+opkg update
+opkg install ntfs-3g kmod-usb-storage block-mount kmod-fs-ext4 kmod-fuse
+opkg install kmod-fs-vfat  kmod-nls-cp437 kmod-nls-iso8859-1 kmod-nls-utf8 fdisk
+</pre>
+建立挂载硬盘的目录:
+<pre>
+mkdir /mnt/cloud-storage
+#将下面这句加入/etc/rc.local,最好放在最前面
+#ntfs-3g /dev/sdb1 /mnt/cloud-storage -o noatime,big_writes,async
+</pre>
+其中/dev/sdb1可以由fdisk -l来获得.如果是EXT格式的硬盘,请用下面的方法挂载:
+<p style="color:red">update:2016-10-04 Tue 01:46 AM</p>
+1.使用fdisk获得你的磁盘当前在openwrt上的分区,比如我的为/dev/sda1,然后使用block info获得U盘的UUID信息,比如:
+<pre> /dev/sda1: UUID="a1b29c10-0ae6-41ca-a201-97de37b00175" NAME="EXT_JOURNAL" VERSION="1.0" TYPE="ext4" </pre>
+2.打开fstab:/etc/config/fstab,加入如下信息:
+<pre>
+ config 'mount'
+    option target '/mnt/cloud-storage'
+    option uuid   'a1b29c10-0ae6-41ca-a201-97de37b00175'
+    option enabled '1'
+</pre>
+同样地,目录/mnt/cloud-storage你要事先建立.
+
+
+<a name="sec0x06-2"></a>
+<h4 class="subtitle">安装Samba服务并配置</h4>
+<pre>
+#安装
+    opkg install samba36-server luci-app-samba
+#配置:
+    vi /etc/samba/smb.conf.template
+    用#号注释掉这一行:invalid users = root
+#设为开机启动并设置访问密码：
+    /etc/init.d/samba enable
+    /etc/init.d/samba start
+#配置需要Samba共享的目录(里面的/mnt/cloud-storage需要依据你自身需求而修改)：
+    vi /etc/config/samba
+    config samba
+            option 'name'                   'air-share' #显示名,不能有空格,否则无法正常显示
+            option 'workgroup'              'WORKGROUP'
+            option 'description'            'OpenWrt'
+            option 'homes'                  '0'
+
+    config sambashare
+            option 'name'                   'cloud-share'
+            option 'path'                   '/mnt/cloud-storage'
+            option 'users'                  'owner'
+            option 'read_only'              'no'
+            option 'guest_ok'               'yes'
+            option 'create_mask'            '0755'
+            option 'dir_mask'               '0755'
+
+    config sambashare
+            option 'name'                   'cloud-share-public'
+            option 'path'                   '/mnt/cloud-storage/Public'
+            option 'read_only'              'no'
+            option 'guest_ok'               'yes'
+            option 'create_mask'            '0755'
+            option 'dir_mask'               '0755'
+
+
+
+    config sambashare
+            option 'name'                   'music-share'
+            option 'path'                   '/mnt/sda3'
+            option 'users'                  'owner'
+            option 'read_only'              'no'
+            option 'guest_ok'               'yes'
+            option 'create_mask'            '0755'
+            option 'dir_mask'               '0755'
+#访问方式:
+    smb://openwrt/cloud-share/
+</pre>
+挂载完我们当然希望手机也可以访问,以Android手机为例,安装ES Explorer,然后依次:<br/>
+网络(Network)/局域网(LAN)/扫描(Scan),就会扫描出一个OPENWRT的主机,双击进入便可访问硬盘了.<br/>
+samba提供流式的媒体服务,因此,硬盘上的视频你可以直接在Android手机上进行点播了.上面的配置文件中,
+每个config sambashare对应一个samba共享目录,这里的配置例子为一个两个只有owner用户才可以访问的目录,
+需要用户名和密码.一个是公共访问目录,无需密码直接能打开,可以读取存放文件.
+
+<p class="subtitle">更多关于Samba的介绍</p>
+<p style="color:red">update:2016-10-11 Tue 04:34 AM</p>
+Openwrt的samba配置是先读取/etc/config/samba,结合/etc/samba/smb.conf.template文件,生成配置文件/etc/samba/smb.conf,
+因此,你只能也只需修改配置/etc/config/samba和/etc/samba/smb.conf.template即可.在OpenWrt中的Samba是一个轻量级的Samba,
+提供的选项非常少,你可以在<a href="https://wiki.openwrt.org/doc/uci/samba" target="_blank">这里</a>看到所有的选项及其含义.<br/>
+OpenWrt中的Samba仅仅提供两种共享方式,一种是匿名方式的,一种是用户名密码登陆认证的方式.<br/>
+对于匿名共享方式,如下:
+<pre>
+#/etc/config/samba
+config sambashare
+        option name 'share-name'
+        option path '/path/to/folder'
+        option users  'nobody'
+        option read_only 'no'
+        option guest_ok 'yes'
+        option create_mask '0700'
+        option dir_mask '0700'
+</pre>
+另一种是认证方式的,
+<pre>
+config sambashare
+        option name 'share-name'
+        option path '/path/to/folder'
+        option users 'user1,user2'  #多个用户间用逗号隔开
+        option read_only 'no'
+        option guest_ok 'no'
+        option create_mask '0700'
+        option dir_mask '0700'
+</pre>
+对于认证方式,你需要安装如下几个工具:
+<pre>
+opkg update
+opkg install shadow-groupadd shadow-useradd shadow-userdel shadow-groupdel
+</pre>
+这种方式要求你在samba的模板文件中设置security=user.你接下来需要创建用户,在Linux系统内创建,在Samba内添加.
+这里我们建立一个用户组,里面添加一个owner用户,并设置密码:
+<pre>
+1.设置完全访问用户组theroot:
+    在linux中添加theowner用户组:groupadd gowner #可以使用groupdel删除
+    将用户god添加到该用户组:useradd -g gowner owner #可以使用userdel删除
+    设置密码passwd owner
+2.设置owner到samba用户:
+先看是否存在/etc/samba/smbpasswd,若不存在touch一个.
+smbpasswd -a owner   #smbpasswd -x owner  #删除owner用户
+3.切换目录所有者(这一步很关键,是解决大多数权限问题的步骤)
+chown -R owner /path/to/folder #如果硬盘较大,时间会很长
+4. 配置完毕,重启即可.
+/etc/init.d/samba restart
+</pre>
+
+
+<a name="sec0x07"></a>
+<h3 class="titlebar">7.系统备份</h3>
+如果感觉U盘上的路由器系统配置好了,关掉路由器,拔掉U盘,然后插到电脑上使用dd命令备份系统镜像:<br/>
+使用<b>df -h</b>命令获得如下输出:
+<pre>
+/dev/sdc3        16G   44M   15G   1% /media/root/adbeb255-82d7-41aa-a8d2-e3b2bc32315d
+/dev/sdc1       7.8G   33M  7.4G   1% /media/root/371c9e15-704b-4a26-9f91-e8c142ac8eb6
+/dev/sdc4       3.0G   16M  3.0G   1% /media/root/4E0F643A4C2AAD16
+</pre>
+系统镜像为/dev/sdc1,我们备份到/dev/sdc3上.
+<pre>
+dd if=/dev/sdc1 | gzip > /media/root/adbeb255-82d7-41aa-a8d2-e3b2bc32315d/openwrt-usb-image-2016.08.05.img.gz
+</pre>
+恢复镜像的时候,也是将U盘插到电脑上,然后使用如下命令恢复:
+<pre>
+gzip -dc /path/to/backup/openwrt-usb-image-2016.08.05.img.gz | dd of=/dev/sdc1
+</pre>
+注意sdc1你需要更换为你自己的系统分区.
+如果备份期间你想用网,打开路由器就行啊,反正不用U盘也行,是不是很爽呢?
+<a name="sec0x08"></a>
+<h3 class="titlebar">8.OpenWrt的网络配置</h3>
+<a name="sec0x08-1"></a>
+<h4 class="subtitle">8.1 无线网络的配置</h4>
+<pre>
+#cat /etc/config/wireless
+config wifi-device  radio0
+        option type     mac80211
+        option channel  11
+        option hwmode   11g
+        option path     'platform/ar933x_wmac'
+        option htmode   HT20
+        # REMOVE THIS LINE TO ENABLE WIFI:
+        # option disabled 1
+config wifi-iface
+        option device   radio0
+        option network  lan
+        option mode     ap
+        option ssid     OpenWrtLinux
+        option encryption psk2
+        option key xxxx
+</pre>
+在文件/etc/config/wireless中,你可以配置是否开启WIFI(option disabled 1),
+WIFI的SSID(option ssid),加密方式(option encryption psk2),以及WIFI密码(option key xxxx).
+<a name="sec0x08-2"></a>
+<h4 class="subtitle">8.2 宽带连接的配置</h4>
+<pre>
+#cat /etc/config/network
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'fd08:0300:88e5::/48'
+
+config interface 'lan'
+        option type 'bridge'
+#       option ifname 'eth0'
+        option proto 'static'
+        option ipaddr '192.168.1.1'
+        option netmask '255.255.255.0'
+        option ip6assign '60'
+config interface 'wan'
+        option proto 'pppoe'
+        option ifname 'eth0'
+        option username '宽带用户名'
+        option password '宽带密码'
+</pre>
+在文件中/etc/config/network你可以配置局域网信息(LAN),一般的路由器地址都设置为192.168.1.1
+(option ipaddr '192.168.1.1'),子网掩码为255.255.255.0(option netmask '255.255.255.0').<br/>
+宽带拨号则在WAN一栏里皮遏制,协议通常是pppoe,然后就是用户名和密码了.
+<a name="sec0x09"></a>
+<h3 class="titlebar">9.其他可选安装</h3>
+<pre>
+opkg update
+opkg install aria2
+opkg install python python3
+</pre>
+
+<a name="sec0x10"></a>
+<h3 class="titlebar">10.OpenWrt命令总结</h3>
+<pre>
+#wifi连接人数
+    iw dev wlan0 station dump |grep Station |wc -l
+#连接的用户MAC
+    iw dev wlan0 station dump |grep Station |awk -F ' ' ' {print $2}'
+#连接用户的信号强弱
+    iw dev wlan0 station dump
+#查看wifi信息
+    iw wlan0 info
+#查看连接信息:
+    cat  /tmp/dhcp.leases
+#查看banner
+    cat /etc/banner
+</pre>
+
+<a name="sec0x11"></a>
+<h3 class="titlebar">11.ISSUES</h3>
+<h4 class="subtitle">0x01.ImageBuilder的内核大小限制</h4>
+<section style="color:red">Solved 2016-08-10 Wed 12:17 AM</section>
+有网友在使用ImageBuilder构件自定义固件时,加入了luci的一个语言包:luci-i18n-base-zh-cn,编译命令如下:
+<pre>
+make image PROFILE=TLMR12U PACKAGES="kmod-fs-ext4 kmod-usb-storage kmod-usb-ohci e2fsprogs block-mount luci-i18n-base-zh-cn"
+</pre>
+但是并未生成需要的路由器固件,晚上事情处理完后,我看了一下,爆出的错误在这里:
+<pre>
+[mktplinkfw] kernel length aligned to 1176652
+[mktplinkfw] *** error: images are too big
+</pre>
+很明显加入上述语言包之后,镜像超过了镜像的最大限制,这个限制是由于路由器自身提供的空间所限制(这和load到RAM中不一样).<br/>
+下面说一下如何查看路由器自身的可用空间.<br/>
+进到路由器,使用如下命令显示路由器结构布局:
+<pre>
+root@OpenWrt:~# <b style="color:red">dmesg | grep -A 5 MTD</b>
+[    0.510000] 5 tp-link partitions found on MTD device spi0.0
+[    0.510000] Creating 5 MTD partitions on "spi0.0":
+[    0.520000] 0x000000000000-0x000000020000 : "u-boot"
+[    0.520000] 0x000000020000-0x00000013f64c : "kernel"
+[    0.530000] 0x00000013f64c-0x0000003f0000 : "rootfs"
+[    0.530000] mtd: device 2 (rootfs) set to be root filesystem
+[    0.540000] 1 squashfs-split partitions found on MTD device rootfs
+[    0.540000] 0x0000003a0000-0x0000003f0000 : "rootfs_data"
+[    0.550000] 0x0000003f0000-0x000000400000 : "art"
+[    0.550000] 0x000000020000-0x0000003f0000 : "firmware"
+[    0.590000] libphy: ag71xx_mdio: probed
+[    1.190000] ag71xx ag71xx.0: connected to PHY at ag71xx-mdio.1:04 [uid=004dd041, driver=Generic PHY]
+</pre>
+一般第二个段就是路由器可用的固件空间,我这里为0x13f64c-0x20000=1177164(Bytes)=1.12MB(即:1177164/1024/1024).
+正如上面的error所指明的,内核长度对齐到1176652字节.
+<pre>
+root@OpenWrt:~# opkg info luci-i18n-base-zh-cn
+Package: luci-i18n-base-zh-cn
+Version: git-16.018.33482-3201903-1
+Depends: libc, luci-base
+Status: unknown ok not-installed
+Section: luci
+Architecture: all
+MD5Sum: f6b3f992e3ec70b8a5729c73cd7f655e
+Size: 22200
+Filename: luci-i18n-base-zh-cn_git-16.018.33482-3201903-1_all.ipk
+Source: feeds/luci/modules/luci-base
+Description: Translation for luci-base - 普通话 (Chinese)
+</pre>
+太困了,匆忙写了一个脚本,检测所自定义的包大小以及可用空间:
+<pre>
+#! /bin/sh
+
+# filename:Size limit calculator for Openwrt ImageBuilder
+# Author:bugnofree
+# www.ahageek.com
+
+#Get all of the pkgs size
+#============================
+sizes=$(for pkg in $@;do opkg info $pkg|grep Size|cut -d ":" -f 2;done)
+#Accumulate the size
+for sz in $sizes
+do
+        let "sum+=sz"
+done
+echo "Pkgs size sum:$sum Bytes"
+
+#available space
+#===========================
+beg=$(dmesg | grep -A 5 MTD | grep -E "kernel|linux"  | cut -d "]" -f 2 | cut -d ":" -f 1 | cut -d "-" -f 1)
+end=$(dmesg | grep -A 5 MTD | grep -E "kernel|linux"  | cut -d "]" -f 2 | cut -d ":" -f 1 | cut -d "-" -f 2)
+beg_int=$(printf "%d\n" $beg)
+#echo $beg_int
+end_int=$(printf "%d\n" $end)
+#echo $end_int
+let "space=$end_int-$beg_int"
+echo "Availavle space:$space bytes"
+</pre>
+运行:
+<pre>
+root@OpenWrt:~# ./pkg-size-calc kmod-fs-ext4 kmod-usb-storage kmod-usb-ohci e2fsprogs block-mount luci-i18n-base-zh-cn
+Pkgs size sum:489880 Bytes
+Availavle space:1177164 bytes
+</pre>
+理论上来说使可用编译运行的.<br/>
+但是,这里无法运行,这需要重新修改Openwrt的源码去除限制,有时间再说吧.太晚了.<br/>
+有需要的朋友可用暂时参考一下这里:http://icevel5473.lofter.com/
+<hr/>
+文中涉及到的下载链接: http://pan.baidu.com/s/1jIrXgZc 密码: 4buv<br/>
+文件说明:<br/>
+openwrt-15.05.1-ar71xx-generic-with-usb-extend-pkgs.zip:包含了USB扩展包的自定义固件压缩包(适用于tl-mr12u-v1).<br/>
+OpenWrt-ImageBuilder-15.05.1-ar71xx-generic.Linux-x86_64.tar.bz2:ImageBuilder<br/>
+<a name="sec0x12"></a>
+<h1 class="titlebar">WAN 口桥接</h1>
+<p>2017-09-20</p>
+<p>先看需求,网络简单拓扑如下:</p>
+<img src="./wan-brg.svg" alt="">
+<p>本来台式机位于 172.20.109.x 网段,172.20 也是个局域网,其中的每台电脑都通过一跟网线连接,
+我的台式机名称为 pc,还有打印机 printer,以及其他电脑,pc1,pc2等等.
+现在我希望我的笔记本通过,手机等通过无线网络和 172 网内的电脑同处于一个网段,
+这时候,我把 pc 上的网线拔掉插到 OpenWRT(以下简称 op) 上的 WAN 口中去,
+然后通过一跟网线,将 op 的 LAN 口和 pc 的网口连接上,然后希望通过对 op 设置,
+实现 pc 以及 op 发出的 WiFi 网络是 172.20 网段.</p>
+<p>如果仅仅要求 pc WiFi 网络是 172.20 网段,实现非常简单,只需要 Network/Wireless,
+选择 WiFi 网络,修改 Interface Configuration 中的 Network 为 WAN 即可.</p>
+<p>但是要让连接 LAN 口的 pc 也处于 172.20 网段,可没那么简单,摸索了三四个小时才搞定.
+方法见下面的设置.</p>
+<p>总体上,实现需求的解决方法如下:</p>
+<h2 class="subtitle">WAN 口设置</h2>
+<p>首先设置 WAN 口网络桥接,依次 Network/Wireless,选择你的网络,然后在 Interface
+Configuration 中设置 Newtwork 为 WAN. Mode 设置为 Access Point 应该也是可以的.如下图所示:</p>
+<img src="./wan-brg-01.png" alt="">
+<p>接着设置 WAN 口接口,依次 Network/Interfaces,选择 WAN/Physical Settings,按照下图勾选:</p>
+<img src="./wan-brg-02.png" alt="">
+注意勾选 Bride interfaces,这个可以设置 WAN 口桥接到指定的接口上,
+指定的接口在 Interface 中设定,如上图所示的,勾选了 WAN 口,LAN 口,以及 OpenWRT 发出无线网络接口.
+<h2 class="subtitle">LAN 口设置</h2>
+<p>进入到 LAN 接口,在 General Setup 中设置协议为 DHCP client,如下图:</p>
+<img src="./wan-brg-03.png" alt="">
+<p>在 Physical Settings 中设定 Interface 为带有 lan 的接口.如下图:</p>
+<img src="./wan-brg-04.png" alt="">
+<p>在 Firewall Settings 设置 firmware-zone 为 wan,如下图:</p>
+<img src="./wan-brg-05.png" alt="">
+
+<p>最后, Save &amp; Apply,重启网络即可,这时候连接 LAN 的 PC 以及连接到 OpenWRT 的WIFI 网络的客户端,
+它们所有的 IP 都和 WAN 口处于一个网段.</p>
+
+</body>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+Reference:<br/>
+1.https://samhobbs.co.uk/2013/11/more-space-for-packages-with-extroot-on-your-openwrt-router<br/>
+2.http://blog.csdn.net/hexw7/article/details/9864617<br/>
+3.https://wiki.openwrt.org/doc/howto/obtain.firmware.generate#<br/>
+4.http://blog.gaku.net/openwrts-flash-layout/<br/>
+5.https://wiki.openwrt.org/doc/techref/flash.layout<br/>
+6.http://blog.csdn.net/lvshaorong/article/details/53230545<br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>

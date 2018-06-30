@@ -1,0 +1,203 @@
+.content {
+    margin-top: 1px;
+}
+img {
+  vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}
+.row {
+  margin-left: -20px;
+  *zoom: 1;
+}
+.row:before,
+.row:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.row:after {
+  clear: both;
+}
+[class*="span"] {
+  float: left;
+  min-height: 1px;
+  margin-left: 20px;
+}
+.container{
+  width: 940px;
+}
+.span12 {
+  width: 940px;
+}
+.span11 {
+  width: 860px;
+}
+.span10 {
+  width: 780px;
+}
+.span9 {
+  width: 700px;
+}
+.span8 {
+  width: 620px;
+}
+.span7 {
+  width: 540px;
+}
+.span6 {
+  width: 460px;
+}
+.span5 {
+  width: 380px;
+}
+.span4 {
+  width: 300px;
+}
+.span3 {
+  width: 220px;
+}
+.span2 {
+  width: 140px;
+}
+.span1 {
+  width: 60px;
+}
+
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+body {
+  font-family: Comic Sans MS, "Comic Sans MS", Arial, sans-serif;
+}
+
+.underline {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid $pink;
+}
+
+.center {
+  text-align: center;
+}
+.small {
+  font-size: 14px;
+}
+.align-right {
+  text-align: right;
+}
+.align-left {
+  text-align: left;
+}
+.medium {
+  font-size: 21px;
+}
+.big {
+  font-size: 24px;
+  line-height: 32px;
+}
+.gray {
+  color: #7a7a7a;
+}
+/*居中显示*/
+.container {
+  margin-left: auto;
+  margin-right: auto;
+}
+.container-white {
+  background: #fff;
+}
+.container-gray .container {
+  padding: 24px 0 0 0;
+}
+.container-gray .container a {
+  color: #7a7a7a;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.container-gray .container a:hover {
+  color: #5bd5a0;
+}
+.circles {
+  padding: 0;
+}
+.circles .row {
+  padding-left: 140px;
+}
+.circles img {
+  margin-top: 25px;
+}
+.circle {
+  /*margin: 25px 10px;*/
+  width: 250px;
+  color: #fff;
+  font-size: 32px;
+  line-height: 250px;
+  text-align: center;
+  height: 250px;
+  border-radius: 200px;
+}
+.bg-green {
+  background: #5bd5a0;
+}
+.bg-blue {
+  background: #1daee9;
+}
+.bg-purple {
+  background: #c843a5;
+}
+.bg-red {
+  background: #eb3980;
+}
+.bg-yellow {
+  background: #ffcc35;
+}
+.button {
+  display: inline-block;
+  clear: both;
+  padding: 36px 36px 24px 36px;
+  background: #1daee9;
+  text-align: center;
+  color: #fff;
+  font-size: 36px;
+  line-height: 28px;
+  margin: 36px 0;
+  border-radius: 5px;
+  color: $white;
+  border: 2px solid $pink;
+}
+.button:hover {
+  background: #fff;
+  color: $pink;
+  border: 2px solid $pink;
+}
+.pill {
+  color: #fff;
+  padding: 8px;
+  background: #1daee9;
+  text-align: center;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  border-radius: 15px;
+  line-height: 14px;
+  display: inline-block;
+  margin-right: 12px;
+}
+/*使整块DIV超链接*/
+div.clickdiv {
+    position: relative;
+}
+div.clickdiv a {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    text-decoration: none; /* No underlines on the link */
+    z-index: 10; /* Places the link above everything else in the div */
+    background-color: #FFF; /* Fix to make div clickable in IE */
+    opacity: 0; /* Fix to make div clickable in IE */
+    filter: alpha(opacity=1); /* Fix to make div clickable in IE */
+}

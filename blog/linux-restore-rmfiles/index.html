@@ -1,0 +1,189 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Linux Restore rm Files</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+ 
+<!-- 代码高亮:不再使用 2016-06-16 Thu 02:27 PM -->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">-->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">-->
+<!--<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>-->
+<!--<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>-->
+<!--<script type="text/javascript">-->
+  <!--hljs.initHighlightingOnLoad();-->
+<!--</script>-->
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>Linux恢复误删的文件|bugnofree|2016-06-16 Thu 07:11 PM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+<br/><b>本文所涉及的文件(如果有的话)大部分可以通过文章末尾的链接下载.</b> <br/>
+<hr/>
+<!--文章正文-->
+<i>如果你误删除了一些重要文件,记住,不要再做任何写操作了,比如创建文件,写文件什么的了.
+特别是,如果删除了系统的重要部分,比如/usr,/etc,/var等什么的(本文描述的就是这种情况)...囧orz..</i>
+在这种情况下..赶紧要关闭电脑....进入Live系统...安装extundelete并恢复文件,总体的流程如下:
+<h1 class="titlebar">使用extundelete恢复Ext3/Ext4文件</h1>
+<pre>
+wget http://nchc.dl.sourceforge.net/project/extundelete/extundelete/0.2.4/extundelete-0.2.4.tar.bz2 
+sudo apt-get install e2fsprogs 
+sudo apt-get install e2fslibs-dev 
+sudo apt-get install build-essential 
+然后编译安装并恢复文件
+</pre>
+<h3 class="subtitle">安装依赖项</h3>
+然而,一般都不会那么顺,中间总是会出现各种问题,下面是一些问题的解决方法,希望对你有所帮助.
+<pre>
+第一条命令:sudo apt-get install e2fslibs-dev 
+The following packages have unmet dependencies:
+ e2fslibs-dev : Depends: comerr-dev but it is not going to be installed
+                Depends: e2fslibs (= 1.42.9-3ubuntu1) but 1.42.9-3ubuntu1.2 is to be installed
+E: Unable to correct problems, you have held broken packages.
+comerr-dev和e2fslibs依赖项不满足.
+先来安装指定版本的e2fslibs即可:
+sudo apt-get install e2fslibs=1.42.9-3ubuntu1
+接下来再安装:comerr-dev:
+sudo apt-get install comerr-dev
+The following packages have unmet dependencies:
+ comerr-dev : Depends: libcomerr2 (= 1.42.9-3ubuntu1) but 1.42.9-3ubuntu1.2 is to be installed
+也是安装指定的版本:
+sudo apt-get install  libcomerr2=1.42.9-3ubuntu1
+最后安装build-essential:
+sudo apt-get install build-essential 
+build-essential : Depends: g++ (>= 4:4.4.3) but it is not going to be installed
+                   Depends: dpkg-dev (>= 1.13.5) but it is not going to be installed
+此时你需要更新源列表,然后执行:
+sudo apt-get update
+上述命令没有任何错误时(可能需要重复执行几次apt-get update),再安装build-essential即可.
+</pre>
+<h3 class="subtitle">编译extundelete</h3>
+首先切换为root权限,然后进行编译:
+<pre>
+ubuntu@ubuntu:/tmp/extundelete-0.2.4$ sudo -i
+root@ubuntu:~# cd /tmp/extundelete-0.2.4/
+root@ubuntu:/tmp/extundelete-0.2.4# make && make install
+make -s all-recursive
+Making all in src
+Making install in src
+  /usr/bin/install -c extundelete '/usr/local/bin'
+</pre>
+如你所见,程序安装后被放在/usr/local/bin下面,我们转到该目录下测试一下该程序:
+<pre>
+root@ubuntu:/tmp/extundelete-0.2.4# cd /usr/local/bin
+root@ubuntu:/usr/local/bin# ./extundelete -v
+extundelete version 0.2.4
+libext2fs version 1.42.9
+Processor is little endian.
+</pre>
+以上说明安装成功.
+<h3 class="subtitle">使用extundelete来恢复文件</h3>
+使用sudo fdisk -l来查看自己自己要恢复的分区,这里假设为/dev/sda7
+然后查看该分区下被删除的文件(分区根目录的节点一般为2):
+<pre>
+root@ubuntu:/usr/local/bin# extundelete /dev/sda7 --inode 2
+NOTICE: Extended attributes are not restored.
+Loading filesystem metadata ... 448 groups loaded.
+//省略一部分输出..
+File name                                       | Inode number | Deleted status
+.                                                 2
+..                                                2
+lost+found                                        11
+etc                                               523265         Deleted
+media                                             3401217
+bin                                               2616321        Deleted
+boot                                              261633
+dev                                               2877953
+home                                              2093057
+lib                                               130817         Deleted
+lib64                                             1046529
+mnt                                               654081
+opt                                               784897
+proc                                              392449
+root                                              915713
+run                                               1177345
+sbin                                              1308161
+srv                                               2354689
+sys                                               1438977
+tmp                                               1569793        Deleted
+usr                                               1831425        Deleted
+var                                               1962241        Deleted
+vmlinuz                                           12
+initrd.img                                        13
+cdrom                                             654082
+updmap.texmf.new                                  20216          Deleted
+lib32                                             1700609
+updmap.texlive.new                                20217          Deleted
+</pre>
+需要注意的是显示的deleted状态并不是完全都正确的,使用下面的命令恢复:
+<pre>
+选取恢复全部:
+extundelete --restore-all /dev/sda7
+
+恢复指定文件:
+extundelete --restore-file filename /dev/sda7  
+</pre>
+恢复的文件保存在当前目录的RECOVERED_FILES文件夹下面.
+
+
+
+<h1 class="titlebar">使用ntfsundelete恢复ntfs文件</h1>
+<p>使用df查看你的分区: </p>
+
+<pre>
+bugnofree@ishell~$ df -hl
+Filesystem      Size  Used Avail Use% Mounted on
+...
+/dev/sdb7       121G  100G   21G  84% /mnt/data
+...
+</pre>
+
+<p>现在我要恢复/mnt/data下面的文件,那么首先卸载该NTFS分区:</p>
+
+<pre> umount /dev/sdb7 </pre>
+
+<p>查看近期删除的数据:</p>
+
+<pre>ntfsundelete /dev/sdb7 -t 1d</pre>
+
+<p>其中-t指定了天数,1d就是1天的意思.它会给出删除的文件以及Inode节点.
+找到你想恢复的文件,使用下面命令恢复:</p>
+
+<pre> ntfsundelete /dev/sdb7 -u -i INODE -d /path/to/save/</pre>
+
+<p>其中,INODE为你删除的文件的节点值(Inode),/path/to/sava为保存恢复文件的路径,
+注意,它无法恢复整个文件夹,只可以单个文件逐一恢复.</p>
+
+</body>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>

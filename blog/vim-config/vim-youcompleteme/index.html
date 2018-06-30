@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>VIM配置YouCompleteMe</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+
+<section class="page-header">
+      <h1 class="project-name">VIM配置YouCompleteMe</h1>
+      <h2 class="project-tagline">2017-02-11 Sat 03:25 by bugnofree</h2>
+      <a href="http://www.ahageek.com/blog/vim-config/vim-youcompleteme" class="btn">Paper Link</a>
+      <a href="http://www.ahageek.com" class="btn">Home</a>
+      <a href="" class="btn"><del> Download</del></a>
+</section>
+<!-- 写文章 -->
+<p>Linux主机:<b>Ubuntu 16.04 x64</b></p>
+<h3 class="titlebar">一、手动安装YouCompleteMe</h3>
+<h4 class="subtitle">1.确保vim至少是 7.4.143并且支持python2或者python3<br/> </h4>
+<p>在命令行中输入vim --version,我的输出如图1:
+<img src="1.png" alt="">
+<center>图1</center>
+其中,Vi IMproved后面的数字是vim的大版本,这里是7.4.
+接着Included patches后面有一个1-1689,其中1689是小版本号,
+这里是1689,只要大于或等于143即可.<br/>
+在最下面的那个红框里面,-python表示不支持python2, +python3表示支持python3.<br/> </p>
+<h4 class="subtitle">2.安装YCM</h4>
+这里使用Vundle安装,将语句 <b>Plugin 'Valloric/YouCompleteMe'</b>放入vimrc中,
+然后执行 <b>:PluginInstall</b>
+<h4 class="subtitle">3.语义支持</h4>
+安装最新的libclang,到 <a href="http://llvm.org/releases/download.html">这里</a>下载,
+官网提供了Ubuntu 16.04的预编译二进制文件.
+<pre>
+wget http://releases.llvm.org/3.9.1/clang+llvm-3.9.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+tar -Jxvf clang+llvm-3.9.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz 
+cd clang+llvm-3.9.1-x86_64-linux-gnu-ubuntu-16.04/
+sudo cp -r * /usr/local #将对应的文件拷贝到/usr/local中的对应目录
+clang --version #测试安装
+    clang version 3.9.1 (tags/RELEASE_391/final)
+    Target: x86_64-unknown-linux-gnu
+    Thread model: posix
+    InstalledDir: /usr/local/bin
+</pre>
+如果你开个代理,应该会下载的快一些.
+<h4 class="subtitle">4.编译ycm_core库</h4>
+<p>安装依赖项:</p>
+<pre>sudo apt-get install cmake
+sudo apt-get install python-dev python3-dev</pre>
+<p>然后执行一下命令:</p>
+<pre>#创建编译目录
+cd ~/.vim
+mkdir ycm_build
+cd ycm_build
+#生成makefiles,这里LLVM参数指定clang位置,我安装位置/usr/local
+cmake -G "Unix Makefiles" -DPATH_TO_LLVM_ROOT=/usr/local . ~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp
+#成功的输出如下:
+    -- The C compiler identification is GNU 5.4.0
+    -- The CXX compiler identification is GNU 5.4.0
+    -- Check for working C compiler: /usr/bin/cc
+    -- Check for working C compiler: /usr/bin/cc -- works
+    -- Detecting C compiler ABI info
+    -- Detecting C compiler ABI info - done
+    -- Detecting C compile features
+    -- Detecting C compile features - done
+    -- Check for working CXX compiler: /usr/bin/c++
+    -- Check for working CXX compiler: /usr/bin/c++ -- works
+    -- Detecting CXX compiler ABI info
+    -- Detecting CXX compiler ABI info - done
+    -- Detecting CXX compile features
+    -- Detecting CXX compile features - done
+    -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython2.7.so (found suitable version "2.7.12", minimum required is "2.6") 
+    Using libclang to provide semantic completion for C/C++/ObjC
+    Using external libclang: /usr/local/lib/libclang.so.3.9
+    -- Found PythonInterp: /usr/bin/python2.7 (found version "2.7.12") 
+    -- Looking for pthread.h
+    -- Looking for pthread.h - found
+    -- Looking for pthread_create
+    -- Looking for pthread_create - not found
+    -- Looking for pthread_create in pthreads
+    -- Looking for pthread_create in pthreads - not found
+    -- Looking for pthread_create in pthread
+    -- Looking for pthread_create in pthread - found
+    -- Found Threads: TRUE  
+    -- Configuring done
+    -- Generating done
+    -- Build files have been written to: /home/bugnofree/.vim/ycm_build
+#编译
+cmake --build . --target ycm_core
+#成功的输出部分如下:
+    ...
+    [ 83%] Linking CXX static library libBoostParts.a
+    [ 83%] Built target BoostParts
+    Scanning dependencies of target ycm_core
+    [ 84%] Building CXX object ycm/CMakeFiles/ycm_core.dir/CandidateRepository.cpp.o
+    [ 84%] Building CXX object ycm/CMakeFiles/ycm_core.dir/Utils.cpp.o
+    [ 85%] Building CXX object ycm/CMakeFiles/ycm_core.dir/Result.cpp.o
+    [ 86%] Building CXX object ycm/CMakeFiles/ycm_core.dir/LetterNode.cpp.o
+    [ 86%] Building CXX object ycm/CMakeFiles/ycm_core.dir/PythonSupport.cpp.o
+    [ 88%] Building CXX object ycm/CMakeFiles/ycm_core.dir/IdentifierUtils.cpp.o
+    [ 89%] Building CXX object ycm/CMakeFiles/ycm_core.dir/versioning.cpp.o
+    [ 89%] Building CXX object ycm/CMakeFiles/ycm_core.dir/LetterNodeListMap.cpp.o
+    [ 90%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/Documentation.cpp.o
+    [ 91%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/CompilationDatabase.cpp.o
+    [ 91%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/CompletionData.cpp.o
+    [ 92%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/TranslationUnit.cpp.o
+    [ 92%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/ClangHelpers.cpp.o
+    [ 94%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/Range.cpp.o
+    [ 95%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/ClangUtils.cpp.o
+    [ 95%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/TranslationUnitStore.cpp.o
+    [ 96%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ClangCompleter/ClangCompleter.cpp.o
+    [ 97%] Building CXX object ycm/CMakeFiles/ycm_core.dir/Candidate.cpp.o
+    [ 97%] Building CXX object ycm/CMakeFiles/ycm_core.dir/ycm_core.cpp.o
+    [ 98%] Building CXX object ycm/CMakeFiles/ycm_core.dir/IdentifierDatabase.cpp.o
+    [100%] Building CXX object ycm/CMakeFiles/ycm_core.dir/IdentifierCompleter.cpp.o
+    [100%] Linking CXX shared library /home/bugnofree/.vim/bundle/YouCompleteMe/third_party/ycmd/ycm_core.so
+    [100%] Built target ycm_core
+</pre>
+<h3 class="titlebar">二、配置YouCompleteMe</h3>
+打开 <b>.vimrc</b>在最后加入:
+<pre>
+"YouCompleteMe配置 
+"默认配置文件路径"
+let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+"打开vim时不再询问是否加载ycm_extra_conf.py配置"
+let g:ycm_confirm_extra_conf=0
+"让Vim的补全菜单行为与一般IDE一致
+set completeopt=longest,menu
+"python解释器路径"
+let g:ycm_path_to_python_interpreter='/usr/bin/python'
+"是否开启语义补全"
+let g:ycm_seed_identifiers_with_syntax=1
+"是否在注释中也开启补全"
+let g:ycm_complete_in_comments=1
+let g:ycm_collect_identifiers_from_comments_and_strings = 0
+"开始补全的字符数"
+let g:ycm_min_num_of_chars_for_completion=2
+"补全后自动关闭预览窗口"
+let g:ycm_autoclose_preview_window_after_completion=1
+" 禁止缓存匹配项,每次都重新生成匹配项"
+let g:ycm_cache_omnifunc=0
+"字符串中也开启补全"
+let g:ycm_complete_in_strings = 1
+"离开插入模式后自动关闭预览窗口"
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+ "上下左右键的行为 会显示其他信息
+inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
+inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
+inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
+inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
+</pre>
+然后打开<b>.ycm_confirm_extra_conf</b>,你会看到一个flags数组如下:
+<pre>
+flags = [
+'-Wall',
+'-Wextra',
+'-Werror',
+'-Wno-long-long',
+....省略...
+'./tests/gmock',
+'-isystem',
+'./tests/gmock/include',
+]
+</pre>
+你可以根据头文件在哪里进行添加,比如下面的,不要忘了最后的逗号.
+<pre>
+'-isystem',
+'/usr/include',
+'-isystem',
+'/usr/include/c++/5.4.0',
+'-isystem',
+'/usr/include',
+'/usr/include/x86_64-linux-gnu/c++',
+</pre>
+<p>注意每加入一个路径,都要加入一句 <b>'-isystem',</b></p> <p>一个简单的效果如图2:</p>
+<img src="2.png" alt="">
+<center>图2</center>
+<h3 class="titlebar">三、一些问题</h3>
+<p>有时候中英文混合书写的时候,YouCompleteMe有时候不会自动弹出补全框,这个时候你可以使用vim自己带的补全工具,
+快捷键是 <b>ctrl+n</b> 或者 <b>ctrl+p</b> </p>
+
+<hr style="height:10px;background-color:green"/>
+
+<p>Windows主机:<b>Windows 10  x64</b></p>
+<h3 class="titlebar">一、依赖软件</h3>
+<ul>
+    <li><b><a href="https://www.python.org/downloads/windows/">Python2 x64 && Python3 x64</a></b><br/>
+    注意64位系统下载64位的Python,32位系统下载32位Python.如果你打算使用Python3编译,那
+    么你最好先安装Python3,然后再安装Python2.</li>
+    <li><a href="https://cmake.org/download/"><b>CMake</b></a><br/>
+    下载完成后,需要将其添加到环境变量,在执行如下命令前请注意不要敲错命令看错说明,
+    这话我已经说了,搞错环境变量的话,后果自己承担,否则字节老老实实用GUI的方式添加环境
+    变量去吧.命令行添加环境变量的方法为:
+    <b>wmic environment where 'UserName="&lt;system&gt;" and name="Path"' set
+        VariableValue="%Path%;C:\Users\Programs\cmake\bin"</b>
+    注意将其中的C:\Users\Programs\cmake\bin替换为你自己的路径.
+    </li>
+    <li> <a href="https://www.visualstudio.com/downloads/"><b>Visual Studio</b></a><br/>
+    自己去下载社区版本的安装即可,建议下载安装Visual Studio 2015.</li>
+    <li> <a href="http://www.7-zip.org/download.html"><b>7-zip</b></a><br/>
+        下载完毕后,设置环境变量:
+        <b>wmic environment where 'UserName="&lt;system&gt;" and name="Path"' set
+            VariableValue="%Path%;C:\Users\Programs\7-Zip"</b>
+        注意将其中的C:\Users\Programs\7-Zip修改为你自己的安装目录.
+    </li>
+    <li> <b>在vim中安装YCM</b><br>
+        打开vim的配置文件_vimrc,添加 Plugin 'Valloric/YouCompleteMe',然后执行:PluginInstall来安装.
+    </li>
+    <li> <a href="http://releases.llvm.org/download.html"><b>安装clang</b></a> <br>
+    安装过程中选择将LLVM添加到环境变量中去.</li>
+</ul>
+
+<h3 class="titlebar">二、编译YCM</h3>
+
+<p>进入vimfiles目录(位于$VIM/vimfiles),新建ycm_build目录,然后进入ycm_build目录.执行下面的命令:</p>
+
+<pre>
+cmake -G "Visual Studio 14 2015 Win64" -DPATH_TO_LLVM_ROOT="C:\Users\Programs\LLVM" .  "C:\Users\Programs\Vim\vimfiles\bundle\YouCompleteMe\third_party\ycmd\cpp" -DPYTHON_INCLUDE_DIR="C:\Users\Programs\Python3\include" -DPYTHON_LIBRARY="C:\Users\Programs\Python3\libs\python36.lib" -DUSE_PYTHON2=OFF
+</pre>
+
+
+<p>上面的"Visual Studio 14"可以打开你的 Visual Studio 安装目录,在路径中你可以看到那个
+数值,更换为你的即可.成功输出如下:</p>
+
+<pre>
+-- The C compiler identification is MSVC 19.0.24215.1
+-- The CXX compiler identification is MSVC 19.0.24215.1
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PythonLibs: C:/Users/Programs/Python3/libs/python36.lib (found suitable version "3.6.1", minimum required is "3.3")
+Using libclang to provide semantic completion for C/C++/ObjC
+Using external libclang: C:/Users/Programs/LLVM/lib/libclang.lib
+-- Found PythonInterp: C:/Users/Programs/Python3/python.exe (found version "3.6.1")
+-- Looking for pthread.h
+-- Looking for pthread.h - not found
+-- Found Threads: TRUE
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/Programs/Vim/vimfiles/ycm_build
+</pre>
+
+<p>现在开始编译: </p>
+
+<pre> cmake --build . --target ycm_core --config Release </pre>
+
+<p>编译成功后,配置_vimrc,在其中加入:</p>
+
+<pre>
+let g:ycm_global_ycm_extra_conf = 'C:\Users\Programs\Vim\vimfiles\bundle\YouCompleteMe\third_party\ycmd\cpp\ycm\.ycm_extra_conf.py'
+
+"打开vim时不再询问是否加载ycm_extra_conf.py配置"
+let g:ycm_confirm_extra_conf=0
+"让Vim的补全菜单行为与一般IDE一致
+set completeopt=longest,menu
+"python解释器路径"
+let g:ycm_path_to_python_interpreter='C:\Users\Programs\Python3/python.exe'
+"是否开启语义补全"
+let g:ycm_seed_identifiers_with_syntax=1
+
+"是否在注释中也开启补全"
+let g:ycm_complete_in_comments=1
+let g:ycm_collect_identifiers_from_comments_and_strings = 0
+"开始补全的字符数"
+let g:ycm_min_num_of_chars_for_completion=2
+"补全后自动关闭预览窗口"
+let g:ycm_autoclose_preview_window_after_completion=1
+" 禁止缓存匹配项,每次都重新生成匹配项"
+let g:ycm_cache_omnifunc=0
+"字符串中也开启补全"
+let g:ycm_complete_in_strings = 1
+"离开插入模式后自动关闭预览窗口"
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+
+ "上下左右键的行为 会显示其他信息
+inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
+inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
+inoremap <expr> <PageDown> pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<PageDown>"
+inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
+</pre>
+
+<p>然后再.ycm_extra_conf.py中的flags数组中加入如下语句:</p>
+
+<pre>
+'-isystem',
+'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include',
+</pre>
+
+
+
+
+
+<h1 class="titlebar">WMIC命令</h1>
+<p>wmic 命令可以方便的设置环境变量,wmic environment相当于一个数据库,
+该数据库的属性包括8个,分别为: </p>
+
+<pre>
+Caption,Description,InstallDate,Name,Status,SystemVariable,UserName,VariableValue
+</pre>
+
+<p>举两个例子: </p>
+
+<pre>
+<span class="Function">&lt;</span>SYSTEM<span class="Function">&gt;</span>\Path,<span class="Function">&lt;</span>SYSTEM<span class="Function">&gt;</span>\Path,Path,OK,TRUE,<span class="Function">&lt;</span>SYSTEM<span class="Function">&gt;</span>,%SystemRoot%\system32;%SystemRoot%
+BLABLAHAHAHA\Administrator\TEMP,BLABLAHAHAHA\Administrator\TEMP,TEMP,OK,FALSE,BLABLAHAHAHA\Administrator,%USERPROFILE%\AppData\Local\Temp
+</pre>
+
+<p>以上面的例子来说明这8个属性,Caption指当前环境变量的具体归属,
+比如说, &lt;system&gt;\Path 具体指定了系统归属里的 Path 环境变量,而
+BLABLAHAHAHA\Administrator\TEMP 则指明了当前用户归属里的 TEMP 环境变量,
+Description是对当前环境变量的额外描述,但是一般默认情况下和 Caption 一样,
+InstallDate一般不用,设置为空.Name比较重要,指定了当前归属的环境变量名称,
+Status一般均设置为OK,SystemVariable指明当前环境变量是否为系统环境变量,如果是,
+则为TRUE,若不是则为FALSE.然后是UserName,这个属性比较重要,它从整体上指明了要查询的环境
+变量归属范围,最后的属性 VariableValue 指明了环境变量的值.这8个属性我们只需要关注3个,
+分别是 <b>UserName,Name,VariableValue</b></p>
+
+<p>环境变量的归属,一般地我们用的就两个,一个是系统,一个是用户.
+系统的名称在 wmic 中总是 <b>&lt;system&gt;</b>,而用户则是当前用户,其名称可以用
+<b>whoami</b> 来获得.更直观的,下面是系统自带的GUI环境变量设置界面:</p>
+
+<img src="3.png" alt="">
+<center>图3:图形化的环境变量设置界面</center>
+
+<p> 标记1处为环境变量的用户归属,而标记2处为环境变量的系统归属即 &lt;system&gt;.
+现在我们可以使用wmic命令来增删改查环境变量了.</p>
+
+<p>
+增加:<br/>
+wmic environment create UserName="&lt;system&gt;",name="Hello",VariableValue="World"<br/>
+修改:<br/>
+wmic environment where 'UserName="&lt;system&gt;" and name="Hello"' set VariableValue="AnotherWorld"<br/>
+查询:<br/>
+wmic environment where 'UserName="&lt;system&gt;" and name="Hello"' get VariableValue<br/>
+删除:<br/>
+wmic environment where 'UserName="&lt;system&gt;" and name="Hello"' delete<br/>
+注意where后面的语句需要用引号括起来,另外,如果UserName中有反斜线,比如说你的当前用户名
+字为blablahahaha\administrator,那么你需要写成UserName="blablahahaha\\administrator"才可以.
+</p>
+
+
+
+<h1 class="titlebar">2017-09-27/自定义项目补全</h1>
+<p>当我们自己写项目时,可能包含了一些头文件或者包,我们只需要将
+.ycm_confirm_extra_conf.conf 拷贝到自己项目的顶级目录下面即可.
+无须做任何修改,然后重新启动 vim,就可以补全自己头文件里面的类方法或者包方法.</p>
+</body>
+</html>

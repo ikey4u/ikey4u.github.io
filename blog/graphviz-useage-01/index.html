@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>图形可视化软件graphviz-01</title>
+<style>
+/** 设置pre标签元素为4个圆角且能够自动换行 **/
+pre.corner{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+pre{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+/** 设置图片居中显示 **/
+img{
+display: block;
+margin-left: auto;
+margin-right: auto
+}
+/** 背景色渐变,兼容Chrome,IE,Firefox,Opera,Safari **/
+html{
+background: -webkit-gradient(linear,0 0, 0 100%, from(rgba(250,250,250,1)), to(rgba(210,210,210,1))); /** Chrome Safari **/
+background: -moz-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1)); /** FireFox **/
+background: -o-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1));  /** Opera **/
+background: -ms-linear-gradient(rgba(250,250,250,1) 0%,rgba(210,210,210,1) 100%);  /** IE9 IE10 **/
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE8 **/
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE7 **/
+padding:10px;
+line-height: 32px;　　　          　/* 设定文字行距 */
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+</head>
+<body>
+    <h1 style="text-align:center">图形可视化软件graphviz-01</h1>
+    <p style="font-size:14px;text-align:center"><a href="http://www.ahageek.com">www.ahageek.com</a></p>
+    <p style="font-size:14px;text-align:center">2015.09.04</p>
+    Ubuntu中软件的安装方法如下(其他系统的安装方法,自己去Google一下吧):<br/>
+    apt-get install graphviz graphviz-doc<br/>
+    先来看一个例子,将以下代码保存为world.txt<br/>
+    <pre class="corner">
+digraph world {
+size="17,17";
+graph [bgcolor="transparent"]
+	{rank=same; S8 S24 S1 S35 S30;}
+	{rank=same; T8 T24 T1 T35 T30;}
+	{rank=same; 43 37 36 10 2;}
+	{rank=same; 25 9 38 40 13 17 12 18;}
+	{rank=same; 26 42 11 3 33 19 39 14 16;}
+	{rank=same; 4 31 34 21 41 28 20;}
+	{rank=same; 27 5 22 32 29 15;}
+	{rank=same; 6 23;}
+	{rank=same; 7;}
+
+	S8 -> 9;
+	S24 -> 25;
+	S24 -> 27;
+	S1 -> 2;
+	S1 -> 10;
+	S35 -> 43;
+	S35 -> 36;
+	S30 -> 31;
+	S30 -> 33;
+	9 -> 42;
+	9 -> T1;
+	25 -> T1;
+	25 -> 26;
+	27 -> T24;
+	2 -> {3 ; 16 ; 17 ; T1 ; 18}
+	10 -> { 11 ; 14 ; T1 ; 13; 12;}
+	31 -> T1;
+	31 -> 32;
+	33 -> T30;
+	33 -> 34;
+	42 -> 4;
+	26 -> 4;
+	3 -> 4;
+	16 -> 15;
+	17 -> 19;
+	18 -> 29;
+	11 -> 4;
+	14 -> 15;
+	37 -> {39 ; 41 ; 38 ; 40;}
+	13 -> 19;
+	12 -> 29;
+	43 -> 38;
+	43 -> 40;
+	36 -> 19;
+	32 -> 23;
+	34 -> 29;
+	39 -> 15;
+	41 -> 29;
+	38 -> 4;
+	40 -> 19;
+	4 -> 5;
+	19 -> {21 ; 20 ; 28;}
+	5 -> {6 ; T35 ; 23;}
+	21 -> 22;
+	20 -> 15;
+	28 -> 29;
+	6 -> 7;
+	15 -> T1;
+	22 -> T35;
+	22 -> 23;
+	29 -> T30;
+	7 -> T8;
+	23 -> T24;
+	23 -> T1;
+}
+
+    </pre>
+    好的,现在打开终端,输入命令:<b>dot world.txt -Tpng -oworld.png</b>,产生的图形如下:<br/>
+    <img src="world.png" width=99%>
+    这幅图来自官网,地址是<a href="http://www.graphviz.org/content/world" target="_blank">http://www.graphviz.org/content/world</a>,源码只是做了一点儿修改,包括改变了尺寸大小,设置为透明背景色两项.<br/>
+    一般情况下,编译源码生成图片的命令为:<b>dot InputFilename -Ttype -oOutputFilename</b>.实际上,dot是有向图的过滤器.其他的还包含:<br/>
+    <pre>
+       dot      :绘画有向图的过滤器
+       neato    :绘画无向图的过滤器
+       twopi    :绘画放射性布局图形的过滤器
+       circo    :绘画环状布局图形的过滤器
+       fdp      :绘画无向图的过滤器
+       sfdp     :绘画大型无向图的过滤器
+       patchwork:树形图过滤器
+    </pre>
+    目前仅仅在学习利用dot作图,其他的目前还不甚了解,主要参考的是文末链接1中的文档<a href="http://www.graphviz.org/pdf/dotguide.pdf" target="_blank">dotguide.pdf</a>,
+    你可以认为此系列是该文档的阅读笔记罢!.<br/>
+    <h3>1.基本的图形绘画</h3>
+    dot的运作分为四个阶段:
+    <ol>
+        <li>确保图中没有任何环,这可以通过改变图中某些边的方向实现.</li>
+        <li>将节点划分为不同的等级,从上到下,再由等级决定Y坐标.</li>
+        <li>设置X坐标</li>
+        <li>节点之间连线</li>
+    </ol>
+    节点在文件中第一次出现时创建,边在节点通过-&gt;连接时出现.下面是一个例子:<br/>
+    <pre class="corner">
+1  digraph G
+2  {
+3      graph[bgcolor="transparent"]
+4      main -> parse -> execute;
+5      main -> init;
+6      main -> cleanup;
+7      execute -> make_string;
+8      execute -> printf
+9      init -> make_string;
+10      main -> printf;
+11      execute -> compare;
+12   }
+    </pre>
+    将上述代码保存为graph1.gv,然后使用命令<b> dot -Tpng graph1.gv -o graph1.png</b>来生成如下图形:<br/>
+    <img src="graph1.png">
+    1.行3处的代码设置背景色为透明,这主要是为了使图片在博客的文章里看起来比较搭配.<br/>
+    2.行4-11处,就是绘图指令了,节点名称直接写出来,比如"main","parse"节点.节点之间的连线使用标志符号"-&gt;",代码书写的顺序建议按照节点层次,从顶层开始往下一层层进行书写.<br/>
+    3.这里的代码就是按照这样的规则,第一层main,第二层(在第一层中已经链接了).然后是第三层init,execute.<br/>
+    4.每一句用分号结尾,但是设置属性的语句可以不用分号结尾,如第三行处的代码.<br/>
+通常情况下,我们需要对图,以及对图中的节点,边的属性进行一些设置.这些属性通过字符串形式的键值对在源码中进行控制.第二部分就是讲解属性的设置.
+<h3>2.绘画属性</h3>
+<h4>2.1节点以及线的属性</h4>
+节点默认的属性为椭圆形状,宽0.75cm,高0.5cm(shape=ellipse,width=.75,height=.5)以及使用节点的名字作为节点显示的名称.<br/>
+其他常见的节点形状有box,cricle,record以及plaintext.其中plaintext是指节点不使用任何外轮廓.需要说明的是,节点类型可归为两大类:
+基于多边形形状的节点和基于记录类型的节点.下面会分别提到.<br/>
+首先是基于多边形形状的节点,第一个示例:<br/>
+<pre class="corner">
+1  digraph G
+2  {
+3      graph[bgcolor="transparent"]
+4      size ="4,4";
+5      main [shape=box]; /* this is a comment */
+6      main -> parse [weight=8];
+7      parse -> execute;
+8      main -> init [style=dotted];
+9      main -> cleanup;
+10     execute -> { make_string; printf}
+11     init -> make_string;
+12     edge [color=red]; // so is this
+13     main -> printf [style=bold,label="100 times"];
+14     make_string [label="make a\nstring"];
+15     node [shape=box,style=filled,color=".7 .3 1.0"];
+16     execute -> compare;
+17  }
+</pre>
+结果如下所示:<br/>
+<img src="graph2.png">
+1.行4中为图的大小属性,键为size,值为"4,4"表示图的大小为4x4cm,需要说明的是,如果图没有设置fixedsize=true(图的大小尺寸固定)属性,那么<br/>
+所绘制出来的图形实际尺寸将会进行适当的放大或者缩小.<br/>
+2.节点或者边的属性设置在中括号内,比如行5中设置main节点的形状为box,行6设置main到parese的线权重(weight),在dot中,线权重代表了所画连线
+的长度和弯曲程度,简单来说,当一条来连线的权重越大,那么该连线将会更加趋向于直线.默认的权重值是1.其他的设置有:<br/>
+<ul>
+    <li>行8中设置main到init的连线为虚线</li>
+    <li>行12设置默认的连线颜色为红色,因此你看到main到printf以及execute到compare的连线为红色</li>
+    <li>行13中设置main到printf的节点连线线形为粗,连线的显示名称为"100 times"</li>
+    <li>行14中设置节点make_string的显示名称为"make a string",还可以在其中加入换行符"\n"</li>
+    <li>行15中设置默认的节点属性,设置形状为box,样式为filled,填充颜色为可以通过内置颜色名来声明,也可以通过设置RGB三原色值来声明(待考证)</li>
+</ul>
+3.注释符和C/C++相同,可以使用/* */ 或者 //.<br/>
+第二个示例:<br/>
+<pre class="corner">
+1  digraph G
+2  {
+3      graph[bgcolor="transparent"]
+4      a -> b -> c;
+5      b -> d;
+6      a [shape=polygon,sides=5,peripheries=3,color=darkgreen,style=filled];
+7      c [shape=polygon,sides=4,skew=.4,label="c-hello world"]
+8      d [shape=invtriangle];
+9      e [shape=polygon,sides=4,distortion=.7];
+10  }
+</pre>
+图形如下:<br/>
+<img src="graph3.png">
+<ul>
+    <li>行6中设置节点a的形状为polygon,也就是多边形,边数slides为5,peripheries指明了节点外轮廓线的绘制条数,填充颜色为深绿</li>
+    <li>行7中引入了skew参数,该参数用于对多边形进行变换.skew的值为一个浮点数,从-1到1.如果值为正,那么将会把多边形从顶部开始向右水平扭曲</li>
+    <li>行8中设置节点形状为倒三角</li>
+    <li>行9中引入多边形的另一属性distortion,该属性用于从顶部到底部缩放多边形平行的两条边.如果值为负,那么将会使底部边长大于顶部.</li>
+</ul>
+第三个示例:<br/>
+<pre class="corner">
+1  digraph structs
+2  {
+3      graph[bgcolor="transparent"]
+4      node [shape=record];
+5      struct1 [shape=record,label=" left| mid\ dle| right"];
+6      struct2 [shape=record,label=" one| two"];
+7      struct3 [shape=record,label="hello\nworld |{ b |{c|d|e}| f}| g | h"];
+8      struct1 -> struct2;
+9      struct1 -> struct3;
+10  }
+</pre>
+图形如下:<br/>
+<img src="graph4.png">
+该图形中的节点形状是基于记录型的.基于记录型的节点分为两类,一类是record,一类是Mrecord,除了后者是圆角之外,两个都是一样的.<br/>
+记录类型的形状就是表格,将表格作为一个节点来呈现.表格的构造放在lable属性值中.<br/>
+<ul>
+    <li>记录类型的节点声明为shape=record</li>
+    <li>记录类型的形状通过在label里构造,使用竖线|来对表格中的列进行分割</li>
+    <li>记录类型的表格嵌入多行通过大括号{}来实现</li>
+    <li>记录类型中的要显示空格,竖线以及角符号(&lt; &gt;)需要进行转义</li>
+    <li>记录类型中的文本可以通过\n换行并居中对齐,\l左对齐,\r右对齐</li>
+</ul>
+<br/>
+关于graphviz就先写到这里,以后有时间再写该系列第二部.然而实际上,对于简单需求,通过本文所提到的知识,基本上能够做出来.
+
+
+<pre>
+参考:
+1.http://www.graphviz.org/pdf/dotguide.pdf
+2.http://www.graphviz.org/Gallery.php
+3.http://www.graphviz.org/Documentation.php
+</pre>
+    <p style="text-align:right">By KillerLegend</p>
+</body>
+</html>

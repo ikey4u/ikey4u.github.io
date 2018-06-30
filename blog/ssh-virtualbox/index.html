@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>ssh virtualbox</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">使用SSH连接VirtualBox中的虚拟机</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2017-04-01 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+
+<p><i>有这么一种需求,我在 VirtualBox 中安装了一个 Ubuntu Server 虚拟机,
+然后我希望在主机上可以使用 SSH 来通过命令行操作虚拟机,而不需要来回手动往虚拟机中切换.
+这里面涉及到一个关键问题就是虚拟机中的 IP 不断变化,而设置静态 IP 又略显麻烦,
+而且有时候还不一定行得通,比如当你连接移动,电信或者联通提供的无线 WIFI 时,
+你设置静态 IP 后很有可能导致你连不上网络.更别说虚拟机了.经过一番探究可以如下做,
+而不用考虑 IP 地址的变化.</i></p>
+<p>首先安装 ssh,在 ubuntu 16.04 上安装方式如下:</p>
+<pre>sudo apt-get install openssh-client openssh-server</pre>
+<p>启动 ssh 服务的命令如下:</p>
+<pre>sudo /etc/init.d/ssh start</pre>
+<p>你可以修改 ssh 的默认服务端口(22),编辑 /etc/ssh/sshd_config 这个文件里面的 Port 值
+,然后重启 ssh: sudo /etc/init.d/ssh restart</p>
+
+<p>然后确保你设置的虚拟机网络连接方式为NAT模式,然后虚拟机已经关闭.获取VirtualBox中的虚拟机名称:</p>
+
+<pre class="code"> VBoxManage list vms | awk -F\" '{print $2}' </pre>
+
+<p>
+在列出的虚拟机名称中选择一个,设置主机端口3022,虚拟机端口22,如下所示:
+</p>
+
+<pre class="code"> VBoxManage modifyvm  "Ubuntu 16.04 x64 Server" --natpf1 "sshserver,tcp,,3022,,22" </pre>
+
+<p>其命令格式为: </p>
+
+<pre>
+--natpf<span class="Function">&lt;</span>1-N<span class="Function">&gt;</span> [<span class="Function">&lt;</span>name<span class="Function">&gt;</span>],tcp|udp,[<span class="Function">&lt;</span>hostip<span class="Function">&gt;</span>],<span class="Function">&lt;</span>hostport<span class="Function">&gt;</span>,[<span class="Function">&lt;</span>guestip<span class="Function">&gt;</span>], <span class="Function">&lt;</span>guestport<span class="Function">&gt;</span>
+</pre>
+
+<p>
+其中 <b class="term">"Ubuntu 16.04 x64 Server"</b>是虚拟机名称,
+<b class="term">--natpf</b>代表的是NAT Port Forwarding,
+它指明了端口转发规则, <b class="term">1</b>是网卡号,双引号里面的 <b class="term">sshserver</b>是一个描述性字段,可按需随意填写,
+<b class="term">tcp</b>是所使用的协议,主机IP省略和端口 <b class="term">3302</b>,
+虚拟机IP省略和虚拟机端口 <b class="term">22</b>.通常地,
+我们只需要安装上面的例子设置端口.只要端口号能用即可.缺省的IP地址为127.0.0.1
+</p>
+
+<p>设你的虚拟机中服务器的名字为server,在主机上用ssh连接虚拟机上可以这样做: </p>
+<pre class="code">
+ssh -p 3022 server@127.0.0.1
+</pre>
+
+<p>设置自动登陆: </p>
+
+<pre class="code">
+sudo vim /etc/systemd/system/getty.target.wants/getty@tty1.service
+#修改[Service]中的"ExecStart"一行为如下:
+#其中user-name为你要自动登陆的用户名称.
+ExecStart=-/sbin/agetty -a user-name %I $TERM
+</pre>
+
+
+
+
+<h1 class="titlebar">Reference</h1>
+
+<ol>
+    <li><a href="http://stackoverflow.com/questions/5906441/how-to-ssh-to-a-virtualbox-guest-externally-through-a-host"><b>how-to-ssh-to-a-virtualbox-guest-externally-through-a-host </b></a></li>
+    <li><a href="https://www.virtualbox.org/manual/ch06.html"><b>Chapter 6. Virtual networking</b></a></li>
+    <li><a href="https://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm"><b>Chapter 8. VBoxManage</b></a></li>
+    <li><a href="https://ubuntuforums.org/showthread.php?t=2334547 "><b>Test upgrade from 14.04 server to 16.04: Auto login fails</b></a></li>
+</ol>
+</body>
+ <!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

@@ -1,0 +1,49 @@
+/*
+* 本CSS文件是自己根据需要而逐渐增加的样式
+* 最近更新日期:2017.01.30
+*/
+
+
+/* 3d文本 */
+.text3d
+{
+    color: #fafafa;
+    letter-spacing: 0;
+    text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 4px 0px #666, 0px 5px 0px #555, 0px 6px 0px #444, 0px 7px 0px #333, 0px 8px 7px #001135
+}
+/* 子标题 */
+.subtitle
+{
+    color: #390;
+}
+/* 标题框(蓝色) */
+.titlebar
+{
+    background: #2B6695;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+    color: #FFFFFF;
+    font-family: "微软雅黑" , "宋体" , "黑体" ,Arial;
+    font-size: 20px;
+    font-weight: bold;
+    height: 35px; /* box-sizing已经设置为border-box,
+                  因此需要调整总高度,也就是说盒子的宽度和高度包括padding和border区域*/
+    line-height: 25px;
+    margin: 15px 0 !important;
+    padding: 5px 0 5px 20px;
+    text-shadow: 2px 2px 3px #222222;
+    display: block;
+    -webkit-margin-before: 0.67em;
+    -webkit-margin-after: 0.67em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+}
+/* pre标签在指定cornor类时的样式:圆角pre标签,默认是方角标签(在normalize.css中) */
+pre.cornor{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}

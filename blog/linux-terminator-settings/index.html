@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Linux Terminator Settings</title>
+<style>
+/** 设置pre标签元素为4个圆角且能够自动换行 **/
+pre{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+/** 设置图片居中显示 **/
+img{
+display: block;
+margin-left: auto;
+margin-right: auto
+}
+/** 背景色渐变,兼容Chrome,IE,Firefox,Opera,Safari **/
+html{
+background: -webkit-gradient(linear,0 0, 0 100%, from(rgba(250,250,250,1)), to(rgba(210,210,210,1))); /** Chrome Safari **/
+background: -moz-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1)); /** FireFox **/
+background: -o-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1));  /** Opera **/
+background: -ms-linear-gradient(rgba(250,250,250,1) 0%,rgba(210,210,210,1) 100%);  /** IE9 IE10 **/
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE8 **/
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE7 **/
+padding:10px;
+line-height: 32px;　　　          　/* 设定文字行距 */
+}
+a{
+    text-decoration:none;
+}
+table
+{
+    margin-left:auto;margin-right:auto;
+    border:1px solid black;border-collapse:collapse;
+    width:80%;
+
+}
+td
+{
+    text-align:center;
+    border:1px solid black;
+}
+</style>
+</head>
+<body>
+<h1 style="text-align:center">Linux Terminator Settings</h1>
+<p style="font-size:14px;text-align:center"><a href="http://www.ahageek.com">www.ahageek.com</a></p>
+<br/>
+
+<hr/>
+<center> <h2>Ubuntu 16.04 x64 LTS</h2> </center>
+<hr/> <br/>
+<center>Latest update:2017-09-29</center>
+
+
+
+
+
+<h3 class="titlebar">Since 2017-02-14:使得 terminator 启动后显示在屏幕中央</h3>
+<p>系统升级到Ubuntu 16.04了,以后打算使用16.04了.
+Ubuntu 16.04自身打开终端添加到了鼠标右键中,apt源里面因此移除了nautilus-open-terminal,
+但是我仍然希望右键打开 termintor 这个终端,新的设置方法仍是通过 nautilus-admin,首先安装:</p>
+
+<pre> sudo apt-get install -y nautilus-admin && nautilus -q </pre>
+
+安装后打开,以前设置 nautilus-actions 时,无法在文件目录下打开,总是在当前目录的上一层打开,
+这让我很郁闷,前天仔细读了读 nautilus-actions 的手册,说实话英文看着有的地方理解不到位的话,
+很难做成功,最后得知是通过 <b>%f</b> 参数完成对应的功能,设置如下图1:
+<img src="01.png" alt=""> <center>图1</center>
+<p>其他地方地方请参看早些时候的文章.这里主要是将 Working directory 为 %f .</p>
+<p>通常的,我们希望终端在打开后在屏幕比较中心的位置打开,那么怎么设置呢,通过termintor的帮助手册,
+我们可以看到有一个参数 <b> --geometry=GEOMETRY </b>, 有了这个参数就好办多了.
+我们只需要设置 GEOMETRY 的值为靠近屏幕中心的位置,并在 termintor 启动时指定该参数. </p>
+<p> GEOMETRY 这个参数是怎样用的呢,一番搜索之后,我在 <a
+    href="http://physics.oregonstate.edu/~landaur/nacphy/coping-with-unix/node126.html">这里</a>
+找到了一个描述,如下图2,所示:
+<img src="02-xwindow-geometry.gif" alt=""> <center> 图2 </center>
+它的指定值是 <b> 宽度(列数)+高度(行数)±X偏移±Y偏移 </b> </p>
+<p> 首先将你的终端移动到你认为比较中心的位置,打开命令行输入 <b>xwininfo</b>,
+用鼠标单击终端,就会显示如下图3的信息: <img src="03.png" alt=""><center>图3</center></p>
+<p> 红框里面的信息就是我们所需要的,然后安装一个工具 <b>sudo apt install alacarte </b>,
+打开该工具,依次 System Tools / Terminator ,然后在属性里面输入:
+<b>terminator --geometry 131x29+245-78</b>即可.</p>
+
+
+<h3 class="titlebar">2017-02-20:精细的控制 terminator 启动</h3>
+<p>更方便的让termintor启动后保持在屏幕指定位置.</p>
+<p>在一些尝试之后,我发现写一个小脚本能够更好的控制,termintor安装后,
+会在/usr/bin/下面创建一个链接,叫做termintor,我们可以将其保存为terminator-ori,
+然后写一个叫做terminator的脚本放在/usr/bin/目录下面:
+<pre>
+#! /bin/bash
+/usr/bin/terminator-ori  --geometry 131x29+245-78
+</pre>
+然后chmod +x termintor加上执行权限即可.基本的思路还是 <b>偷梁换柱</b>.
+</p>
+
+
+<h3 class="titlebar">2017-02-23:命令行重命名 tab</h3>
+<p> 通常我们打开一个终端,希望会对TAB的名字进行重命名,对于terminator,可以在~/.bashrc中
+加入一个bash函数如下:
+<pre>
+#命令行设置终端TAB名称,用法:tab your_tabname
+#ref:http://stackoverflow.com/questions/5343265/setting-title-for-tabs-in-terminator-console-application-in-ubuntu
+# Another good reference about bash colors found here:
+# https://misc.flogisoft.com/bash/tip_colors_and_formatting
+# I will not use this method to set up terminator title since they
+# will mess up long commands
+tab()
+{
+    # 有一个参数,表示设置标题,如果 tab ishell 将标题设置为 ishell
+    ORIG=$PS1
+    if [[ $# -eq 1 ]];then
+        TITLE="\e]2;$*\a"
+        PS1=${ORIG}${TITLE}
+    # 其他情况(无参数),表示将当前基准目录设置为标题
+    else
+        bn=`basename $(pwd)`
+        TITLE="\e]2;$bn\a"
+        PS1=${ORIG}${TITLE}
+    fi
+}
+</pre>
+然后source ~/.bashrc,这时就可以用tab your_tabname来将当前tab重命名为your_tabname了.
+但是这种方法有一个弊端,就是如果命令行过长,那么命令行将会自己覆盖自己,看着很不舒服,
+目前我已经放弃了这种方法.留在此处仅供参考.
+</p>
+
+
+<h3>2017-09-29:gnome-terminal 颜色主题设置</h3>
+<p>Github 上有一个开源项目 <a href="https://github.com/Mayccoll/Gogh"> Gogh </a>,
+提供了 gnome terminal 的各种颜色主题:</p>
+<img src="./themes.gif" alt="">
+<p>项目很不错,但是安装都是在线安装,这里我将其打包成一个 <a
+    href="https://github.com/ikey4u/BlogStuffs/tree/master/blog/linux-terminator-settings/bash-scheme-gnome">离线安装包</a> 了.
+该安装包如下所示:</p>
+<img src="./gogh.png" alt="">
+<p>其中 download.sh 和 install.sh 是我写的两个用于下载以及安装 gogh 颜色主题的 bash 脚本,
+download.sh 会将所有的 gogh 主题下载到 colors 目录,离线包的 colors 中已经离线好了主题颜色,
+你只需要执行 install.sh 即可. install.sh 支持安装到自定义目录,
+默认安装目录是 /opt/bash-scheme ,如果想安装到自定义目录,可以传入一个参数.
+</p>
+<p>安装完成后,打开终端,执行 gogh 命令即可,然后选择对应的颜色编号,如下所示:</p>
+<img src="./gogh-setup.png" alt="">
+<p>然后设置完成后,鼠标右键就可以在 Profiles 中选择自己喜欢的颜色主题.
+如果想设置默认的主题,打开 gnome-terminal 的 Preferiences 设置默认主题,如下:</p>
+<img src="./gogh-def.png" alt="">
+
+
+
+<br/> <hr/>
+<center> <h2>Ubuntu 14.04 x64 LTS</h2> </center>
+<hr/> <br/>
+
+<h3 class="titlebar">2016.6.16 Update</h3>
+分享一个设置此处打开命令行的快捷方法:
+<pre> apt-get install nautilus-open-terminal </pre>
+备份原有的shell:
+<pre> mv /usr/bin/gnome-terminal /usr/bin/gnome-terminal-bak </pre>
+创建terminator软链接,名字为gnome-terminal
+<pre> ln -s /usr/bin/terminator  /usr/bin/gnome-terminal </pre>
+然后nautilus -q退出.<br/>
+如果上述操作失败后可以尝试重新尝试安装terminator:apt-get install terminator
+你可以查看一下相关设置(应该如下所示):
+<pre>
+root@user:/usr/bin# ls -l *term*
+lrwxrwxrwx 1 root root     19 Apr 14 04:27 gnome-terminal -> /usr/bin/terminator
+-rwxr-xr-x 1 root root 301520 Dec 15  2013 gnome-terminal-bak
+lrwxrwxrwx 1 root root     30 Aug  7  2014 terminator -> ../share/terminator/terminator
+</pre>
+
+<hr/>
+<h3 class="titlebar">2016.1.26 Update</h3>
+最近几日重新安装了系统,Linux的终端设置我更改了一下背景设置,设置图片为背景,效果也不错,如下:<br/>
+<br/><img src="0x10.png"><br/>
+主要改动的地方为:<br/>
+1.设置背景图片,在这里:<br/>
+<br/><img src="0x11.png"><br/>
+2.设置前景与后景色,在这里:<br/>
+<br/><img src="0x12.png"><br/>
+其中前景色颜色代码为:#A2DEE5,后景色代码为:#002130 <br/>
+<br/>
+如果你也喜欢我所用的背景图片,那么鼠标右键将下图保存到本地吧~<br/>
+<br/><img src="shell.jpg"><br/>
+
+
+
+Linux下的终端颜色默认配置并没有那么令我满意,于是就手动配置了一下着色.先放上一张效果图如下:<br/>
+<img src="0x01.png">
+我使用的是Ubuntu14.04,终端工具是Terminator(使用apt-get install terminator即可安装),Ubuntu自带的终端也可以配置.<br/>
+首先打开首选项界面,如下:<br/>
+<img src="0x02.png">
+标记1中涉及的为文本的颜色以及终端的背景色.标记2中涉及的是终端中显示不同类型的文件时对应的着色模板.着色代码对应如下所示:<br/>
+<table >
+    <th colspan="16">文本及其背景色</th>
+    <tr/><td colspan="8">文本色(#E8E8E8)</td><td colspan="8"><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#E8E8E8;"></canvas></td><tr/>
+    <tr/><td colspan="8">背景色(#2D5F5F)</td><td colspan="8"><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#2D5F5F;"></canvas></td><tr/>
+    <th colspan="16">着色模板(顺序与上图是一样的)</th>
+    <tr>
+        <td>(#000000)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#000000;"></canvas></td>
+        <td>(#5A8E1C)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#5A8E1C;"></canvas></td>
+        <td>(#2D5F5F)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#2D5F5F;"></canvas></td>
+        <td>(#CDCD00)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#CDCD00;"></canvas></td>
+        <td>(#1E90FF)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#1E90FF;"></canvas></td>
+        <td>(#CD00CD)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#CD00CD;"></canvas></td>
+        <td>(#00CDCD)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#00CDCD;"></canvas></td>
+        <td>(#E5E5E5)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#E5E5E5;"></canvas></td>
+    </tr>
+        <td>(#4C4C4C)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#4C4C4C;"></canvas></td>
+        <td>(#868E09)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#868E09;"></canvas></td>
+        <td>(#00FF00)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#00FF00;"></canvas></td>
+        <td>(#FFFF00)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#FFFF00;"></canvas></td>
+        <td>(#4682B4)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#4682B4;"></canvas></td>
+        <td>(#FF00FF)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#FF00FF;"></canvas></td>
+        <td>(#00FFFF)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#00FFFF;"></canvas></td>
+        <td>(#FFFFFF)</td><td><canvas style="width:45px;height:20px;border:1px solid black;margin-top:12.5px;background-color:#FFFFFF;"></canvas></td>
+</table>
+对于着色模板中的每一项颜色具体代表上面,你可以使用以下bash代码来运行查看:<br/>
+<pre>
+eval
+$(
+    echo "no:global default;fi:normal file;di:directory;ln:symbolic link;pi:named pipe;so:socket;do:door;bd:block device;
+    cd:character device;or:orphan symlink;mi:missing file;su:set uid;sg:set gid;tw:sticky other writable;
+    ow:other writable;st:sticky;ex:executable;"|sed -e 's/:/="/g; s/\;/"\n/g'
+)
+{
+    IFS=:
+    for i in $LS_COLORS
+    do
+    echo -e "\e[${i#*=}m$( x=${i%=*}; [ "${!x}" ] && echo "${!x}" || echo "$x" )\e[m"
+    done
+}
+</pre>
+运行后如下所示:<br/>
+<img src="0x03.png">
+另外你需要将背景色设置为固实颜色,如下图所示:<br/>
+<img src="0x04.png">
+Terminator的默认配置文件位于文件~/.config/terminator/config中,你可以将下面的配置复制粘贴到你的config文件中即可.<br/>
+<p><b>本配置文件最近一次更新时间:2017-02-23 Thu 02:58 pm</b></p>
+<pre>
+[global_config]
+  enabled_plugins = CustomCommandsMenu, LaunchpadCodeURLHandler, APTURLHandler, LaunchpadBugURLHandler
+  handle_size = -3
+  inactive_color_offset = 0.83
+  suppress_multiple_term_dialog = True
+  title_font = YaHei Consolas Hybrid Bold 10
+  title_hide_sizetext = True
+  title_inactive_bg_color = "#656566"
+  title_inactive_fg_color = "#e9c8c8"
+  title_transmit_bg_color = "#000000"
+  title_transmit_fg_color = "#36f317"
+  title_use_system_font = False
+[keybindings]
+  next_tab = <Primary>Right
+  prev_tab = <Primary>Left
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      profile = default
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      size = 925, 570
+      type = Window
+[plugins]
+[profiles]
+  [[default]]
+    background_color = "#2d5f5f"
+    background_image = /home/bugnofree/Pictures/shellbg.jpg
+    background_type = image
+    copy_on_selection = True
+    cursor_shape = ibeam
+    font = YaHei Consolas Hybrid 10
+    foreground_color = "#e8e8e8"
+    palette = "#000000:#5a8e1c:#2d5f5f:#cdcd00:#1e90ff:#cd00cd:#00cdcd:#e5e5e5:#4c4c4c:#868e09:#00ff00:#ffff00:#4682b4:#ff00ff:#00ffff:#ffffff"
+    scroll_background = False
+    scrollback_infinite = True
+    scrollback_lines = 3000
+    use_system_font = False
+</pre>
+由于Terminator默认不会集成到鼠标右键,这很不方便,好的下面来将其集成到鼠标右键.<br/>
+1.安装工具:<br/>
+apt-get install nautilus-actions -y<br/>
+2.启动改工具,Unity中输入nautilus-actions-config-tool,如下图所示:<br/>
+<img src="0x05.png">
+启动后按照下图设置:<br/>
+<img src="0x06.png">
+标记1处添加一个菜单项目,在标记2中勾选所有的复选框,在Context label中输入菜单项的名称,在标记3中通过Browse按钮浏览图标.<br/>
+然后转到Command栏,设置命令:<br/>
+<img src="0x07.png">
+标记1处为Terminator的路径,标记2处为参数,此处应该填入--working-directory=%D/%w,以保证启动时自动转到当前目录(但是在桌面失效).标记3填入/root/Desktop/.<br/>
+你还可以按照下图设置鼠标右键的显示样式:<br/>
+<img src="0x08.png">
+然后Ctrl+S保存设置.然后执行<b>nautilus -q</b>退出,再重启一下,就可以生效了.最终的效果如下:<br/>
+<img src="0x09.png">
+
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</body>
+</html>

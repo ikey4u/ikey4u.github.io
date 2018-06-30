@@ -1,0 +1,456 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Ubuntu Configuration Guide</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="../../../home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="../../../home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../../blog-assets/blog-style.css" type="text/css">
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>Ubuntu  配置指南|bugnofree|2016-08-08|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<p> Latest update:2017-08-13 16:27:21</p>
+<p>你有两种方式升级到Ubuntu 16.04,一种是从14.04升级,另一种是全新的安装16.04.两种方式我都尝试过了,
+最后还是选择了全新安装.</p>
+
+
+
+<h3 class="titlebar">在线从Ubuntu 14.04升级到16.04</h3>
+<pre>
+<b style="color:red">升级前请务必备份你的原有系统</b>
+#安装最新软件包
+sudo apt-get update && sudo apt-get dist-upgrade
+#重启
+sudo reboot
+#升级(改命令执行后会出现GUI界面,选择升级即可,时间较长)
+sudo update-manager -c
+#升级完后查看
+lsb_release -a
+    No LSB modules are available.
+    Distributor ID:	Ubuntu
+    Description:	Ubuntu 16.04.1 LTS
+    Release:	16.04
+    Codename:	xenial
+</pre>
+
+<h3 class="titlebar">Ubuntu 16.04 要做的事情</h3>
+<p>大部分可以参考文章<a href="http://www.ahageek.com/blog/ubuntu-config-guide/ubuntu-14.04-TLS/" target="_blank">
+    Ubuntu 14.04 TLS 极致配置</a>,但是需要注意的是我已经 <b style="color:red">不推荐使用root用户作为日常使用的用户</b>,以下都是以普通用户权限操作的.<br/>
+</p>
+
+<h4 class="subtitle">安装网络速度指示器</h4>
+<pre>
+wget https://launchpad.net/~fixnix/+archive/ubuntu/netspeed/+files/indicator-netspeed-unity_1.04-xenial0_amd64.deb
+sudo dpkg -i indicator-netspeed-unity_1.04-xenial0_amd64.deb
+</pre>
+
+
+<h4 class="subtitle">将dash移动到下侧</h4>
+<pre> gsettings set com.canonical.Unity.Launcher launcher-position Bottom </pre>
+
+
+<h4 class="subtitle">免翻墙下载google chrome</h4>
+你可以来这里http://gmirror.org/或者直接执行下面的命令:
+<pre> wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb </pre>
+
+<h4 class="subtitle">安装ss</h4>
+<pre>
+wget "https://launchpad.net/~hzwhuang/+archive/ubuntu/ss-qt5/+files/shadowsocks-qt5_2.8.0-1~ubuntu16.04.1_amd64.deb"
+wget "https://launchpad.net/~hzwhuang/+archive/ubuntu/ss-qt5/+files/shadowsocks-libqtshadowsocks_1.10.0-1~ubuntu16.04.1_amd64.deb"
+wget "https://launchpad.net/~hzwhuang/+archive/ubuntu/ss-qt5/+files/libqtshadowsocks_1.10.0-1~ubuntu16.04.1_amd64.deb"
+sudo dpkg -i libqtshadowsocks_1.10.0-1~ubuntu16.04.1_amd64.deb shadowsocks-libqtshadowsocks_1.10.0-1~ubuntu16.04.1_amd64.deb  d shadowsocks-qt5_2.8.0-1~ubuntu16.04.1_amd64.deb
+</pre>
+
+<h4 class="subtitle">保护眼睛 </h4>
+<pre>
+wget https://launchpad.net/~slgobinath/+archive/ubuntu/safeeyes/+files/safeeyes_1.1.4-1_amd64.deb
+sudo dpkg -i safeeyes_1.1.4-1_amd64.deb
+</pre>
+
+<h4 class="subtitle">图标最小化</h4>
+<pre> sudo apt-get install unity-tweak-tool </pre>
+打开unity-tweak-tool后,进入Launcher,按图2设置:
+<img src="2.png" alt="">
+<center>图2</center>
+
+<h4 class="subtitle">安装 sticky notes,规划任务</h4>
+<p>如果你希望将自己这周的任务写下来,放在桌面上,以提醒自己的话,你可以使用这个小软件:
+<a href="https://launchpad.net/~umang/+archive/ubuntu/indicator-stickynotes/+packages">indicator-stickynotes</a>,
+直接到上面那个地址下载 deb 包,然后使用 dpkg 安装即可,对于 Ubuntu 16.04 x64的朋友,可以直接使用下面命令:</p>
+<pre>
+wget https://launchpadlibrarian.net/274677685/indicator-stickynotes_0.5.8-0~ppa1_all.deb
+sudo dpkg -i indicator-stickynotes_0.5.8-0~ppa1_all.deb
+</pre>
+
+<h4 class="subtitle">网易音乐下载工具</h4>
+<p>通常我喜欢网页直接打开网易的音乐播放主页,然后播放音乐,
+但是有时候还是希望有一个简单的离线播放器来播放下载到本地的音乐.
+这里推荐 <a href="https://github.com/ziwenxie/netease-dl"> netease-dl </a>作为下载器.
+推荐使用 pip3 进行安装,安装命令如下:</p>
+<pre> pip3 install netease-dl </pre>
+<p>注意,这些工具随着网易提供的接口变化可能会失效,目前位置(2017-06-15)是可以使用的.
+用法比较简单,比如说你想下载某个歌单,命令如下:</p>
+<pre>
+------➢ ⚔ $ netease-dl -l playlist --name 歌单名称
+</pre>
+<p>一般在线能听的歌曲都可以下载下来.</p>
+
+
+<h4 class="subtitle">纯粹的音乐播放器</h4>
+<p>玩电脑时间越长,或者说随着接触的东西越来越多,越喜欢简洁干练的东西.
+Linux 下的许多音乐播放器功能设计复杂而没有人性的请参考 Rhythmbox,
+这个软件我看到界面后直接就扔了.苦苦寻觅许久,终于找到了一个软件:
+ <a href="http://audacious-media-player.org/">Audacious</a>,
+ 安装方法很简单:
+</p>
+<pre>sudo apt install audacious </pre>
+<p>然后我们可以通过打开设置选择其样式为 Winamp 格式,
+里面有几款很经典而不失优雅的皮肤,比如我用的就是下面这款:</p>
+<img src="./audacious.png" alt="">
+<p>正所谓纯粹而简单的才是真正的美.</p>
+
+
+<h4 class="subtitle">修改grub背景图片</h4>
+<p>grub 2 及其以上支持 png 图片作为背景图片,并且可以很方便的修改 grub 背景图片,
+如下几个地方是 grub 依次寻找的图片位置: </p>
+<p>
+<ol>
+    <li>/etc/default/grub 中的 GRUB_BACKGROUND 参数.</li>
+    <li>/boot/grub/ 目录,如果有多张图片,则按照字母顺序选择第一个.</li>
+    <li>/usr/share/desktop-base/grub_background.sh  里面所声明的图片文件.</li>
+    <li>/etc/grub.d/05_debian_theme 的 WALLPAPER 参数.</li>
+</ol>
+GRUB 2 可以使用 PNG/JPG/JPEG/TAG 格式的图片文件.这些图片文件的属性必须有以下属性:
+<ul>
+    <li>JPG/JPEG:必须是 8bit(256色)</li>
+    <li>图像色彩模式:必须是 RGB 模式</li>
+</ul>
+通常 PNG 一般都是满足条件的,我们可以将其他图片转换为 png 图片,
+这个通过 convert 命令可以很方便的做到,比如:
+<pre>convert a.jpg a.png</pre>
+</p>
+
+接着打开 <b class="term">/etc/default/grub</b>,确保里面的相应设置如下,
+如果没有可以自己添加:</p>
+<pre>
+GRUB_DEFAULT=saved
+GRUB_SAVEDEFAULT=true
+#GRUB_HIDDEN_TIMEOUT=0
+</pre>
+
+<p>另外你也可以在 /etc/default/grub 中设置分辨率:</p>
+
+<pre>
+GRUB_GFXMODE=1600x1200,1280x1024,1024x768,800x600,640x480
+</pre>
+
+<p>最后执行 <b class="term">sudo update-grub</b>即可.</p>
+
+
+<!--<h4 class="subtitle">GIF 录制工具 peek</h4>
+内存占用太大! 差评! 无法使用!
+<p>peek 是一款简洁易用的 GIF 录制工具,界面清晰而实用,官方主页在 <a href="https://github.com/phw/peek">这里</a>.
+在 ubuntu 16.04 源里已经有了该工具,直接执行 sudo apt install peek 即可.
+如果想手动编译,可以按照官网上的步骤来.使用 peek 时录制 GIF 需要设定 magick 的磁盘大小,
+否则 gif 很有可能会录制不成功,执行下面命令打开配置文件:
+</p>
+<pre>
+sudo gvim /etc/ImageMagick-6/policy.xml
+</pre>
+<p>翻到最下面,然后按下图红框中的修改即可:</p>
+<img src="./peek-config.png" alt="">
+<p>由于 peek 使用了 magick 来进行图像处理,中间用到的磁盘来存放缓存文件,
+如果太小,将会导致转换 gif 失败.这里修改为 5GB,你可以按个人喜好设置大小.
+最后放一张 peek 的 GUI:</p>
+<img src="./peek-gui.png" alt="">
+<p>嗯哼,就喜欢这么简洁而漂亮的界面!</p>-->
+
+
+<h3 class="titlebar">一些问题的解决</h3>
+<h4 class="subtitle">台式机安装 ubuntu 16.04 提示 信号超出范围</h4>
+<p>可以先安装 Server 版本,然后安装桌面,再安装显卡驱动.使用下面命令查找最佳驱动:</p>
+<pre>
+sudo ubuntu-drivers list
+sudo ubuntu-drivers devices
+</pre>
+<p>然后选择推荐显卡驱动进行安装即可.</p>
+
+<h4 class="subtitle">alt+tab切换窗口失灵</h4>
+<p>有一次,突然地,我发现我的 alt+tab 切换窗口就失灵了,
+找了很多解决方法,比如安装 compiz 管理工具,重新安装桌面等等,这些都无效.
+最后在 Unity Tewak 中找到了解决方法.打开 Unity Tweak 中选择 Unity/Switcher ,
+点击里面的 Restore Defaults 即可.</p>
+<h4 class="subtitle">evince无法显示书签</h4>
+<pre>chown -R [your-user-name] ~/.local/share/gvfs-metadata/home </pre>
+<p>不过此时是 Index 起到书签的作用,bookmarks仍然是空的,很尴尬,但又不是不能用....</p>
+<h4 class="subtitle">循环登陆</h4>
+<p>由于电脑死机,然后强制关机了.再打开就在登录界面循环了,进不去,解决方法如下:</p>
+<pre>
+sudo apt-get remove --purge nvidia-*
+sudo apt-get install ubuntu-desktop
+sudo rm /etc/X11/xorg.conf
+echo 'nouveau' | sudo tee -a /etc/modules
+sudo reboot
+</pre>
+<p>这个问题解决后,你很有可能会遇到 登陆后屏幕卡死的问题,往下看也有解决方法.</p>
+
+<h4 class="subtitle">Ubuntu 16.04 server 网络配置</h4>
+<p>使用命令 <b> dmesg | grep "eth0" </b> 你会看到一行 <b>eno1: renamed from eth0</b>,
+这个说明你的新的有线连接被重命名为 eno1,只需要修改网络配置文件
+<b>/etc/network/interfaces</b>为如下即可:</p>
+
+<pre>
+auto eno1
+iface eno1 inet  dhcp
+</pre>
+
+然后重新启动网络配置: <b> sudo /etc/init.d/networking restart </b>
+
+<h4 class="subtitle">NVIDIA显卡问题:登录后屏幕卡死</h4>
+
+<p>打开 <b>软件和更新</b>,转到 <b>附加驱动</b>,如下图:</p>
+<img src="nvidia.png" alt="">
+<p>我们可以看到一个 nvidia-375,因此使用下面的命令安装:</p>
+<pre> sudo apt install nvidia-375 </pre>
+<p>然后再选择该显卡驱动,重启即可.</p>
+
+<h4 class="subtitle">搜狗输入法打字只显示输入框,无法自动联想,无法输入汉字</h4>
+<p>解决方法为删除配置文件,然后重启输入法:</p>
+
+<pre>
+rm -rf ~/.config/SogouPY* ~/.config/sogou*
+</pre>
+
+<h4 class="subtitle">SCP Connection refused </h4>
+<p>错误提示如下</p>
+<pre>
+root@OpenWrt:~# scp  username@192.168.2.102:~/Downloads/exo.torrent ./
+/usr/bin/dbclient: Exited: Error connecting: Connection refused
+</pre>
+<p> Ubuntu 16.04默认似乎没有安装ssh服务器,安装一下就可以了:</p>
+<pre>
+sudo apt-get install openssh-server
+sudo ufw allow 22 #如果没有打开端口22,可以执行一下改命令
+</pre>
+<h4 class="subtitle">VeraCrypt No such file or directory: dmsetup</h4>
+<p> 提示错误的截图如图3: <img src="3.png" alt=""> <center>图3</center></p>
+<p>解决方法: <pre> sudo apt-get install dmsetup </pre> </p>
+<h4 class="subtitle">google chrome 55以上版本默认停用flash</h4>
+<p>这个原本是一个棘手的问题,我最初尝试了网上的多种方法解决,都无济于事.
+最后发现最有效的方法是通过chrome自身来安装,我在Ubuntu的14.04和16.04上都测试通过了.</p>
+<p>这种方法唯一的麻烦之处在于 <b>代理</b>.诺,你看我加粗了这俩字,可恶的GxW啊.下面我说这么个搞法.</p>
+<p>正常情况下你在chrome的地址栏里面输入 <b>chrome://plugins</b>,你看的是如下图所示的:</p>
+<img src="plugin.png" alt="">
+<p>里面显示的是 <b>internal-not-yet-present</b>,就是说,插件还没有安装呢!</p>
+<p>现在我们安装,你需要有一个能越过藩篱的工具,那就蓝灯吧,由于shadowsocks全局代理不好开,
+在Linux下用ss来是不行的.蓝灯打开后,会自动打开浏览器,记下地址栏里面的地址,一般是 <b>http://localhost:PORT</b>,
+PORT是一个端口,换上你的即可.</p>
+<p>然后关闭浏览器,打开命令行,输入:
+ <pre> google-chrome --proxy-server="http://localhost:PORT"</pre>
+</p>
+<p>打开浏览器后,地址栏输入 <b>chrome://components</b>,点击如下图所示的 <b>Check for update</b>,
+<img src="componets.png" alt=""> 更新完后,关闭浏览器,重新打开就可以啦.</p>
+
+<h4 class="subtitle">update-grub检测错误 或 grub cannot get c/h/s values</h4>
+<p>描述一下我的主机情况,电脑上买回来的时候是 <b>光驱+一个硬盘</b>.后来我把光驱拆了,换上了一个SSD硬盘,
+原来的硬盘当做数据盘使用了.ssd(sda)以及磁盘(sdb),我把两个系统Ubuntu和windows都安装在了ssd上,
+使用grub检测的时候检测出来了windows,我刚开始没注意,在grub菜单中选择windows后进入,
+提示 <b>grub cannot get c/h/s values</b>,很奇怪的问题,后来仔细一看,grub中显示的windows所在硬盘是sdb,
+也就是原来磁盘上的系统,磁盘上的系统早就被我抹去了.解决方法很简单:我到了原来的磁盘上找了找,发现上面有一个 <b>Boot</b>文件夹,
+将其拷贝到sda上对应分区的根目录下,然后再次 <b>sudo update-grub</b>就会输出<b>Found windows 10 on /dev/sda2</b>,
+重启电脑,完美解决问题.</p>
+<h4 class="subtitle">出现两个输入法图标,日期出现两个"月"字</h4>
+<img src="1.png" alt=""> <center>图1</center>
+解决方法如下:
+<pre>
+sudo apt-get purge fcitx-ui-qimpanel
+gsettings set com.canonical.indicator.datetime time-format 'custom'
+gsettings set com.canonical.indicator.datetime custom-time-format '%m月%d日 %A%H:%M:%S'
+</pre>
+<h4 class="subtitle">W: http://archive.ubuntukylin.com:10006/ubuntukylin/dists/xenial/InRelease </h4>
+<pre> W: http://archive.ubuntukylin.com:10006/ubuntukylin/dists/xenial/InRelease: Signature by key 6CE35A4EBAB676094476BE7CD259B7555E1D3C58 uses weak digest algorithm (SHA1) </pre>
+<p>解决方法：将/etc/apt/sources.list.d/sogoupinyin.list中ubuntukylin所在行注释掉。</p>
+
+
+<h4 class="subtitle">gvim错误GLib-GObject-WARNING **: cannot retrieve class for invalid</h4>
+<p>解决方法如下:</p>
+<pre>
+sudo apt remove vim*
+sudo apt install vim vim-gtk
+</pre>
+<h4 class="subtitle">挂载NTFS分区上的文件权限问题chmod/chown不管用 </h4>
+在命令行中使用id显示自己的组id和用户id,然后打开/etc/fstab:
+<pre>
+UUID=255BEFE718361441  /mnt/fhub   ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=0004B23B000EE1BB  /mnt/core   ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=0002C00100072AE8  /mnt/tools  ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=000F8DAE00012599  /mnt/data   ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=0000F2770007B1C7  /mnt/happy  ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=0008F51E0003C0B4  /mnt/open   ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=6A7666DC7666A911  /mnt/winos  ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+UUID=0EBA05350EBA0535  /mnt/vos    ntfs defaults,utf-8,uid=1000,gid=1000,dmask=022,fmask=033 0 1
+</pre>
+将其中uid和gid的值换成你的用户id和组id,重启电脑即可.
+<p>
+<h4 class="subtitle">apt-get update 源更新问题NO_PUBKEY解决方法</h4>
+错误如下:
+<pre>
+W: GPG error: http://archive.ubuntukylin.com:10006/ubuntukylin xenial
+   InRelease: The following signatures couldn't be verified because the public key
+   is not available: NO_PUBKEY 8D5A09DC9B929006
+W: The repository 'http://archive.ubuntukylin.com:10006/ubuntukylin xenial InRelease' is not signed.
+N: Data from such a repository can't be authenticated and is therefore potentially dangerous to use.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+</pre>
+解决方法:
+<pre>
+#注意最后那个公钥应该换为你自己的
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8D5A09DC9B929006
+#清理缓存并更新源
+cd /var/lib/apt
+#rm -rf lists.old  #如果有lists.old的话
+mv lists lists.old
+apt-get clean
+apt-get update
+</pre>
+<p>如果出现问题请以root身份删除/var/lib/apt/lists/文件夹并且
+将/var/lib/apt/lists.old/文件夹重命名为/var/lib/apt/lists/以恢复.</p>
+<h4 class="subtitle">tsocks导致wget segment fault错误</h4>
+这个错误是相当诡异的,看下面的说明(如果不想看,可以直接跳到解决方案的地方):
+<pre>
+<section style="color:red">先运行wget,没有任何问题</section>
+root@shell:~# wget
+wget: missing URL
+Usage: wget [OPTION]... [URL]...
+
+<section style="color:red">运行wget没问题时查看依赖库</section>
+Try `wget --help' for more options.
+root@shell:~# ldd /usr/bin/wget
+	linux-vdso.so.1 =>  (0x00007ffda79e0000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f7f0a00e000)
+	libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f7f09e06000)
+	libssl.so.1.0.0 => /lib/x86_64-linux-gnu/libssl.so.1.0.0 (0x00007f7f09b96000)
+	libcrypto.so.1.0.0 => /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 (0x00007f7f09736000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f7f09516000)
+	libidn.so.11 => /usr/lib/x86_64-linux-gnu/libidn.so.11 (0x00007f7f092de000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f7f08f0e000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f7f08cee000)
+	/lib64/ld-linux-x86-64.so.2 (0x000055cecc253000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f7f08ae6000)
+
+<section style="color:red">再运行一次tsocks</section>
+root@shell:~# tsocks
+
+<section style="color:red">wget Segmentation fault了</section>
+root@shell:~# wget
+Segmentation fault
+
+<section style="color:red">wget Segmentation fault时查看依赖项</section>
+root@shell:~# ldd /usr/bin/wget
+	linux-vdso.so.1 =>  (0x00007ffe33548000)
+        <u>/usr/lib/libtsocks.so (0x00007f177047e000)</u>
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f17701de000)
+	libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f176ffd6000)
+	libssl.so.1.0.0 => /lib/x86_64-linux-gnu/libssl.so.1.0.0 (0x00007f176fd66000)
+	libcrypto.so.1.0.0 => /lib/x86_64-linux-gnu/libcrypto.so.1.0.0 (0x00007f176f906000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f176f6e6000)
+	libidn.so.11 => /usr/lib/x86_64-linux-gnu/libidn.so.11 (0x00007f176f4ae000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f176f0de000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f176eed6000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f176ecb6000)
+	/lib64/ld-linux-x86-64.so.2 (0x00005631b4af5000)
+
+<section style="color:red">诡异的事情发生了,输入exit退出shell,结果好像是从一个内嵌shell退出了</section>
+root@shell:~# exit
+exit
+
+<section style="color:red">再执行wget,没有任何问题</section>
+root@shell:~# wget
+wget: missing URL
+Usage: wget [OPTION]... [URL]...
+
+Try `wget --help' for more options.
+</pre>
+<p>虽然丈二和尚摸不到头脑,怎么运行了一下tsocks,wget就依赖libtsocks.so这个库了...ubuntu 14.04
+上完全没有事情.<br/>
+于是我搜了一下,居然搜索到了,有人已经解决了:在<a href="https://bugs.launchpad.net/ubuntu/+source/tsocks/+bug/1574270" target="_blank">这里</a>.</p>
+解决方法如下:<br/>
+<pre>
+apt-get build-dep tsocks
+apt-get source tsocks
+wget http://bugs.launchpad.net/ubuntu/+source/tsocks/+bug/1574270/+attachment/4655719/+files/07_always_init_function_pointers.dpatch
+cp 07_always_init_function_pointers.dpatch tsocks-1.8beta5/debian/patches/
+echo -e "\n07_always_init_function_pointers.dpatch" >> tsocks-1.8beta5/debian/patches/00list
+cd tsocks-1.8beta5/
+dpkg-buildpackage -us -uc
+apt-get purge tsocks
+dpkg --install ../tsocks_1.8beta5-9.3_amd64.deb
+</pre>
+你也可以直接去文末的下载链接中下载已经打完补丁的安装包.
+<h4 class="subtitle">界面回到windows 95时代问题</h4>
+有时候窗口一言不合变得很难看(就像Windows 95那样的界面):
+<img src="ugly.png"></img>
+<p>这个问题目前还没有有效的解决方法,我推测这很有可能是因为我安装了两个系统Windows 10和Ubuntu所导致的.
+庆幸的是,这个问题不经常出现,如果出现了,开机后,注销一下,再登录就好了.</p>
+<h4 class="subtitle">Windows窗口超过屏幕,但是无法调整</h4>
+<p>这个问题看起来让人有点很尴尬,症状就如下图:</p>
+
+<img src="oversize.png" alt="">
+
+<p>我截图的时候只好用使用工作空间的缩图来说明这种尴尬的问题,解决方法很简单,按住alt键,
+然后就可以拖动窗口了,知道下面的按钮出现在你的视野中.</p>
+
+
+<h3 class="titlebar">未解决问题</h3>
+<h4 class="subtitle">nautilus 打开目录 GLib-GIO-CRITICAL错误  </h4>
+<pre>
+(nautilus:2810): GLib-GIO-CRITICAL **: g_dbus_interface_skeleton_unexport: assertion 'interface_->priv->connections != NULL' failed
+
+(nautilus:2810): GLib-GIO-CRITICAL **: g_dbus_interface_skeleton_unexport: assertion 'interface_->priv->connections != NULL' failed
+
+(nautilus:2810): Gtk-CRITICAL **: gtk_icon_theme_get_for_screen: assertion 'GDK_IS_SCREEN (screen)' failed
+
+(nautilus:2810): GLib-GObject-WARNING **: invalid (NULL) pointer instance
+
+(nautilus:2810): GLib-GObject-CRITICAL **: g_signal_connect_object: assertion 'G_TYPE_CHECK_INSTANCE (instance)' failed
+</pre>
+这个问题暂时未解决掉.
+<br/><br/>
+<br/><br/>
+<hr/>
+
+
+</body>
+
+相关下载:<br/>
+链接: https://pan.baidu.com/s/1pK9jvpp 密码: 3iyf
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

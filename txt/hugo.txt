@@ -1,0 +1,158 @@
+@title 使用 hugo 搭建文档系统
+@date 2018-05-05
+
+文档书写工具 hugo 地址:https://github.com/gohugoio/hugo
+
+因为 hugo 使用 hugo 写的,先介绍一下 go 的几大命令.
+• go build : 编译出可执行文件
+• go install : go build + 把编译后的可执行文件放到 GOPATH/bin 目录下
+• go get : git clone + go install
+
+安装 hugo 的方法
+go get -v github.com/gohugoio/hugo
+需要先配置代理, 不是 hugo 的问题, 而是 go 全家都被墙了. hugo 官方更新了从源码
+安装的方式,还说是最简单的, 明明最不简单, 如下
+
+
+go get github.com/magefile/mage
+go get -d github.com/gohugoio/hugo
+cd ${GOPATH:-$HOME/go}/src/github.com/gohugoio/hugo
+mage vendor
+mage install
+
+
+我就没用这种方法安装. 然后我们选选看 hugo 的主题, 然后主题各种加载不上来,
+开了代理也不行, 看 了一下网页源码, 发现一个网站 http://cloudfront.net/,
+是亚马逊提供的 cdn 服务, 好吧, 把这个网 站加入到 ss 的代理名单里面,
+然后刷新网页就可以了.
+
+hugo 的主要命令有如下几个
+
+• hugo new 命令用于为网站生成新的内容, 其后可以接上命令也可以接上路径.
+主要的命令为 site(创建一个新网站轮廓) 以及 theme(创建一个新主题),
+当接上路径时将会创建一个新的指定文件.
+• hugo server , 改命令应该在网站根目录下运行, 然后启动 hugo 服务,
+便可以在浏览器中输入网址来浏览生成的网站了.
+
+
+现在让我们来创建一个网站
+1. hugo new site projdocs, 其生成的目录如下
+xserver@xserver:~/projdocs$ tree
+    .
+    ├── archetypes
+    │   └── default.md
+    ├── config.toml
+    ├── content
+    ├── data
+    ├── layouts
+    ├── static
+    └── themes
+
+其中 archetypes 中存放的是工程模板, 什么意思呢,
+就是使用 hugo new <document>的时候 向 document 中自动添加的内容.
+config.toml 是 hugo 工程的配置文件,content 目录存我们网 站的所有内容,
+在 content 目录下面的每一个顶级目录都被hugo 当成是一个内容节区 (content section).
+data 目录存储 hugo 生成网站时所用到的配置文件. layouts 存放的是模板文件,
+也就是如何渲染生成你的静态网站的模板.  static 目录下面存放的是你网站用到的静态资源,
+比如图片,css,JavaScript 等等, 这些资源在生成静态网站时, 会原封不动的进行拷贝.
+
+2. 进入 projdocs 目录, 下载主题 dockdock 到 thems 目录并启动.
+
+git clone https://github.com/vjeantet/hugo-theme-docdock.git themes/docdock
+hugo server -w --bind=0.0.0.0 --theme=docdock
+
+3. 如何设置这个主题为站点主题呢, 只需要将
+themes/docdock/exampleSite/config.toml 复制到站点根目录即可,
+然后修改config.toml 中的 theme 和 themesdir 的值即可.
+
+4. 然后使用下面的命令启动, 可以修改页面, 动态显示.
+screen -dm -S hugo hugo server -w --bind=0.0.0.0
+这样基本上一个文档网站的雏形就算完成了, 然后就是添加页面了, 在网站根目录下面执行下面的命令:
+hugo new simengine/_index.md
+我们将会新建一个内容节区 simengine 目录以及其首页文件 _index.md.
+首页文件的名字必须是 _index.md, 其默认内容定义在archetypes/default.md 中.
+
+
+[搭建个人博客]
+以 just4tus.github.io 为例:
+
+> 用户名为 just4tus
+
+申请 github 账号,新建两个 repo:
+1: just4tuts.github.io
+2: hugosite
+
+2.1 将 hugosite 克隆到本地
+2.2 使用 hugo 新建一个站点,然后拷贝其下的内容到 hugosite 中, 进入 hugosite
+    >克隆主题
+        cd themes
+        git clone https://github.com/keichi/vienna
+    >修改 hugosite/config.toml 为
+        baseURL = "https://just4tuts.github.io/"
+        languageCode = "en-us"
+        theme = "vienna"
+        title = "VIM - THE EDITOR FOR GOD"
+        copyright = '&copy; Theme from <a href="https://themes.gohugo.io/vienna/">vienna</a> Updated by bugnofree'
+
+        [params]
+            subtitle = "subtile"
+            contact = "mailto:xxx@gmail.com"
+            author = "author name"
+            avatar = "/images/boy.jpg"
+            bio = "your bio"
+    >新建文章
+    hugo new post/article.md
+    这个文件位于 content/post/ 中,博客中的图片可以放到 static 目录中,
+    比如 static 下面放入一个 xxx.png,
+    那么在 article.md 中可以用 ![img-title] (/xxx.png) 引用.
+
+2.3 配置 github
+    依旧是进入 hugosite 目录
+    > github 用户名和邮箱
+    git config user.name "just4tus"
+    git config user.email "xxx@gmail.com" # xxx@gmail.com 修改为为你的邮箱
+    > 添加子模块
+    git submodule add git@github.com:<username>/<username>.github.io.git public
+    其中 <username> 填入你 github 的用户名
+    多用户的话注意配置好三个文件:
+    .git/config, .git/modules/public/config 和 .gitmodules.
+
+2.4 部署到 github 上
+    > 自动化部署工具
+    依旧是进入 hugosite 目录,新建一个 deploy 文件,写入如下内容
+#!/bin/bash
+    echo -e "\033[0;32mDeploying updates to GitHub...\033[0m"
+
+    msg="rebuilding site `date`"
+    if [ $# -eq 1 ]
+      then msg="$1"
+    fi
+
+# Push Hugo content
+    git add -A
+    git commit -m "$msg"
+    git push origin master
+
+# Build the project.
+    hugo # if using a theme, replace by `hugo -t <yourtheme>`
+
+# Go To Public folder
+    cd public
+# Add changes to git.
+    git add -A
+
+# Commit changes.
+    git commit -m "$msg"
+
+# Push source and build repos.
+#    git pull origin master # optional
+    git push origin master
+
+# Come Back
+    cd ..
+ > 添加可执行权限
+ chmod +x deploy
+ > 部署
+ ./deploy
+
+2.5 没了

@@ -1,0 +1,78 @@
+@-webkit-keyframes spin_cube 
+{
+  from 
+  {
+    -webkit-transform: rotateX(0deg) rotateY(0deg);
+  }
+  to
+  {
+    -webkit-transform: rotateX(360deg) rotateY(360deg);
+  }
+}
+
+
+#container
+{
+ margin-top:150px;
+ -webkit-perspective :1000px;
+ -webkit-perspective-origin  : 50% 50%;
+}
+
+.show{
+  -webkit-animation : spin_cube 3s infinite linear;
+}
+
+#cube
+{
+  position: relative;
+  margin: 0 auto;
+  height: 200px;
+  width: 200px;
+  -webkit-transition  : -webkit-transform 2s linear;
+  -webkit-transform-style : preserve-3d;
+}
+
+#cube>div 
+{
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  padding: 50px;
+  opacity: 0.6;
+}
+
+#cube div[value="FRONT"]
+{
+  -webkit-transform : translateZ(100px);
+  background-color  : #5E275F;
+  text-align:center;  
+}
+#cube div[value="RIGHT"]
+{
+  -webkit-transform : rotateY(90deg) translateZ(100px);
+  background-color  : #1D3A7D;
+}
+
+#cube div[value="BACK"]
+{
+  -webkit-transform : rotateY(180deg) translateZ(100px);
+  background-color  : #2D8C12;
+}
+
+#cube div[value="LEFT"] 
+{
+ -webkit-transform : rotateY(-90deg) translateZ(100px);
+  background-color  : #699C9F;
+}
+
+#cube div[value="BOTTOM"] 
+{
+  -webkit-transform : rotateX(-90deg) translateZ(100px) rotate(180deg);
+  background-color  : #129212;
+}
+
+#cube div[value="TOP"]
+{
+  -webkit-transform : rotateX(90deg) translateZ(100px);
+  background-color  : #E34C26;
+}

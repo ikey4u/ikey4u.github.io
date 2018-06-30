@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>北京市党政机关网站安全攻防大赛 - 2017</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">北京市党政机关网站安全攻防大赛 - 2017</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2017-12-09 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<h3 class="text3d">背景 && 摘要</h3>
+
+<h3 class="text3d">环境</h3>
+<!--正文-->
+<h1 class="titlebar">PE 信息: ATScanner.exe</h1>
+<h2>题目描述</h2>
+<p><i>此文件IMAGE_NT_HEADERS结构体由三个成员组成,
+    第一个成员为签名结构体,其值为00004550h,CPU常值为014Ch,
+    块（节）数目的值为______，文件时间戳值为______，文件入口点地址为______，
+    用于文件信息标识（文件头属性特征）的值为______.</i></p>
+<p>PE 文件结构包括 DOS 头和 NT 头,这里要填的信息都在 NT 头里面,
+NT 头实际上包含了两个头 File Header 和 Optional Header.
+File Header 里面包含了节区数目(NumberOfSections),时间戳(TimeDateStamp),
+文件头属性(Characteristics).
+而文件入口点(AddressOfEntryPoint)位于 Optional Header 中.
+用 CFF Explorer 打开该文件,可以看到这些信息:
+<img src="./images/peinfo.png" alt="">
+<center>CFF 查看 PE 信息</center>
+所以 flag 就是: <b>BJWXB_CTF{0004h-591D5CCCh-0005B789h-0103h}</b></p>
+
+<h1 class="titlebar">热身: Warmup.exe</h1>
+<p>运行程序,显示 <b>Please Input the Flag：</b>,
+使用 IDA 交叉引用的功能,能够快速找到关键代码:</p>
+<img src="./images/warmup.png" alt="">
+<center>Warmup 关键代码</center>
+<p>1 处读入输入字符串放在 v17 中,然后获取输入字符串的长度 v7.
+2 处遍历每一个输入字符,将输入字符和 0xE 进行异或操作并写回 v17.
+然后在 3 处进行比较,如果和字符串 'LDYVLQMZHuY:|cQ[^Qyo|cQ{~QYO\CQ[^/s' 相等,
+则说明输入 flag 正确.计算 flag 的 python 代码如下: </p>
+<pre class="code">
+In [1]: for i in 'LDYVLQMZHuY:|cQ[^Qyo|cQ{~QYO\CQ[^/s': print(chr(ord(i) ^ 0xe),end='')
+BJWXB_CTF{W4rm_UP_warm_up_WARM_UP!}
+</pre>
+<h1 class="titlebar">VMP壳/JavaScript:check.exe</h1>
+<p>一个 GUI 程序,运行界面如下:</p>
+<img src="./images/check.png" alt="">
+<center>运行界面</center>
+<p>这个程序是加壳了的,看样子是 vmp 壳.我处理的时候没有脱壳,
+处理方法是这样的,当运行到上述界面后,打开 x64dbg,然后附加到该程序,
+转到 Memory Map 中,按下 Ctrl+B 打开搜索框,输入 <b class="term">is not my GUID</b>,勾选 Entire Block 进行搜索,
+如下:</p>
+<img src="./images/x64dbg-search.png" alt="">
+<center>关键字符串搜索</center>
+<p>根据搜索结果转到 dump 窗口查看,如下:</p>
+<img src="./images/javascript.png" alt="">
+<center>JavaScript 代码</center>
+<p>具体的代码如下:</p>
+<pre class="code">
+function ckpswd()
+{
+    a=document.all.pswd.value;
+    if(a == "BJWXB_CTF{by-simpower91-antiy-cn}")
+    {
+        alert("congratulations!")
+    }
+    else
+    {
+        alert("wrong!<"+a+">is not my GUID ;-)")
+    }
+}
+</pre>
+<p>flag 就可以拿到手了.</p>
+
+<h1 class="titlebar">简单 Android 题目:app-release</h1>
+<p>直接用 jadx 打开看一下即可,也是简单的异或操作.</p>
+<img src="./images/android1.png" alt="">
+<center>异或函数</center>
+<img src="./images/android2.png" alt="">
+<center>检查函数</center>
+<p>也是简单的异或操作</p>
+<pre class="code">
+for b in b"PXEJPMQFTiS|v`\"#vMDw`KMA3_b~w3o":print(chr(b ^ 18),end='')
+</pre>
+<p>输出: BJWXB_CTF{Andr01d_VerY_S!Mple!}</p>
+
+
+<h1 class="titlebar">虚拟机指令:CrackMe.exe</h1>
+<h1 class="titlebar">Sparc架构:loop</h1>
+<h1 class="titlebar">流量包文件提取+二进制算法逆向:EveryBit</h1>
+
+
+
+
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <li><a href=""><b></b></a></li>
+</ol>
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Contact me by <b>dXAyZ2Vla0AxNjMuY29tCg==</b><br/>OR<br/>Follow me on <a href="http://weibo.com/bugnofree" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>

@@ -1,0 +1,994 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Ubuntu Configuration Guide</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="../../../home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="../../../home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../../blog-assets/blog-style.css" type="text/css">
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>Ubuntu配置指南|bugnofree|2016-01-21|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/><br/>
+<br/><br/>
+<hr/>
+
+Latest Update: 2018-04-09
+<br/>
+<h3 class="subtitle">0x1.本文所用文件下载</h3>
+以上所有文件均可以从:链接: http://pan.baidu.com/s/1geH0E23 密码: ywau下载得到.<br/>
+<h3 class="subtitle">0x2.安装SMPlayer最新版</h3>
+安装SMPlayer最新版,首页地址http://smplayer.sourceforge.net/first-steps.php,其提供的安装方式是PPA,如下:<br/>
+<pre class="cornor">
+sudo add-apt-repository ppa:rvm/smplayer 
+sudo apt-get update 
+sudo apt-get install smplayer smplayer-themes smplayer-skins 
+</pre>
+但是我不喜欢添加PPA的方式,于是到其<a href="https://launchpad.net/~rvm/+archive/ubuntu/smplayer/+packages?field.name_filter=&field.status_filter=published&field.series_filter=trusty"
+    target="_blank">PPA库</a>里下载了对应的包,现在放在百度网盘里面smplayer文件夹内,分别是:
+<pre>
+smplayer_16.4.0-1-trusty1_amd64.deb      smplayer-themes_15.12.0-1-trusty1_all.deb smplayer-skins_15.2.0-1-trusty1_all.deb
+</pre>
+按顺序安装即可.
+<h3 class="subtitle">0x3.自定义指示器</h3>
+首先安装dconf editor,apt-get install dconf-editor.在系统右上角的声音图标下有如下几项:<br/>
+<br/><img src="0x08.png"></img><br/>
+这里我不喜欢Rhythmbox图标,因此移除.安装完dconf后打开,转到如下图地方:<br/>
+<br/><img src="0x09.png"></img><br/>
+修改interested-media-players即可,无需注销.
+<h3 class="subtitle">0x4.手动安装JAVA</h3>
+你也可以通过apt来安装,但此处采用手动安装.<br/>
+<pre>
+1.下载
+java8:jdk-8u66-linux-x64.tar.gz
+2.解压缩
+mkdir -p /usr/lib/jvm  
+mv jdk-8u66-linux-x64.tar.gz /usr/lib/jvm  
+cd /usr/lib/jvm  
+tar zxvf jdk-8u66-linux-x64.tar.gz  
+ln -s jdk1.8.0_11 java8  
+3.环境变量
+export JAVA_HOME=/usr/lib/jvm/java8  
+export JRE_HOME=${JAVA_HOME}/jre  
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib  
+export PATH=${JAVA_HOME}/bin:$PATH  
+4.附加设置
+update-alternatives --install /usr/bin/java java /usr/lib/jvm/java8/bin/java 300  
+update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java8/bin/javac 300  
+update-alternatives --config java  
+5.测试
+java -version
+</pre>
+
+<h3 class="subtitle">0x5.一波儿...</h3>
+<pre>
+1安装ipython以及pip:apt-get install ipython ipython3 python-pip python3-pip 
+2安装TODO工具xpad以及chm阅读器:apt-get install xpad xchm
+3思维导图:xmind很不错,可以到<a href="http://www.xmind.net/download/linux/" target="_blank">官网</a>下载DEB安装包.
+4流程图软件:yEd,到<a href="http://www.yworks.com/downloads" target="_blank">官网</a>下载安装.
+5几何软件:GeoGebra,下载地址:http://www.geogebra.org/download
+6另一个系统设置编辑工具gconf:安装apt-get install gconf-editor
+7系统信息指示器(如网络速度,内存,CPU等):https://github.com/fossfreedom/indicator-sysmonitor
+ sudo apt-get install python3-psutil curl git
+ git clone https://github.com/fossfreedom/indicator-sysmonitor.git
+ cd indicator-sysmonitor
+ sudo make install
+ nohup indicator-sysmonitor &
+ 删除方法:
+ cd indicator-sysmonitor
+ sudo make uninstall
+8视频字幕编辑工具(手动编译,参见文末ISSUES)
+ add-apt-repository ppa:djcj/aegisub
+ apt-get update
+ apt-get install aegisub
+9视频编辑工具 kdenlive
+ apt-get install kdenlive
+
+10定时休息
+wget https://launchpad.net/~slgobinath/+archive/ubuntu/safeeyes/+files/safeeyes_1.1.0-1_amd64.deb
+dpkg -i safeeyes_1.1.0-1_amd64.deb
+apt-get install -f
+</pre>
+<h3 class="subtitle">0x6.安装电子书阅读器calibre</h3>
+官方网站:<a href="https://calibre-ebook.com/download_linux" target="_blank">https://calibre-ebook.com/download_linux</a>.
+安装方法:
+<pre>
+sudo -v && wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+</pre>
+或许你应该翻墙以加快下载速度.默认安装到/opt/calibre中.当你打开电子书后,你可以将下面的样式加入到配置中,以便于你阅读.
+<pre>
+body{margin-left:30px;margin-right:30px}
+p{text-indent:0.3in;font-family:"Times New Roman",Times,serif;font-size:100%;margin-top:0.01in;margin-bottom:0.01in;}
+.first{text-indent:0;}
+.center{text-indent:0;margin-left:0;text-align:center;}
+.title{text-indent:0;margin-left:0;text-align:center;font-weight: bold;font-size:120%;margin-top:0.2in;margin-bottom:0.2in;}
+.by{text-indent:0;margin-left:0;text-align:center;margin-top:0.2in;margin-bottom:0.2in;}
+.blockquote{text-indent:0.25in;margin-left:0.25in;margin-right:0.25in;}
+.pagebreak{text-indent:0;margin-left:0;text-align:center;page-break-before:always;}
+.right{text-align:right;}
+.bio{text-align:left;text-indent:0;font-family:"Verdana",Arial,sans-serif;font-size:90%;}
+a {color: inherit; text-decoration: inherit; cursor: default;}
+a[href] { color: blue; text-decoration: underline; cursor: pointer;}
+.i {font-style: italic;}
+.b {font-weight: bold;}
+.u {text-decoration: underline;}
+.sup{ vertical-align: super;}
+.strike{text-decoration: line-through;}
+</pre>
+该样式来自:http://ideatrash.net/2011/05/creating-css-stylesheet-so-you-want-to.html
+<h3 class="subtitle">0x7.安装指示器Synapse(快速启动工具)以及大小写开启指示器indicator-keylock</h3>
+<pre>
+1).Synapse: https://launchpad.net/~synapse-core/+archive/ubuntu/ppa
+dpkg -i synapse_0.2.10-2ubuntu3_amd64.deb
+apt-get install -f 
+dpkg -i synapse_0.2.10-2ubuntu3_amd64.deb synapse-dbg_0.2.10-2ubuntu3_amd64.deb 
+2)indicator-keylock: https://launchpad.net/~tsbarnes/+archive/ubuntu/indicator-keylock/+packages
+dpkg -i  indicator-keylock_3.0.1-2-ppa1_amd64.deb
+dpkg -i indicator-keylock-elementary_2-0ppa1-natty_all.deb
+apt-get install -f 
+dpkg -i indicator-keylock-humanity_2-0ppa1-natty_all.deb
+dpkg -i indicator-keylock-ubuntu-mono_2-0ppa1-natty_all.deb
+</pre>
+<hr/>
+
+
+<h3 class="titlebar">几点说明</h3>
+1.一些善意的建议<br/>
+<p>
+如果你打算安装Ubuntu(实际上无论你要安装什么系统)并对其进行个性化配置,请务先记住:<br/>
+<ul>
+    <li>备份你的重要文件,这些位置主要包括你的用户主目录,其他用户主目录以及你个人所特有的用于存放重要文件的地方</li>
+    <li>从可靠来源将文件往系统上转移时务必记住要进行<b style="color:red"> 复制 </b>而不是剪切.</li>
+</ul>
+</p>
+2.环境<br>
+<p>
+本文所针对的操作系统是: Ubuntu 14.04.3 LTS x64,你可以通过uname -a 以及lsb_release-a来综合查看你的系统信息.<br/>
+</p>
+3.个人习惯<br/>
+<p>
+就我个人的计算机而言,我习惯于以最高权限登陆,尽管网上有很多人给出了千万种不要以root登陆的理由,但是可能并不太适合我,个人风格与习惯问题.<br/>
+以下,我均是在root权限下操作,如果你是以普通用户登陆,请适当做一些更改.<br/>
+</p>
+4.文章信息仅供参考.<br>
+
+<h3 class="titlebar">基础工作</h3>
+<h4 class="subtitle">1.获取root权限</h4>
+安装完操作系统,我第一步做的事情就是更改root密码,在登陆界面启用root登陆并禁用来宾账户:<br/>
+更改root密码:
+<pre>
+sudo passwd root
+</pre>
+根据提示输入你的新密码即可.<br/>
+然后使用gedit打开50-unity-greeter.conf:<b>gedit /usr/share/lightdm/lightdm.conf.d/50-unity-greeter.conf</b><br/>
+修改50-unity-greeter.conf,修改后该文件内容看起来就像下面这样:
+<pre>
+[SeatDefaults]
+greeter-session=unity-greeter
+greeter-show-manual-login=true
+allow-guest=false
+</pre>
+其中<b>greeter-show-manual-login=true</b>启用root登陆,<b>allow-guest=false</b>禁用来宾账户.<br/>
+通常地,做完这两步,我将重启系统以root身份登陆系统,然后删除安装系统时创建的账户(假设创建的账户名test),删除命令为:
+<pre>
+userdel -r test
+</pre>
+注意,-r选项将会删除该用户的整个目录,使用时请务必三思.<br/>
+P.S Ubuntu中的shell提示符为
+<pre>username@hostname:路径 #/$ </pre>
+如果你想修改username,只需要修改/etc/passwd中你的用户名即可,如果想修改hostname,
+先打开/etc/hosts修改其中对应行为127.0.1.1	shell,再打开/etc/hostname修该为shell即可.
+最后重启电脑即可生效.
+
+
+<h4 class="subtitle">2.更新源列表</h4>
+<p>
+我通常使用的源为<a href="http://mirrors.163.com/" target="_blank">163</a>和<a href="http://mirrors.ustc.edu.cn/"  target="_blank">USTC</a>的镜像源,你可以点击连接到达对应的站点,
+定位到Ubuntu分支,选择help来获取自己对应的源配置(<b>你选择的源应该时对应于自己Ubuntu的发行版本,不要混淆不同发行版本的源</b>).<br/>
+</p>
+<p>
+无论是否必须,配置前你都应该备份一下你的原有源:
+<pre>
+cp /etc/apt/sources.list /etc/apt/sources.list.bak
+</pre>
+</p>
+<p>
+然后使用gedit打开<b>gedit /etc/apt/sources.list</b>源文件,删除里面的所有内容,然后粘贴入你已经提取到的源配置,下面是2016.1.20日的源文件:
+<pre>
+#USTC open source mirror
+deb http://mirrors.ustc.edu.cn/ubuntu/ trusty main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu/ trusty-security main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu/ trusty-updates main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu/ trusty-proposed main restricted universe multiverse
+deb http://mirrors.ustc.edu.cn/ubuntu/ trusty-backports main restricted universe multiverse
+deb-src http://mirrors.ustc.edu.cn/ubuntu/ trusty main restricted universe multiverse
+deb-src http://mirrors.ustc.edu.cn/ubuntu/ trusty-security main restricted universe multiverse
+deb-src http://mirrors.ustc.edu.cn/ubuntu/ trusty-updates main restricted universe multiverse
+deb-src http://mirrors.ustc.edu.cn/ubuntu/ trusty-proposed main restricted universe multiverse
+deb-src http://mirrors.ustc.edu.cn/ubuntu/ trusty-backports main restricted universe multiverse
+</pre>
+源的顺序越靠前那么这个源优先级越高.<br/>
+配置完成并保存后使用命令<b>apt-get update</b>进行更新,首次更新时间可能会略长.Just have a coffe!
+</p>
+
+
+<h4 class="subtitle">3.安装输入法</h4>
+<p>
+这里我选择安装搜狗输入法,我认为搜狗输入法是Linux下一款非常有良心的而且后盾较为强大的输入法.<br/>
+搜狗输入法如此对待Linux,让我对其也有了很大的好感,你可以细看一下国内各大互联网公司,真正的为Linux提供软件的几乎没有几个.<br/>
+</p>
+<p>
+下载地址:<a href="http://pinyin.sogou.com/linux/">http://pinyin.sogou.com/linux/</a><br/>
+安装方法: <b>dpkg -i xxx.deb</b><br/>
+如果出现依赖性问题,则使用apt-get install -f,然后重新安装.
+P.S.
+使用输入法的过程中,输入法会异常崩溃,无法使用,而且有时候直接不提示系统自动注销,解决方法如下:
+<pre>
+1.找到fcitx的pid并终止:pidof fcitx|xargs kill
+2.启动fcitx:fcitx &
+3.启动搜狗面板:sogou-qimpanel &
+</pre>
+</p>
+
+<p>
+安装完成后,注销登陆并再次登入,调出搜狗输入法的方法如下:
+鼠标右键电脑右上角的图标,选择输入法配置,在打开的界面中,单击左下角的'+'号,如下:<br/>
+<br/><img src="0x01.png"/><br/>
+打开界面'Add input method',去掉'only show current language'的复选框,然后输入<b>sogou</b>来过滤出搜狗输入法,如下:<br/>
+<br/><img src="0x02.png"/><br/>
+选择它,最后点击OK即可. 若打开加号后没有任何输入法显示,
+你需要执行命令 sudo im-config 然后选择 fcitx 框架,重启电脑,
+再执行上述操作即可.
+</p>
+
+<h4 class="subtitle">4.安装vim以及gvim</h4>
+安装方法:
+<pre>
+apt-get install vim vim-gtk
+</pre>
+安装后主要文件位于/usr/share/vim/目录,你可以下载我的配置文件链接: <a href="http://pan.baidu.com/s/1kUrfUb9  target="_blank"">http://pan.baidu.com/s/1kUrfUb9</a> 密码: we83<br/>
+解压其目录如下:
+<pre>
+├── colors/
+├── plugin/
+├── vimrc
+└── YaHei Consolas Hybrid.ttf
+</pre>
+复制配置文件colors文件下的所有文件到vim74下的colors中:
+<pre>
+cp colors/* /usr/share/vim/vim74/colors/
+</pre>
+复制配置文件plugin文件下的所有文件到vim74下的colors中
+<pre>
+cp plugin/* /usr/share/vim/vim74/plugin/
+</pre>
+复制配置文件vimrc文件到$HOME目录下,重命名为.vimrc
+<pre>
+cp vimrc ~/.vimrc
+</pre>
+最后手动双击安装字体Yahei Cosolas Hybrid.ttf.</br>
+按下F2有惊喜哦~
+<h4 class="subtitle">5.安装Google Chrome浏览器并配置代理</h4>
+可以到这里下载Linux 64bit版本Chrome浏览器以及一些必要的插件:链接: <a href="http://pan.baidu.com/s/1ntOBC2t" target="_blank">http://pan.baidu.com/s/1ntOBC2t</a> 密码: ydmt
+安装:
+<pre>
+dpkg -i google-chrome-stable_current_amd64.deb 
+</pre>
+修改以使其可以以root运行:<br>
+用命令vim /usr/bin/google-chrome打开google-chrome然后在<b> exec -a "$0" "$HERE/chrome"  "$@"</b>后面加上<b>--user-data-dir</b>,最后看起来就像下面这样:
+<pre>
+......
+# Make sure that the profile directory specified in the environment, if any,
+# overrides the default.
+if [[ -n "$CHROME_USER_DATA_DIR" ]]; then
+  # Note: exec -a below is a bashism.
+  exec -a "$0" "$HERE/chrome"  \
+    --user-data-dir="$CHROME_USER_DATA_DIR" "$@"
+else
+  exec -a "$0" "$HERE/chrome"  "$@" --user-data-dir
+fi
+......
+</pre>
+
+<p>
+接下来你可以选择安装代理,将上述分析中的SwitchyOmega.crx进行安装,至于如何配置该插件,此处从略.<br/>
+配置完SwitchyOmega插件,接着安装shadowsocks:
+<pre>
+add-apt-repository ppa:hzwhuang/ss-qt5 
+sudo apt-get update &&  sudo apt-get install shadowsocks-qt5
+mv gui-config.json ~/.config/shadowsocks-qt5/
+
+如果你不希望添加apt,那么你可以到下载<a href="https://launchpad.net/~hzwhuang/+archive/ubuntu/ss-qt5/+packages?field.name_filter=&field.status_filter=published&field.series_filter=trusty" target="_blank">这里</a>下载你需要的包,然后安装:
+apt-get install libbotan-1.10-0
+apt-get install libindicator7 libappindicator1 libqrencode3 libzbar0
+dpkg -i libqtshadowsocks_1.10.0-1~ubuntu14.04.1_amd64.deb 
+dpkg -i libqtshadowsocks-dev_1.10.0-1~ubuntu14.04.1_amd64.deb 
+dpkg -i shadowsocks-libqtshadowsocks_1.10.0-1~ubuntu14.04.1_amd64.deb
+dpkg -i shadowsocks-qt5_2.8.0-1~ubuntu14.04.1_amd64.deb
+</pre>
+其中gui-cofig.json是你SS的配置文件,如果没有可以手动打开shadowsocks进行配置.
+通常我不喜欢用使用添加PPA的方式安装,我喜欢下载安装包进行安装.在本文的网盘地址里由shadowsocks的安装包以及依赖库.
+如果你不怕麻烦的话,可以下载安装而不使用PPA.
+<p>
+你或许像我一样不希望每次开机都手动启动shadowsocks这样必备的软件,因此你可以将其加入开机项,打开配置界面的命令为:
+<pre>
+gnome-session-properties
+</pre>
+配置看起来就像下面这样:<br/>
+<br/><img src="0x03.png"></img<br/>
+<br/>其中名字和注释都是自定义的,而命令则必须是正确的.<br/>
+另外一些免费的shadowssocks账号可以从这里获得:http://www.ishadowsocks.com/
+<hr/>
+Update(2017-09-01 13:22:18) <br/>
+配置命令行终端Shadowsocks代理:<br/>
+我们需要先安装 privoxy 将socks5流量转发为http流量:
+<pre> apt-get install privoxy </pre>
+然后打开/etc/privoxy/config,找到下面的内如做适当修改:
+<pre>
+listen-address  127.0.0.1:8118
+forward-socks4    /               127.0.0.1:1080 .
+forward-socks4a   /               127.0.0.1:1080 .
+forward-socks5    /               127.0.0.1:1080 .
+forward-socks5t   /               127.0.0.1:1080 .
+</pre>
+<!--2017-09-06
+mac 下启动方式:
+sudo /usr/local/sbin/privoxy /usr/local/etc/privoxy/config-->
+其中127.0.0.1:8118是默认的监听地址,而127.0.0.1:1080则是本地ss服务器的监听地址.然后你可以测试一下:
+<pre> curl -x 127.0.0.1:8118 google.com </pre>
+返回类似如下表示成功:
+<img src="test-privoxy.png"></img>
+注意, listen-address 的设置很关键,如果你设置为 localhost:8118 那么你需要用
+localhost:8118 来做 http 代理而不是 127.0.0.1:8118,即使你在 /etc/hosts 里面设置
+了 localhost 和 127.0.0.1 一致也不行,这个我在 ubuntu 16.04 server 里面试过了.
+修改完 /etc/privoxy/config 文件后,记得重启服务 sudo service privoxy restart.
+
+此外,你可以设置火狐浏览器,如下不用任何插件的使用socks:
+<img src="privoxy.png"></img><br/>
+
+
+如果想让终端翻墙,没问题,打开~/.bashrc,加入如下代码:
+<pre>
+export http_proxy=http://127.0.0.1:8118
+export https_proxy=http://127.0.0.1:8118
+</pre>
+诺,结果你看咯~
+<img src="wget-http.png"></img>
+这个用处实在太大,让我忍不住提一下下载youtube上的视频.使用下面的命令安装you-get:
+<pre> pip3 install you-get</pre>
+如果你正确设置了上面的http和https流量转发,结果就爽炸了:
+<img src="you-get.png"></img>
+you-get的简要使用方法:
+<pre>
+简单的下载:you-get url
+获取下载的视频信息:you-get -i url
+#比如从上面获取了1080P视频的itag为137,于是我下载高清视频的命令如下:
+#you-get --itag=137 "https://www.youtube.com/watch?v=4_aOIA-vyBo"
+</pre>
+
+<p>现在我们来配置一下命令行终端的命令的代理,我以前用过 tsocks ,但是该软件总是连不上,
+不知原因为何,这里我们已经配置好了 http 代理,所以我们可以写一个简单 shell wrapper 来实现命令行代理,
+将下面脚本保存为 <b>prx</b> 然后 chmod +x prx,放到 /usr/local/bin 目录下即可:</p>
+<pre>
+#! /bin/bash
+#! Wrapper for proxy
+http=$http_proxy
+https=$https_proxy
+ftp=$ftp_proxy
+export http_proxy=127.0.0.1:8118
+export https_proxy=127.0.0.1:8118
+export ftp_proxy=127.0.0.1:8118
+bash -c "$*"
+export http_proxy=$http
+export https_proxy=$https
+export ftp_proxy=$ftp
+</pre>
+<p>然后就可以执行下面命令来直接访问被墙资源了:</p>
+<pre>
+prx CMD
+# prx wget google.com
+</pre>
+
+<h4 class="subtitle">6.安装Windows平台字体以及渲染字体</h4>
+使用到的文件可以到我的网盘下载<a href="http://pan.baidu.com/s/1jGRz7ue" target="_blank">http://pan.baidu.com/s/1jGRz7ue</a>,其中:<br/>
+winfonts_1.3_all.deb几乎包括了所有的windows字体,其中有些是收费的,请体验完后24小时内自行删除....<br/>
+font-render.zip中是来自网友的一个脚本作品,很不错,里面有他的一些个人信息.我几乎没有做什么修改,在此感谢他.<br/>
+上述安装完后,请重启系统:
+<pre>
+reboot
+</pre>
+
+<h4 class="subtitle">6.终端神器teminator和下载神器axel</h4>
+terminator以及必要的辅助工具安装:
+<pre>
+apt-get install terminator
+apt-get install nautilus-actions -y
+</pre>
+配置详见我的文章:<a href="http://www.ahageek.com/blog/linux-terminator-settings/" target="_blank">Linux Terminator Settings</a><br/>
+axel的安装方法为: 
+<pre>
+apt-get install axel
+</pre>
+简要的说一下使用方法:
+<pre>
+axel -n 线程数 "下载地址"
+</pre>
+线程数为一个非负整数,下载地址应该用双引号扩起来,不支持https.<br/>
+
+<h3 class="titlebar">常用软件</h3>
+
+<pre class="cornor">
+
+安装docky(类似于Windows的任务栏):
+add-apt-repository ppa:docky-core/stable
+sudo apt-get update && sudo apt-get install docky
+
+录屏软件kazam:
+sudo apt-get update && sudo apt-get install kazam 
+P.S 1)顺带说一下如何在安装后录制GIF(需要安装apt-get install imagemagick  mplayer):
+    首先录制为mp4(假设为scrool.mp4)然后转换(scroll是临时目录)为scroll.gif:
+    mplayer -ao null scroll.mp4  -vo jpeg:outdir=scroll
+    convert scroll/*.jpg -resize 45% scroll.gif
+    2)录制声音的说明
+它的主界面如下:<img src="kazam.png"></img>
+Sound from speakers说的是录制电脑的声音,而Sound from Microphone则是录制电脑之外的声音.
+如果你发现录制的声音很小,那么你可以进入Ubuntu的设置里面,找到声音(Sound)选项,将音量调大一些,如下图:
+<img src="sound.png"></img>
+如果你发现录制电脑声音失败,你可以进入kazam的preferences里面换换声音源,比如我的如下所示(完美运行):
+<img src="kazam-general.png"></img>
+
+命令行文件查看浏览:
+apt-get install tree ranger
+
+截图工具:
+apt-get install shutter 
+
+多媒体:
+apt-get install libavcodec-extra ubuntu-restricted-extras
+apt-get install mplayer mplayer-fonts mplayer-skin
+apt-get install smplayer
+
+图片图形数据处理:
+安装inkscape:
+wget https://launchpad.net/~inkscape.dev/+archive/ubuntu/stable/+files/inkscape_0.91.0+52~ubuntu14.04.1_amd64.deb
+dpkg -i inkscape_0.91.0+52~ubuntu14.04.1_amd64.deb
+apt-get install -f 
+dpkg -i inkscape_0.91.0+52~ubuntu14.04.1_amd64.deb
+其他的:
+apt-get install gimp gimp-data-extras gimp-plugin-registry dia
+apt-get install graphviz graphviz-doc gnuplot-qt
+
+解压缩: 
+apt-get install unace unrar zip unzip p7zip-full p7zip-rar sharutils rar uudeview mpack  arj cabextract file-roller
+
+实用工具:
+apt-get install  xsel
+
+美化工具:
+apt-get install unity-tweak-tool
+
+虚拟机:
+安装VMWare和Virtual Box,你可以到这里下载:<a href="http://pan.baidu.com/s/1jHzV78a" target="_blank">VMWare 12.0 和 Virtual Box 5.0</a>
+
+编译器:
+你可以使用 apt-cache search mingw | grep 64来查看你想安装的版本:
+1.64bit版本,既可以编译32位程序,也可以编译64位程序
+apt-get install mingw-w64
+P.S:
+--&gt; C
+i686-w64-mingw32-gcc hello.c -o hello32.exe      # 32-bit
+x86_64-w64-mingw32-gcc hello.c -o hello64.exe    # 64-bit
+--&gt; C++
+i686-w64-mingw32-g++ hello.cc -o hello32.exe     # 32-bit
+x86_64-w64-mingw32-g++ hello.cc -o hello64.exe   # 64-bit
+2.32bit版本,只能编译32位程序
+apt-get install mingw32 mingw32-binutils mingw32-runtime
+即使不输入mingw32-binutils和mingw32-runtime也会自动安装
+P.S:
+i586-mingw32msvc-gcc hello.c -o hello.exe
+
+
+编辑器atom
+下载地址: <a href="https://atom.io/" target="_blank">https://atom.io/</a>
+
+PDF阅读编辑工具:
+下载地址: <a href="https://code-industry.net/free-pdf-editor/" target="_blank">https://code-industry.net/free-pdf-editor/</a>
+
+文件管理工具(类似于Total Commander,Total Commander为Linux用户推荐的就是这款工具):
+apt-get install krusader
+
+安装LaTex(完整安装,大约3GB,耗时较长)
+apt-get install texlive-full latex-beamer
+卸载可以参考下面的命令:
+sudo apt-get purge texlive*
+sudo apt-get remove tex-common --purge
+sudo rm -rf /usr/share/texlive
+sudo rm -f /usr/share/doc/texlive-*
+sudo rm -rf  /usr/local/share/texmf/
+rm -rf  ~/.texmf-var/
+
+对于2016版本,可以直接下载 texlive 镜像:中科大的源http://mirrors.ustc.edu.cn/CTAN/systems/texlive/Images/
+直接下载地址:wget http://mirrors.ustc.edu.cn/CTAN/systems/texlive/Images/texlive2016.iso
+安装方法:
+sudo mount -o loop texlive2016.iso /mnt/iso/
+cd /mnt/iso/
+sudo ./install-tl
+安装完成后,加入如下环境变量
+export MANPATH=${MANPATH}:/usr/local/texlive/2016/texmf-dist/doc/man
+export INFOPATH=${INFOPATH}:/usr/local/texlive/2016/texmf-dist/doc/info
+export PATH=${PATH}:/usr/local/texlive/2016/bin/x86_64-linux
+sudo umount  /mnt/iso
+
+卸载方法:rm -rf /usr/local/texlive/2016 && rm -rf ~/.texlive2016
+
+
+
+
+
+MIDI播发器:
+安装:apt-get install timidity timidity-interfaces-extra
+播放:timidity xxx.mid
+GUI:timidity -ig
+
+上面安装了诸多软件,有的软件可能无法再unity中搜索到图标,那么现在来手动添加(假设你要添加的应用为UltraEdit)
+1.gvim /usr/share/applications/ue.desktop
+2.打开输入以下内容:
+-------------------------------------------------------------
+[Desktop Entry]
+Version=1.0
+Encoding=UTF-8
+Name=UltraEdit
+Exec=uex %U
+Type=Application
+Icon=ue.png
+-------------------------------------------------------------
+其中Name就是要显示的名称,Exec指定可执行文件路径(或命令),Icon就是图标.
+3.保存退出
+<hr/>
+下面的一些软件,如果你是安全从业人员,那么你或许需要这些:
+1.wxHexEditor:你可以到这里<a href="http://www.wxhexeditor.org/" target="_blank">wxHexEditor官方网站</a>下载,你也可以使用apt-get安装.
+2.UltraEdit,Beyond Compare以及010 Editor,这些工具是收费的,如果你暂时需要,你可以到这里下载:链接: http://pan.baidu.com/s/1i4nhnCT 密码: 5i4s
+</pre>
+
+
+
+<h3 class="titlebar">个性化</h3>
+<h4 class="subtitle">1.自动挂载NTFS硬盘</h4>
+<pre>
+第一种方式(不建议):
+<hr/>
+进入/etc/init.d目录下新建一个自己的脚本文件夹,比如myscript文件夹:
+mkdir myscript
+cd myscript/
+然后新建一个需要启动的脚本,设置名称为mnt-windows.sh
+在mnt-windows.sh中输入加载分区的命令:
+<pre class="cornor">
+#mnt-windows.sh
+#========================================
+ mount -t ntfs-3g /dev/sda1 /mnt/core/
+ mount -t ntfs-3g /dev/sda5 /mnt/tools/
+ mount -t ntfs-3g /dev/sda6 /mnt/data/
+ mount -t ntfs-3g /dev/sda7 /mnt/happy/
+</pre>
+shell脚本创建结束后,更改其属性为可执行,命令如下:
+chmod a+x mnt-windows.sh
+然后打开/etc/rc.local文件,在exit 0上面输入如下代码:
+/etc/init.d/myscript/mnt-windows.sh start
+再次启动电脑后,便会自动的执行上述脚本中的命令.
+
+
+第二种方式(建议采用此种方法):
+<hr/>
+<pre class="cornor">
+第一步:查看磁盘UUID
+root@shell:~# blkid
+/dev/sda2: LABEL="FileHub" UUID="255BEFE718361441" TYPE="ntfs" 
+/dev/sda5: LABEL="Core" UUID="0004B23B000EE1BB" TYPE="ntfs" 
+/dev/sda6: LABEL="Tools" UUID="0002C00100072AE8" TYPE="ntfs" 
+/dev/sda7: LABEL="Datum" UUID="000F8DAE00012599" TYPE="ntfs" 
+/dev/sda8: LABEL="Happy" UUID="0000F2770007B1C7" TYPE="ntfs" 
+/dev/sda9: UUID="0008F51E0003C0B4" TYPE="ntfs" LABEL="Open" 
+/dev/sdb2: UUID="4466A2CF66A2C0D2" TYPE="ntfs" LABEL="winos" 
+/dev/sdb3: UUID="0EBA05350EBA0535" TYPE="ntfs" LABEL="vos"
+
+第二步:创建挂载点
+mkdir /mnt/{fhub,core,tools,data,happy,open,winos,vos}
+第三步:编辑/etc/fstab文件,加入以下
+UUID=255BEFE718361441  /mnt/fhub   ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=0004B23B000EE1BB  /mnt/core   ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=0002C00100072AE8  /mnt/tools  ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=000F8DAE00012599  /mnt/data   ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=0000F2770007B1C7  /mnt/happy  ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=0008F51E0003C0B4  /mnt/open   ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=4466A2CF66A2C0D2  /mnt/winos  ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+UUID=0EBA05350EBA0535  /mnt/vos    ntfs defaults,utf-8,uid=0,gid=0,dmask=022,fmask=033 0 1
+使用mount -a来检查命令是否有效.
+
+如果你开机时出现如下错误:An error occurred while mounting /mnt/xxx Press S to skip mounting or M for manual recovery.
+修复方法如下:
+apt-get install ntfs-3g
+for d in /dev/{sda1,sda2,sda5,sda6,sda7,sda8,sda9}; do ntfsfix $d; done ;
+其中sda1,sda2等就是你用fdisk -l查看出来的NTFS分区.修复后重启即可.
+
+然而,某一日,执行上述修复方案时,遇到了这个问题:"Windows is hibernated, refused to mount",这是由于windows10的休眠策略导致的,解决方法如下:
+打开windows 10,然后win+x,以管理员运行命令行,执行命令:powercfg -hibernate off,再进入linux执行上述命令即可.
+</pre>
+
+P.S.可以使用fdisk -l来查看所要加载的windows分区.
+
+</pre>
+
+<h4 class="subtitle">2.自动清理内存</h4>
+设置系统每五分钟清理一下内存,使用命令 <b>sudo crontab -e</b>打开 crontab
+(注意,如果你是非 root 用户,你必须加以 sudo ,否则脚本将无法执行,
+除此之外修改 脚本中的 <b>LOG_PATH</b> 为你自己的路径).写入如下语句:
+<pre class="cornor">
+*/5 * * * * echo 3 > /proc/sys/vm/drop_caches && echo \"\" && free >/dev/null 2>&1
+</pre>
+在这里http://blog.philippklaus.de/2011/02/clear-cached-memory-on-ubuntu/发现了一个类似的脚本,经过一些修改,如下:
+<pre>
+#!/bin/bash
+##原作者:By Philipp Klaus
+##修改:By bugnofree www.ahageek.com
+##2016-05-25 Wed 09:06 PM
+##latest update:2017-04-04
+#请确保是以root权限编辑的crontab文件(sudo crontab -e)
+
+#清空文件
+LOG_PATH=/home/bugnofree/.cleanmem
+<span class="Error">&gt;</span> $LOG_PATH
+
+#if [ &quot;$(whoami)&quot; != &quot;root&quot; ]
+#then
+#  echo &quot;必须以root用户运行!&quot; <span class="Error">&gt;</span> $LOG_PATH
+#  exit 1
+#fi
+
+# Get Memory Information
+freemem_before=$(cat /proc/meminfo | grep MemFree | tr -s ' ' | cut -d ' ' -f2) <span class="Error">&amp;&amp;</span> freemem_before=$(echo &quot;$freemem_before/1024.0&quot; | bc)
+#内存小于500MB则拿chrome和网易云开刀
+if [ $((freemem_before)) -lt 500 ]
+then
+   ps -elf| grep -E  &quot;google/chrome|netease-cloud-m&quot;| awk '{print $4}' | xargs kill -9
+fi
+cachedmem_before=$(cat /proc/meminfo | grep &quot;^Cached&quot; | tr -s ' ' | cut -d ' ' -f2) <span class="Error">&amp;&amp;</span> cachedmem_before=$(echo &quot;$cachedmem_before/1024.0&quot; | bc)
+# Output Information
+echo -e &quot;系统缓存:$cachedmem_before MiB 系统内存:$freemem_before MiB&quot; <span class="Error">&gt;&gt;</span> $LOG_PATH
+# Test sync
+if [ &quot;$?&quot; != &quot;0&quot; ]
+then
+    echo &quot;无法同步(sync)文件系统,执行失败!&quot; <span class="Error">&gt;&gt;</span> $LOG_PATH
+  exit 1
+fi
+# Clear Filesystem Buffer using &quot;sync&quot; and Clear Caches
+sync <span class="Error">&amp;&amp;</span> echo 3 <span class="Error">&gt;</span> /proc/sys/vm/drop_caches
+freemem_after=$(cat /proc/meminfo | grep MemFree | tr -s ' ' | cut -d ' ' -f2) <span class="Error">&amp;&amp;</span> freemem_after=$(echo &quot;$freemem_after/1024.0&quot; | bc)
+# Output Summary
+echo -e &quot;本次释放内存:$(echo &quot;$freemem_after - $freemem_before&quot; | bc)MiB 当前自由内存:$freemem_after MiB&quot; <span class="Error">&gt;&gt;</span> $LOG_PATH
+date <span class="Error">&gt;&gt;</span> $LOG_PATH
+exit 0
+</pre>
+这个脚本主要目的是防止死机,当内存小于500MB时的时候搜索chrome浏览器以及网易云音乐播放器(这两个货占内存巨大...),
+然后结束这些进程,当内存大于500MB时,则正常的释放内存.当然你可以自己修改以适合自己所需.该脚本每5分钟执行一次,
+每次执行将会在用户主目录下面的文件.cleanmem中写入本次清理结果.看起来就像下面这样:
+<pre>
+系统缓存:568 MiB 系统内存:152 MiB
+本次释放内存:2012MiB 当前自由内存:2164 MiB
+Wed May 25 21:40:01 CST 2016
+</pre>
+上述脚本保存为clear-mem.sh,然后存放到/opt/ishell/cpu-guard-suits中,并在crontab中加入语句:
+<pre>
+*/5 * * * * "/opt/ishell/cpu-gurad-suites/clear-mem.sh"
+</pre>
+如果某一天你的电脑突然死机了,不妨等个五分钟,看看是否会有奇迹发生...<br/>
+你可以使用如下命令来时实查看系统的内存使用情况:
+<pre class="cornor">
+watch -n 1 cat /proc/meminfo
+</pre>
+按Ctrl-C可以退出.
+
+<h4 class="subtitle">3.快捷键设置</h4>
+1.取消ALT全局快捷键<br/>
+进入系统设置,然后选择快捷键,如下图:<br/>
+<br/><img src="0x04.png"></img><br/>
+单击Key to show the HUD,然后按下回退键(Backspace)即可取消掉让人烦恼的全局ALT键.<br/>
+2.设置Win+D显示桌面<br/>
+类似的,我们切换到如下图所示的位置:<br/>
+<br/><img src="0x05.png"></img><br/>
+单击选中,然后按下Win以及D键,就可以设置为Super+D了<br/>
+3.设置Win+Up窗口最大化以及Win+Down正常窗口<br/>
+参照下图即可:<br/>
+<br/><img src="0x06.png"></img><br/>
+
+<h3 class="titlebar">系统备份与恢复</h3>
+<pre>
+系统备份:
+<hr/>
+1.备份整个硬盘 
+方式一:先生成镜像,再压缩
+dd if=/dev/sda of=~/disk.img
+压缩存储
+gzip disk.img
+方式二:生成镜像并压缩:
+dd if=/dev/sda | gzip > ~/disk.img.gz
+2.备份一个分区(如果你的系统安装在一个分区下面,那么只需备份这个分区即可)
+dd if=/dev/sda1 | gzip > ~/part.img.gz
+
+
+系统恢复:
+<hr/>
+1.从镜像文件恢复磁盘或分区
+dd if=disk.img of=/dev/sda1
+2.从压缩文件恢复
+gzip -dc /part.img.gz | dd of=/dev/sda1
+PS.
+有时候你想提取某些文件,你可以使用下面的命令:
+sudo gzip -dc part.img.gz  | dd of=./system.iso
+以此将文件保存为一个iso文件,然后再用mount挂载,然后进行文件的提取.
+
+
+备份步骤
+<hr/>
+1.备份整个硬盘 
+1.使用Live CD登陆系统(注意不用通过当前系统运行上述命令备份当前系统)
+1.使用fdisk -l确定要备份的分区
+2.使用上述方法备份
+
+
+备份实战:
+<hr/>
+以live cd进入系统后,打开终端,提升为root:<b>sudo -i</b>
+查看磁盘:<b> fdisk -l</b>
+我的系统安装在/dev/sdb9分区上面,我想备份到外接硬盘(默认会挂载再/media/ubuntu目录下面).
+我的硬盘名称位KillerLegend,因此我备份的命令为:
+<b>time -p dd if=/dev/sdb9 | gzip &gt; /media/ubuntu/KillerLegend/Backup/LinuxUbuntu-OS-Backup/2016.01.21-Ubuntu-14.04-x64.img.gz</b>
+命令执行完毕后,输出如下:
+83888672+0 records in
+83888672+0 records out
+42951000064 bytes (43 GB) copied, 4294.5 s, 10.0 MB/s
+real 4294.50
+user 3725.32
+sys 451.77
+
+一共拷贝的硬盘分区为43GB,用时4294.50s(大约1小时10分钟),备份输出的文件2016.01.21-Ubuntu-14.04-x64.img.gz我看了一下大约20GB.
+
+
+
+扩大系统分区尺寸
+<hr/>
+有几种情况,第一种是:
+你的系统盘空间不足,你需要在原基础上对其进行扩展.
+这个要求你的系统盘分区前或者后含有空闲空间,然后进入live cd,
+使用resize进行分区尺寸调整即可.
+第二种情况是:
+你换硬盘了,你给你的系统分配了一个更大的分区.这个时候,
+你除了使用上面的命令进行恢复之外,你还需要调整分区大小.
+假如你原有的系统分区大小为40GB,新的分区大小为90GB,那么覆盖后系统认为你的系统盘仍为40GB,
+而不是90GB,现在我们就是来解决这个问题.依旧是进入live cd,然后打开GParted分区工具,
+选择你的硬盘,然后选择你的系统盘分区,鼠标右键选择check,这个时候在GParted的左下角会出现一个提示:
+1 operation pending.这个时候选择Edit-&lt;Apply All  Operations应用操作.然后重新启动就可以了.
+</pre>
+
+
+<h3 class="titlebar">FAQ</h3>
+<h4 class="subtitle">1.禁用错误提示 </h4>
+1)打开终端,运行gedit /etc/default/apport<br/>
+2)将enabled=1修改为enabled=0<br/>
+3)保存并退出<br/>
+
+<h4 class="subtitle">2.stdin: is not a tty </h4>
+错误提示如下:
+<pre>
+Error found when loading /root/.profile:
+stdin: is not a tty
+As a result the session will not be configured correctly. You should fix the problem as soon as feasible.
+</pre>
+解决方法:<br/>
+打开/root/.profile将mesg n 更改为 tty -s && mesg n
+
+
+<h4 class="subtitle">3.root用户音频无法发音</h4>
+usermod -a -G pulse-access root<br/>
+gpasswd -a root pulse         <br/>
+gpasswd -a root pulse-access    <br/>
+最后加入启动项:pulseaudio --system
+
+<h4 class="subtitle">4.docky无法依附图标</h4>
+1.打开gconf-editor,移动到 /apps/docky-2/Docky/Interface/DockPreferences/Dockn
+2.双击Launchers,在弹出的对话框中添加desktop文件,比如说file:///usr/share/applications/geogebra.desktop
+3.保存并关闭gconf-editor然后重启Docky
+
+<h4 class="subtitle">5.系统引导修复</h4>
+在安装双系统(windows和ubuntu)的时候,你会发现如果后安装windows,那么ubuntu的菜单将会被覆盖.
+这时需要来修复grub菜单,修复方法如下:<br/>
+<pre>
+首先以live方式启动,启动系统后,打开命令行工具.
+0x001================================================
+输入fdisk -l命令,回显类似如下:
+root@kali:~# fdisk -l
+Disk /dev/sda: 500.1 GB, 500107862016 bytes
+255 heads, 63 sectors/track, 60801 cylinders, total 976773168 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 4096 bytes
+I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+Disk identifier: 0x76615352
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *          63   209728574   104864256    7  HPFS/NTFS/exFAT
+Partition 1 does not start on physical sector boundary.
+/dev/sda2       209728636   919969791   355120578    f  W95 Ext'd (LBA)
+Partition 2 does not start on physical sector boundary.
+/dev/sda5       209728638   440438039   115354701    7  HPFS/NTFS/exFAT
+Partition 5 does not start on physical sector boundary.
+/dev/sda6       440438103   692128394   125845146    7  HPFS/NTFS/exFAT
+Partition 6 does not start on physical sector boundary.
+/dev/sda7       692128458   797016779    52444161    7  HPFS/NTFS/exFAT
+Partition 7 does not start on physical sector boundary.
+/dev/sda8       797020160   880906878    41943359+  83  Linux
+/dev/sda9       880908288   919969791    19530752   83  Linux
+0x002=======================================================
+硬盘是SCSI,则显示是/dev/sda#,如果是IDE硬盘,则会显示/dev/hda#
+安装有windows,Ubuntu以及Kali,所以这里在sda8和sda9上看到都是Linux系统.
+如果你想知道这些Linux系统到底是哪些发行版包,你可以这样做(以sda8)为例:
+mkdir /media/test/
+mount /dev/sda8 /media/test/
+cat /media/test/etc/*-release
+回显可能如下:
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=14.04
+DISTRIB_CODENAME=trusty
+DISTRIB_DESCRIPTION="Ubuntu 14.04.1 LTS"
+NAME="Ubuntu"
+VERSION="14.04.1 LTS, Trusty Tahr"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 14.04.1 LTS"
+VERSION_ID="14.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+很明显,你可以看到这是Ubuntu系统,14.04版本.
+0x003========================================================
+到这里,你应该能够确定自己希望设置的Linux系统分区了(假设你确定的系统分区为/dev/sdx#,硬盘为/dev/sdx).
+mount /dev/sdx# /mnt 
+mount --bind /dev /mnt/dev
+mount --bind /proc /mnt/proc
+cp /etc/resolv.conf /mnt/etc/resolv.conf
+chroot /mnt
+grub-install --recheck /dev/sdx 
+reboot
+0x004========================================================
+将Live CD移除,接下来的重启将会进入Linux系统,进入后,我们让grub检测windows系统以及其他系统(打开命令行,输入如下命令):
+update-grub
+如果一切顺列,则OK!
+</pre>
+<h4 class="subtitle">6.ss-qt5: symbol lookup error: /usr/local/lib/libQt5DBus.so.5: undefined symbol: _Z28qEnvironmentVariableIntValuePKcPb</h4>
+这个问题的起因,是由于某天我想做个思维导图,然后下载了个软件,叫做Edraw.安装完成后,不满意,就又卸载了.<br/>
+第二天,我打开电脑,习惯性的打开chrome,发现访问不了网络,我还以为是网络出了问题,特意的去看了一下路由器....后来一看电脑原来是shadowsocks没有开.<br/>
+因为我浏览器主页就是google,所以导致了下意识认为是网断了.我居然还去看路由器了,感觉自己好蠢~~<br/>
+我用GUI的方式重新运行了shadowsocks,半天没有任何反应,于是我用命令行运行了一下,爆出了如下错误:<br/>
+<pre>
+ss-qt5: symbol lookup error: /usr/local/lib/libQt5DBus.so.5: undefined symbol: _Z28qEnvironmentVariableIntValuePKcPb
+</pre>
+查找表错误,那我看看这是什么鬼:
+<pre>
+root@shell:~# readlink -f /usr/local/lib/libQt5DBus.so.5
+/usr/local/lib/edraw/libQt5DBus.so.5.5.1
+</pre>
+是链接到edraw上了,错因找到.那么应该安装哪一个呢?先看一下ss使用的库都有哪些:
+<pre>
+root@shell:~# ldd /usr/bin/ss-qt5
+	linux-vdso.so.1 =>  (0x00007fff8f752000)
+	libqrencode.so.3 => /usr/lib/x86_64-linux-gnu/libqrencode.so.3 (0x00007f57fb1f0000)
+	libQtShadowsocks.so.1 => /usr/lib/libQtShadowsocks.so.1 (0x00007f57fafb0000)
+	libbotan-1.10.so.0 => /usr/lib/libbotan-1.10.so.0 (0x00007f57faab8000)
+	libzbar.so.0 => /usr/lib/libzbar.so.0 (0x00007f57fa878000)
+	libappindicator.so.1 => /usr/lib/x86_64-linux-gnu/libappindicator.so.1 (0x00007f57fa668000)
+	libgtk-x11-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgtk-x11-2.0.so.0 (0x00007f57fa028000)
+	libgobject-2.0.so.0 => /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 (0x00007f57f9dd0000)
+	libQt5Widgets.so.5 => /usr/lib/x86_64-linux-gnu/libQt5Widgets.so.5 (0x00007f57f95a0000)
+<b>	libQt5DBus.so.5 => /usr/local/lib/libQt5DBus.so.5 (0x00007f57f9320000)</b>
+	libQt5Network.so.5 => /usr/lib/x86_64-linux-gnu/libQt5Network.so.5 (0x00007f57f8fd8000)
+	libQt5Gui.so.5 => /usr/lib/x86_64-linux-gnu/libQt5Gui.so.5 (0x00007f57f8988000)
+	libQt5Core.so.5 => /usr/lib/x86_64-linux-gnu/libQt5Core.so.5 (0x00007f57f82e0000)
+	libstdc++.so.6 => /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f57f7fd8000)
+</pre>
+然后再用locate定位libQt5DBus.so.5:
+<pre>
+root@shell:# locate libQt5DBus.so.5
+/usr/lib/x86_64-linux-gnu/libQt5DBus.so.5
+/usr/lib/x86_64-linux-gnu/libQt5DBus.so.5.2
+/usr/lib/x86_64-linux-gnu/libQt5DBus.so.5.2.1
+</pre>
+好的,删除原有的,换上正儿八经的即可:
+<pre>
+rm /usr/local/lib/libQt5DBus.so.5
+ln -s /usr/lib/x86_64-linux-gnu/libQt5DBus.so.5 /usr/local/lib/libQt5DBus.so.5
+</pre>
+再运行,OK!
+<h3 class="titlebar">ISSUES UNSOLVED</h3>
+<h4 class="subtitle">Aegisub的编译问题</h4>
+以下为编译Aegisub的过程记录,虽然最后生成的Aegisub是可以运行的,但是多多少少有些问题,
+比如起Aegisub启动后,会报错,但是不影响使用,而且一个很让人难以忍受的错误是,选项界面会
+变成黑色背景...
+<pre>
+编译 wxwidgets
+======================================================
+#1:apt-get install libgtk-3-dev build-essential checkinstall
+其中checkinstall可用于安装源码编译后的软件也可以用于生成deb包.
+然后进入wxwidgets目录.
+#2: ./configure --disable-shared --enable-unicode
+其中--disable-shared将wxwidgets编译为静态文件,--enable-unicode使wxwidgets支持Unicode字符.
+#3: make
+#4: sudo checkinstall
+
+
+#5.最后输出一些信息如下:
+Done. The new package has been installed and saved to
+
+ /root/Downloads/wxWidgets-3.1.0/wxwidgets_3.1.0-1_amd64.deb
+
+ You can remove it from your system anytime using: 
+
+      dpkg -r wxwidgets
+#编译
+======================================================
+#1.安装依赖项
+apt-get install build-essential  libboost-all-dev libass-dev intltool
+apt-get install libasound2-dev   libffms2-dev libfftw3-dev libgl1-mesa-dev 
+apt-get install libglu1-mesa-dev libgtk2.0-dev libhunspell-dev liblua5.1-dev
+#2.编译安装
+./configure && make && sudo make install
+
+#重新加载动态库配置信息
+ldconfig
+
+real	15m52.781s
+user	15m1.760s
+sys	1m13.280s
+
+#
+Done. The new package has been installed and saved to
+
+ /root/Downloads/aegisub-3.2.2/aegisub_3.2.2-1_amd64.deb
+
+ You can remove it from your system anytime using: 
+
+      dpkg -r aegisub
+</pre>
+如果有哪位朋友搞定了,还烦请告知我一下,不胜感激.
+
+
+
+</body>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

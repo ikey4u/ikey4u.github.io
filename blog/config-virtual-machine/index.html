@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>虚拟机的配置</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="#">首页</a></li>
+		<li><a href="#">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">虚拟机的配置</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2017-03-25 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<p>做信息安全的人离开不了虚拟机,配置一个适合自己且好用的虚拟机是很重要的,
+配置的过程中,往往会忘记某些功能配置,导致快照抓取后突然想起来,
+再接着处理,再抓快照,这样来来回回相当麻烦,此处就当是一个记录,
+在配置虚拟机的时候作为参考,本文会不断更新.</p>
+<h1 class="titlebar">Windows 10虚拟机</h1>
+<h3 class="subtitle">工具安装目录</h3>
+<p>一般的,可以新建一个文件夹,位置为<b class="term">C:\Tools</b>,
+然后各种工具可以安装在这里,然后将该文件夹添加到 Windows Defender的排除文件夹中.
+这样的话,可以很大程度上防止 Defender 查杀干扰.  </p>
+
+<h3 class="subtitle">禁止 Windows 10系统更新</h3>
+<p>打开服务(services.msc),找到 <b class="term">Windows Update</b>选项,
+双击,再打开的界面中,进入 <b class="term">常规</b> 选项卡,
+将 <b class="term">启动类型</b>设置为 <b class="term">禁用</b>.
+然后进入 <b class="term">恢复</b>选项卡,将 <b class="term">第一次失败</b>设置为<b class="term">无操作</b>.</p>
+
+<p>再打开组策略(gpedit.msc),做如下操作:<br/>
+<b class="term">计算机配置/管理模板/Windows组件/Windows更新/{配置自动更新,指定
+    Internet Microsoft更新服务位置,不要连接任何Windows更新Internet位置}</b>,
+对应的设置为<b class="term">已禁用,已启用(两行都填入127.0.0.1),已启用</b>.
+</p>
+
+<h3 class="subtitle">Windows 10 Defender设置</h3>
+<p>进入Defender的系统设置,关闭 <b class="term">实时保护,基于云的保护,自动提交示例,增强型通知</b>,
+在 <b class="term">排除</b>中添加要排除的文件夹.  </p>
+
+<p>以上是系统提供的选项,我们接下来还要通过组策略进一步关闭 Defender,
+首选 <b class="term">win+r</b>打开运行框,输入 <b class="term">gpedit.msc</b>,
+在组策略中,依次选择 <b class="term">计算机配置/管理模板/Windows组件/Windows Defender</b>,
+然后找到 <b class="term">关闭 Windows Defender</b>,双击,在打开的界面中选择 <b class="term">已启用</b>
+</p>
+<h3 class="subtitle">OllyDbg安装配置</h3>
+<p>OllyDbg已经配置完毕,放置在 <a href="https://github.com/ikey4u/BlogShares" target="_blank">这里</a>,
+你可以使用上面页面中的说明进行下载.</p>
+<p>下载到本地后,首要的几件事情如下:</p>
+<ol>
+    <li><b>安装fonts文件夹下面的字体</b><br/>
+    安装YaHei Consolas Hybrid字体.</li>
+    <li><b>以管理员执行help\install-help-support\install.bat</b><br/>
+    使Windows支持 .hlp 文件</li>
+    <li><b>以管理员执行fixpath.bat</b><br/>
+    修复 OllyDbg 的路径问题.</li>
+    <li><b>以管理员执行tools\sendto\sendto.bat</b><br/>
+    为鼠标右键的 发送到 菜单添加几款实用小工具.</li>
+    <li><b>OD添加到鼠标右键</b><br/>
+    打开OD后,依次 Options/Add to Explorer 进行设置</li>
+</ol>
+<h3 class="subtitle">Windbg安装配置</h3>
+<p>这个你可以去微软官网下载 SDK, 地址在<a
+    href="https://developer.microsoft.com/en-us/windows/hardware/windows-driver-kit" target="_blank">这里</a>.</p>
+
+<h3 class="subtitle">IDA Pro安装配置</h3>
+这个请自行上网寻找河蟹版本,最新泄露版本为 6.8 版本.
+安装完成后可以从<a href="https://github.com/ikey4u/BlogShares" target="_blank">这里
+</a>下载相关配置所需的文件,都包含在 IDAPro 文件夹里面,将此文件夹放入 IDAPro 的安装根目录.
+<ol>
+    <li> <b>Options/Font</b> <br>修改所有字体为 YaHei Consolas Hybrid </li>
+    <li> <b>Options/Colors</b> <br>导入背景主题,位于 <b>IDAPro/ida-color-scheme</b>下面,选择你喜欢的主题. </li>
+    <li>
+        <b>IDAPro 桌面布局</b><br/>
+        拖动 IDA 的各个组件,调整为你喜欢的布局,然后 <b>Windows/Save desktop</b> 保存.</b>
+        <br>
+    </li>
+</ol>
+<h3 class="subtitle">微软小工具集合安装配置</h3>
+<p>去微软官网下载
+<a href="https://technet.microsoft.com/en-us/sysinternals/bb842062.aspx"
+    target="_blank">Windows Sysinternals</a>,然后解压到 <b
+    class="term">C:\Tools\SysinternalsSuite</b>,
+之后打开系统环境变量设置(sysdm.cpl),将该路径加入环境变量.
+</p>
+
+<h3 class="subtitle">安装CFF Explorer</h3>
+<p>官网在<a href="http://www.ntcore.com/exsuite.php" target="_blank">这里</a></p>.
+
+<h1 class="text3d">最后关机做个快照吧!</h1>
+</body>
+ <!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

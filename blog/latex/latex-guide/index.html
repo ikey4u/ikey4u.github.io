@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>Title</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">TITLE</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">DATE by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<hr/>
+<h3 class="text3d">背景 && 摘要</h3>
+<p>本文将...</p>
+
+<h3 class="text3d">环境</h3>
+<p>环境</p>
+<hr/>
+<!--正文-->
+<p> 安装一些必要的中文字体.打开文件 <b class="term">/etc/fonts/fonts.conf</b>,
+里面是自定义的一些字体目录,比如说 <b class="term">~/.fonts</b>,我们可以将下载好的字体放到这个目录,
+然后执行下面的命令:
+</p>
+<pre> sudo mkfontscale && sudo mkfontdir && sudo fc-cache -fv </pre>
+<p>我们可以使用命令 <b class="icmd">fc-list :lang=zh-cn</b>看看系统都安装了哪些字体,
+注意上述命令中 fc-list 和 冒号(:)之间是有一个空格的.由于输出的每一行包含了字体所支持的样式,
+这个我们不需要过多关注,因此可以使用命令 <b class="icmd">fc-list :lang=zh-cn | cut -f1,2 -d":"</b>来输出前两个字段,
+我的电脑上输出如下:</p>
+<pre> <b class="term">  </b>
+/usr/share/fonts/truetype/arphic/uming.ttc: AR PL UMing TW MBE
+/usr/share/fonts/truetype/winfonts/BabelStoneHan.ttf: BabelStone Han
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans CJK JP,Noto Sans CJK JP Bold
+/home/bugnofree/.fonts/文泉驿微米黑.ttf: WenQuanYi Micro Hei,文泉驛微米黑,文泉驿微米黑
+/usr/share/fonts/truetype/winfonts/simkai_GB2312.ttf: KaiTi_GB2312,楷体_GB2312
+/usr/share/fonts/truetype/arphic/ukai.ttc: AR PL UKai CN
+/usr/share/fonts/truetype/arphic/ukai.ttc: AR PL UKai HK
+/usr/share/fonts/truetype/winfonts/SIMLI.TTF: LiSu,隶书
+/usr/share/fonts/truetype/arphic/ukai.ttc: AR PL UKai TW
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK KR,Noto Sans Mono CJK KR Bold
+/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc: Noto Sans CJK TC,Noto Sans CJK TC Black
+/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc: Noto Sans CJK KR,Noto Sans CJK KR Black
+/home/bugnofree/.fonts/文泉驿等宽微米黑.ttf: WenQuanYi Micro Hei Mono,文泉驛等寬微米黑,文泉驿等宽微米黑
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK JP,Noto Sans Mono CJK JP Bold
+/usr/share/fonts/truetype/winfonts/simsun.ttc: NSimSun,新宋体
+/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc: Noto Sans CJK JP,Noto Sans CJK JP Medium
+/home/bugnofree/.local/share/fonts/YaHei Consolas Hybrid.ttf: YaHei Consolas Hybrid
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans CJK JP,Noto Sans CJK JP Regular
+/usr/share/fonts/truetype/winfonts/STHUPO.TTF: STHupo,华文琥珀
+/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc: Noto Sans CJK KR,Noto Sans CJK KR Light
+/usr/share/fonts/truetype/winfonts/simkai.ttf: KaiTi,楷体
+/usr/share/fonts/truetype/winfonts/mssong.ttf: MS Song,FZKai_U_P_P
+/usr/share/fonts/truetype/winfonts/simsun.ttc: SimSun,宋体
+/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc: Noto Sans CJK SC,Noto Sans CJK SC Black
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK TC,Noto Sans Mono CJK TC Bold
+/usr/share/fonts/truetype/winfonts/FZYTK.TTF: FZYaoTi,方正姚体
+/usr/share/fonts/truetype/winfonts/msyh.ttf: Microsoft YaHei,微软雅黑
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans CJK KR,Noto Sans CJK KR Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc: Noto Sans CJK SC,Noto Sans CJK SC Light
+/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc: Noto Sans CJK KR,Noto Sans CJK KR Medium
+/home/bugnofree/.fonts/文泉驿等宽正黑.ttf: WenQuanYi Zen Hei Mono,文泉驛等寬正黑,文泉驿等宽正黑
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans Mono CJK SC,Noto Sans Mono CJK SC Bold
+/usr/share/fonts/truetype/winfonts/simfang_GB2312.ttf: FangSong_GB2312,仿宋_GB2312
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK JP,Noto Sans Mono CJK JP Regular
+/usr/share/fonts/truetype/winfonts/arialuni.ttf: Arial Unicode MS
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans CJK TC,Noto Sans CJK TC Bold
+/usr/share/fonts/opentype/noto/NotoSansCJK-DemiLight.ttc: Noto Sans CJK JP,Noto Sans CJK JP DemiLight
+/usr/share/fonts/opentype/noto/NotoSansCJK-Thin.ttc: Noto Sans CJK JP,Noto Sans CJK JP Thin
+/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc: Noto Sans CJK JP,Noto Sans CJK JP Light
+/usr/share/fonts/truetype/winfonts/STZHONGS.TTF: STZhongsong,华文中宋
+/usr/share/fonts/opentype/noto/NotoSansCJK-Thin.ttc: Noto Sans CJK KR,Noto Sans CJK KR Thin
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK KR,Noto Sans Mono CJK KR Regular
+/usr/share/fonts/truetype/winfonts/STCAIYUN.TTF: STCaiyun,华文彩云
+/usr/share/fonts/opentype/noto/NotoSansCJK-Thin.ttc: Noto Sans CJK SC,Noto Sans CJK SC Thin
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans CJK SC,Noto Sans CJK SC Bold
+/usr/share/fonts/truetype/winfonts/msyhbd.ttf: Microsoft YaHei,微软雅黑
+/usr/share/fonts/opentype/noto/NotoSansCJK-DemiLight.ttc: Noto Sans CJK TC,Noto Sans CJK TC DemiLight
+/usr/share/fonts/truetype/winfonts/FZSTK.TTF: FZShuTi,方正舒体
+/usr/share/fonts/truetype/winfonts/sursong.ttf: Simsun (Founder Extended),宋体\-方正超大字符集
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans CJK SC,Noto Sans CJK SC Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-DemiLight.ttc: Noto Sans CJK SC,Noto Sans CJK SC DemiLight
+/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc: Noto Sans CJK TC,Noto Sans CJK TC Medium
+/usr/share/fonts/truetype/winfonts/STFANGSO.TTF: STFangsong,华文仿宋
+/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc: Noto Sans CJK JP,Noto Sans CJK JP Black
+/usr/share/fonts/truetype/winfonts/STXINWEI.TTF: STXinwei,华文新魏
+/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc: Noto Sans CJK SC,Noto Sans CJK SC Medium
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans CJK TC,Noto Sans CJK TC Regular
+/usr/share/fonts/opentype/noto/NotoSansCJK-DemiLight.ttc: Noto Sans CJK KR,Noto Sans CJK KR DemiLight
+/usr/share/fonts/truetype/arphic/ukai.ttc: AR PL UKai TW MBE
+/home/bugnofree/.fonts/文泉驿正黑.ttf: WenQuanYi Zen Hei,文泉驛正黑,文泉驿正黑
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK TC,Noto Sans Mono CJK TC Regular
+/usr/share/fonts/truetype/arphic/uming.ttc: AR PL UMing TW
+/usr/share/fonts/truetype/winfonts/simfang.ttf: FangSong,仿宋
+/usr/share/fonts/truetype/arphic/uming.ttc: AR PL UMing CN
+/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc: Noto Sans Mono CJK SC,Noto Sans Mono CJK SC Regular
+/usr/share/fonts/truetype/arphic/uming.ttc: AR PL UMing HK
+/usr/share/fonts/truetype/winfonts/unifont.ttf: unifont
+/usr/share/fonts/opentype/noto/NotoSansCJK-Thin.ttc: Noto Sans CJK TC,Noto Sans CJK TC Thin
+/usr/share/fonts/truetype/winfonts/Sun-ExtA.ttf: Sun\-ExtA
+/usr/share/fonts/truetype/winfonts/STSONG.TTF: STSong,华文宋体
+/usr/share/fonts/truetype/winfonts/STKAITI.TTF: STKaiti,华文楷体
+/usr/share/fonts/opentype/noto/NotoSansCJK-Light.ttc: Noto Sans CJK TC,Noto Sans CJK TC Light
+/usr/share/fonts/truetype/winfonts/simyou.ttf: YouYuan,幼圆
+/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc: Noto Sans CJK KR,Noto Sans CJK KR Bold
+/usr/share/fonts/truetype/winfonts/simhei.ttf: SimHei,黑体
+/usr/share/fonts/truetype/winfonts/STLITI.TTF: STLiti,华文隶书
+/usr/share/fonts/truetype/winfonts/STXINGKA.TTF: STXingkai,华文行楷
+/usr/share/fonts/truetype/winfonts/STXIHEI.TTF: STXihei,华文细黑
+</pre>
+<p>但我们在 latex 中使用字体时,所用的字体名称就是每一行第一个冒号之后所显示出来的名称,
+有的字体有多个名称,那么它们会用逗号来间隔,我们随便选择哪一个都可以.举个例子,
+如幼圆字体,你既可以用 <b class="term">幼圆</b>,也可以用 <b class="term">YouYuan</b>.</p>
+
+<p>所有的 latex 文档都是以 documentclass 开始的,同时我们大多数时间用的是中文书写,
+所以首先需要解决中文环境问题,要解决中文问题,第一是需要让 latex 支持中文,第二需要设置中文字体.
+一个较小的中文环境如下:</p>
+
+<pre class="code">
+\documentclass[a4paper,11pt]{article}
+%中文自动换行
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
+%中文编码支持
+\usepackage{xltxtra,fontspec,xunicode}
+%中文支持包
+\usepackage{xeCJK}
+%书签
+\usepackage{CJKutf8}
+%中文字体
+%\setCJKmainfont{YouYuan}
+\setCJKsansfont{SimSun}
+%自定义要使用的中文字体
+\setCJKmonofont{YaHei Consolas Hybrid}
+\setCJKfamilyfont{SimSun}{SimSun}
+\setCJKfamilyfont{SimHei}{SimHei}
+\setCJKfamilyfont{FangSong}{FangSong}
+\setCJKfamilyfont{KaiTi}{KaiTi}
+\setCJKfamilyfont{YouYuan}{YouYuan}
+\newcommand{\song}{\CJKfamily{SimSun}} % 宋体
+\newcommand{\hei}{\CJKfamily{SimHei}}  % 黑体
+\newcommand{\fs}{\CJKfamily{FangSong}} % 仿宋
+\newcommand{\kai}{\CJKfamily{KaiTi}}   % 楷体
+\newcommand{\yy}{\CJKfamily{YouYuan}}  % 楷体
+%英文字体
+\setmainfont{YouYuan}
+%\setmainfont{Segoe Print} %遗憾的是,会导致乱码
+\setmonofont{Courier New}
+</pre>
+<h1 class="titlebar">大标题</h1>
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <li><a href=""><b></b></a></li>
+    <li><a href=""><b></b></a></li>
+    <li><a href=""><b></b></a></li>
+</ol>
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Find me by <a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>   <b>or</b> <a href="http://weibo.com/u/5293648175/home" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>

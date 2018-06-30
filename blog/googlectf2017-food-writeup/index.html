@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>Google CTF 2017 food writeup</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">Google CTF 2017 food writeup</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2018-05-04 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<h3 class="text3d">背景 && 摘要</h3>
+<p>就是想多做几道 Android 逆向题目了.</p>
+
+<h3 class="text3d">环境</h3>
+<p>macos 10.13 + IDA 7.0 + Jadx</p>
+<!--正文-->
+<h1 class="titlebar">纯静态分析求解 flag</h1>
+<p>
+模拟器安装程序后直接挂掉,运行不了,于是静态分析之.
+用 jadx 打开改程序,如下
+<img src="./images/jadx-decomp.png" alt="">
+没啥东西,就是加载了一个 so 库, 用 IDA 打开这个 so 库. 定位到 JNI_OnLoad 函数中,
+映入眼帘的是一大坨数字,如下
+<img src="./images/decrypt_str.png" alt="">
+后来分析后,这个函数式用于从这一大坨数值中解密出来一个字符串,
+第一个参数为数值的个数,其他参数就是数值了. 用 IDA F5 得到这个函数如下
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+_BYTE *decrypt_str(<font color="#87af5f">int</font> a1, ...)<br/>
+{<br/>
+  <font color="#87af5f">int</font> v1; <font color="#875f87"><i>// r4</i></font><br/>
+  _BYTE *result; <font color="#875f87"><i>// r0</i></font><br/>
+  _BYTE *mem; <font color="#875f87"><i>// r2</i></font><br/>
+  <font color="#87af5f">int</font> i; <font color="#875f87"><i>// r3</i></font><br/>
+  <font color="#87af5f">int</font> num; <font color="#875f87"><i>// r1</i></font><br/>
+  <font color="#87af5f">int</font> varg_r0; <font color="#875f87"><i>// [sp+28h] [bp-10h]</i></font><br/>
+  <font color="#87af5f">va_list</font> varg_r1; <font color="#875f87"><i>// [sp+2Ch] [bp-Ch]</i></font><br/>
+<br/>
+  va_start(varg_r1, a1);<br/>
+  varg_r0 = a1;<br/>
+  v1 = <font color="#d7875f">2</font> * a1;<br/>
+  result = j_malloc(<font color="#d7875f">2</font> * a1 + <font color="#d7875f">1</font>);<br/>
+  mem = result;<br/>
+  i = <font color="#d7875f">0</font>;<br/>
+  <font color="#ffd75f">while</font> ( i &lt; varg_r0 )<br/>
+  {<br/>
+    num = *(varg_r1 + i++);<br/>
+    *mem = ~((~num | ((num &amp; <font color="#d7875f">0xFF00</font>) &gt;&gt; <font color="#d7875f">8</font>)) &amp; (~((num &amp; <font color="#d7875f">0xFF00</font>) &gt;&gt; <font color="#d7875f">8</font>) | num));<br/>
+    mem[<font color="#d7875f">1</font>] = HIBYTE(num) ^ ((num &amp; <font color="#d7875f">0xFF0000u</font>) &gt;&gt; <font color="#d7875f">16</font>);<br/>
+    mem += <font color="#d7875f">2</font>;<br/>
+  }<br/>
+  result[v1] = <font color="#d7875f">0</font>;<br/>
+  <font color="#ffd75f">return</font> result;<br/>
+}<br/>
+</font>
+</pre>
+
+<p>然后手动用 python 实现一个</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#875f87"><i>#! /usr/bin/env python3</i></font><br/>
+<font color="#875f87"><i>#! -*- coding:utf-8 -*-</i></font><br/>
+<br/>
+<font color="#ffd75f">def</font> <font color="#878787">solve</font>(lst):<br/>
+    result = []<br/>
+    <font color="#ffd75f">for</font> numstr <font color="#ffd75f">in</font> lst:<br/>
+        num = <font color="#878787">int</font>(numstr)<br/>
+        chaint = ~((~num | ((num &amp; <font color="#d7875f">0xFF00</font>) &gt;&gt; <font color="#d7875f">8</font>)) &amp; (~((num &amp; <font color="#d7875f">0xFF00</font>) &gt;&gt; <font color="#d7875f">8</font>) | num))<br/>
+        cha = chaint &amp; <font color="#d7875f">0xff</font><br/>
+        chbint = ((num &amp; <font color="#d7875f">0xFF000000</font>) &gt;&gt; <font color="#d7875f">24</font>) ^ ((num &amp; <font color="#d7875f">0xFF0000</font>) &gt;&gt; <font color="#d7875f">16</font>)<br/>
+        chb = chbint &amp; <font color="#d7875f">0xff</font><br/>
+        result.append(<font color="#878787">chr</font>(cha))<br/>
+        result.append(<font color="#878787">chr</font>(chb))<br/>
+    rst = <font color="#afaf87"><i>''</i></font>.join(result)<br/>
+    <font color="#878787">print</font>(rst)<br/>
+    <font color="#ffd75f">return</font> rst<br/>
+</font>
+</pre>
+
+<p>
+传入的参数为数值列表,比如 solve([1142966885, 90266995, 459477109])输出的解密字符串为
+<b class="term">/d.dex</b>.
+转换到 python 代码的过程是这样的,我们看 C 代码中是对每一个整数做一下组合运算赋值给 *mem,
+而我们由 mem += 2 实际上可以确定一次得到两个字节, *mem 处确定的是第一个字节,
+由于 mem 的元素是字节类型的,所以 *mem 处实际上得到了表达式结果的最低字节,
+而 mem[1] 则确定第二个字节. 在 IDA 中,
+<b class="term">HIBYTE(num)</b> 取得整数 num 的最高一字节. 所以,
+相应的在 python 中就是 (num & 0xFF000000) &gt;&gt; 24,剩下的转换就是照搬了.
+</p>
+
+<p>
+我们可以对所有字符串进行解密,解密后大致浏览一下 JNI_OnLoad 中的代码,
+可以看到这里转储生成一个 dex 文件,如下:
+<img src="./images/saveddex.png" alt="">
+根据 fwrite 的参数,我们知道是从 libcook.so 偏移 0x2F18 处读入 0x15A8 个字节到某个文件,
+这个文件是真实的 dex 文件,但这个文件实际上并不能操作成功,
+不过这里我们不关心,因为我们可以手动提取.
+然后后面是一系列其他操作,比如移除生成的 dex 文件操作,获取类加载器等,
+不过对我们用处不大,在 JNI_OnLoad 末尾有这么一个操作如下
+<img src="./images/decrypt-tail.png" alt="">
+这里的 decrypt_app 函数实际上是对 dex 文件进行了进一步解密,看看这个函数的样子,
+如下
+<img src="./images/decrypt_app.png" alt="">
+</p>
+
+<p>
+因为在 JNI_OnLoad 中移除了 dex 文件,但是该 dex 文件还位于内存中,
+为了得到 dex 的内容,遍历进程空间 /proc/self/maps 搜索 d.dex,
+并且只有当搜索到的内存区域前四个字节为 'dex\n0' 时才算找到.
+主要解密代码就是红框部分. 上图中有一个很奇怪的地方是,
+IDA 给了我们一个 v9=&i[-v6], -v6 是什么鬼,此时回到汇编中看一下
+<img src="./images/negindex.png" alt="">
+红框中的部分就是上面的伪代码部分,也就是说 v9 实际上是 0.
+然后根据伪代码可以知道复制 libcook.so 偏移 0x2E88 处的 0x90 个字节,
+将每个字节和 0x5A 异或处理后依次存放到 dex 偏移 0x720 处,
+所以我们可以用 python 来实现这一功能:
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#ffd75f">with</font> <font color="#878787">open</font>(<font color="#afaf87"><i>"</i></font><font color="#afaf87"><i>./lib/armeabi/libcook.so</i></font><font color="#afaf87"><i>"</i></font>, <font color="#afaf87"><i>"</i></font><font color="#afaf87"><i>rb</i></font><font color="#afaf87"><i>"</i></font>) <font color="#ffd75f">as</font> libcook:<br/>
+    libcook.seek(<font color="#d7875f">0x2f18</font>)<br/>
+    patched_ddex = <font color="#878787">bytearray</font>(libcook.read(<font color="#d7875f">0x15a8</font>))<br/>
+<br/>
+data = [<br/>
+<font color="#d7875f">0x49</font>, <font color="#d7875f">0x5E</font>, <font color="#d7875f">0x52</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x79</font>, <font color="#d7875f">0x1B</font>, <font color="#d7875f">0x7B</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x7C</font>,<br/>
+<font color="#d7875f">0x5B</font>, <font color="#d7875f">0x66</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x48</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x6F</font>, <font color="#d7875f">0x1A</font>,<br/>
+<font color="#d7875f">0x55</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x12</font>, <font color="#d7875f">0x58</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0xE</font>, <font color="#d7875f">9</font>, <font color="#d7875f">0x5F</font>, <font color="#d7875f">0x5A</font>,<br/>
+<font color="#d7875f">0x12</font>, <font color="#d7875f">0x59</font>, <font color="#d7875f">0x59</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0xED</font>, <font color="#d7875f">0x68</font>, <font color="#d7875f">0xD7</font>, <font color="#d7875f">0x78</font>, <font color="#d7875f">0x15</font>,<br/>
+<font color="#d7875f">0x58</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x82</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x72</font>, <font color="#d7875f">0xA8</font>,<br/>
+<font color="#d7875f">0x78</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x45</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x2A</font>, <font color="#d7875f">0x7A</font>, <font color="#d7875f">0x7E</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x4A</font>,<br/>
+<font color="#d7875f">0x5A</font>, <font color="#d7875f">0x40</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x34</font>, <font color="#d7875f">0x7A</font>, <font color="#d7875f">0x7F</font>, <font color="#d7875f">0x5A</font>,<br/>
+<font color="#d7875f">0x4A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x50</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x63</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x47</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0xE</font> ,<br/>
+<font color="#d7875f">0xA</font>, <font color="#d7875f">0x58</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x34</font>, <font color="#d7875f">0x4A</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font> ,<br/>
+<font color="#d7875f">0x56</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x78</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x45</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x38</font>, <font color="#d7875f">0x58</font>, <font color="#d7875f">0x5E</font>,<br/>
+<font color="#d7875f">0x5A</font>, <font color="#d7875f">0xE</font>, <font color="#d7875f">9</font>, <font color="#d7875f">0x5F</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x2B</font>, <font color="#d7875f">0x7A</font>, <font color="#d7875f">0x78</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x68</font>,<br/>
+<font color="#d7875f">0x5A</font>, <font color="#d7875f">0x56</font>, <font color="#d7875f">0x58</font>, <font color="#d7875f">0x2A</font>, <font color="#d7875f">0x7A</font>, <font color="#d7875f">0x7E</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x7B</font>, <font color="#d7875f">0x5A</font>,<br/>
+<font color="#d7875f">0x48</font>, <font color="#d7875f">0x48</font>, <font color="#d7875f">0x2B</font>, <font color="#d7875f">0x6A</font>, <font color="#d7875f">0x4F</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x4A</font>, <font color="#d7875f">0x58</font>, <font color="#d7875f">0x56</font>,<br/>
+<font color="#d7875f">0x5A</font>, <font color="#d7875f">0x34</font>, <font color="#d7875f">0x4A</font>, <font color="#d7875f">0x4C</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x54</font>, <font color="#d7875f">0x5A</font>,<br/>
+<font color="#d7875f">0x5A</font>, <font color="#d7875f">0x59</font>, <font color="#d7875f">0x5B</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x52</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x5A</font>, <font color="#d7875f">0x40</font>,<br/>
+<font color="#d7875f">0x41</font>, <font color="#d7875f">0x44</font>, <font color="#d7875f">0x5E</font>, <font color="#d7875f">0x4F</font>, <font color="#d7875f">0x58</font>, <font color="#d7875f">0x48</font>, <font color="#d7875f">0x5D</font><br/>
+]<br/>
+<font color="#ffd75f">for</font> i <font color="#ffd75f">in</font> <font color="#878787">range</font>(<font color="#878787">len</font>(data)):<br/>
+    patched_ddex[<font color="#d7875f">0x720</font> + i] = data[i] ^ <font color="#d7875f">0x5A</font>;<br/>
+<font color="#ffd75f">with</font> <font color="#878787">open</font>(<font color="#afaf87"><i>"</i></font><font color="#afaf87"><i>./patached_ddex.dex</i></font><font color="#afaf87"><i>"</i></font>, <font color="#afaf87"><i>"</i></font><font color="#afaf87"><i>wb</i></font><font color="#afaf87"><i>"</i></font>) <font color="#ffd75f">as</font> _:<br/>
+    _.write(patched_ddex)<br/>
+</font>
+</pre>
+
+<p>
+上述代码里面第一个 with 语句用于初步将 dex 文件读取出来,
+data 是从 0x2E88 处取出来的 0x90 个字节.
+最后模拟执行异或运算即可,生成的 patched_ddex.dex 即为最终 dex 文件.
+</p>
+
+<p>
+使用 jadx 反编译该 dex 文件,我们得到如下文件目录
+<img src="./images/dexstruct.png" alt="">
+主要是四个 java 文件. 看一下各个文件是什么作用.
+</p>
+
+<h2 class="subtitle">S.java 文件</h2>
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#87af5f">public</font> <font color="#87af5f">class</font> S {<br/>
+    <font color="#87af5f">public</font> <font color="#87af5f">static</font> String I = <font color="#afaf87"><i>"FLAG_FACTORY"</i></font>;<br/>
+    <font color="#87af5f">public</font> <font color="#87af5f">static</font> Activity a;<br/>
+<br/>
+    <font color="#87af5f">public</font> S(<font color="#87af5f">final</font> Activity activity) {<br/>
+        <font color="#87af5f">int</font> i = <font color="#d7875f">0</font>;<br/>
+        a = activity;<br/>
+        Context applicationContext = activity.getApplicationContext();<br/>
+        GridLayout gridLayout = (GridLayout) activity.findViewById(R.id.foodLayout);<br/>
+        String[] strArr = <font color="#ffd75f">new</font> String[]{<font color="#afaf87"><i>"🍕"</i></font>, <font color="#afaf87"><i>"🍬"</i></font>, <font color="#afaf87"><i>"🍞"</i></font>, <font color="#afaf87"><i>"🍎"</i></font>, <font color="#afaf87"><i>"🍅"</i></font>, <font color="#afaf87"><i>"🍙"</i></font>, <font color="#afaf87"><i>"🍝"</i></font>,<br/>
+            <font color="#afaf87"><i>"🍓"</i></font>, <font color="#afaf87"><i>"🍈"</i></font>, <font color="#afaf87"><i>"🍉"</i></font>, <font color="#afaf87"><i>"🌰"</i></font>, <font color="#afaf87"><i>"🍗"</i></font>, <font color="#afaf87"><i>"🍤"</i></font>, <font color="#afaf87"><i>"🍦"</i></font>, <font color="#afaf87"><i>"🍇"</i></font>, <font color="#afaf87"><i>"🍌"</i></font>, <font color="#afaf87"><i>"🍣"</i></font>, <font color="#afaf87"><i>"🍄"</i></font>, <font color="#afaf87"><i>"</i></font><br/>
+                🍊<font color="#afaf87"><i>", "</i></font>🍒<font color="#afaf87"><i>", "</i></font>🍠<font color="#afaf87"><i>", "</i></font>🍍<font color="#afaf87"><i>", "</i></font>🍆<font color="#afaf87"><i>", "</i></font>🍟<font color="#afaf87"><i>", "</i></font>🍔<font color="#afaf87"><i>", "</i></font>🍜<font color="#afaf87"><i>", "</i></font>🍩<font color="#afaf87"><i>", "</i></font>🍚<font color="#afaf87"><i>", "</i></font>🍨<font color="#afaf87"><i>",</i></font><br/>
+            <font color="#afaf87"><i>"🌾"</i></font>, <font color="#afaf87"><i>"🌽"</i></font>, <font color="#afaf87"><i>"🍖"</i></font>};<br/>
+        <font color="#ffd75f">while</font> (i &lt; <font color="#d7875f">32</font>) {<br/>
+            View button = <font color="#ffd75f">new</font> Button(applicationContext);<br/>
+            LayoutParams layoutParams = <font color="#ffd75f">new</font> GridLayout.LayoutParams();<br/>
+            layoutParams.width = (<font color="#87af5f">int</font>) TypedValue.applyDimension(<font color="#d7875f">1</font>, <font color="#d7875f">60.0f</font>, activity.getResources().getDisplayMetrics());<br/>
+            layoutParams.height = (<font color="#87af5f">int</font>) TypedValue.applyDimension(<font color="#d7875f">1</font>, <font color="#d7875f">60.0f</font>, activity.getResources().getDisplayMetrics());<br/>
+            button.setLayoutParams(layoutParams);<br/>
+            button.setText(strArr[i]);<br/>
+            button.setOnClickListener(<font color="#ffd75f">new</font> OnClickListener() {<br/>
+                <font color="#87af5f">public</font> <font color="#87af5f">void</font> onClick(View view) {<br/>
+                    view.playSoundEffect(<font color="#d7875f">0</font>);<br/>
+                    Intent intent = <font color="#ffd75f">new</font> Intent(S.I);<br/>
+                    intent.putExtra(<font color="#afaf87"><i>"id"</i></font>, i);<br/>
+                    activity.sendBroadcast(intent);<br/>
+                }<br/>
+            });<br/>
+            gridLayout.addView(button);<br/>
+            i++;<br/>
+        }<br/>
+        IntentFilter intentFilter = <font color="#ffd75f">new</font> IntentFilter();<br/>
+        intentFilter.addAction(I);<br/>
+        activity.registerReceiver(<font color="#ffd75f">new</font> F(activity), intentFilter);<br/>
+    }<br/>
+}<br/>
+</font>
+</pre>
+<p>
+设置了 32 中食品,给没这个食品添加了一个事件监听器,每个食品有一个食品 id,
+最终该 id 将会通过 intent 发送到 F.java 文件处理, 我们看看 F.java 文件.
+</p>
+
+<h2 class="subtitle">F.java</h2>
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#87af5f">public</font> <font color="#87af5f">class</font> F <font color="#87af5f">extends</font> BroadcastReceiver {<br/>
+    <font color="#87af5f">private</font> <font color="#87af5f">static</font> <font color="#87af5f">byte</font>[] flag = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[]{(<font color="#87af5f">byte</font>) -<font color="#d7875f">19</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">116</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">58</font>,<br/>
+        (<font color="#87af5f">byte</font>) <font color="#d7875f">108</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">1</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">33</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">9</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">61</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">61</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">37</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">108</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">123</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">3</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">35</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">97</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">10</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">15</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">15</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">85</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">66</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">31</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">65</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">17</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">79</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">31</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">25</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">39</font>,<br/>
+        (<font color="#87af5f">byte</font>) <font color="#d7875f">95</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">93</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">1</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">110</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">103</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">118</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">38</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">57</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">58</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">51</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">79</font>};<br/>
+    <font color="#87af5f">private</font> Activity a;<br/>
+    <font color="#87af5f">private</font> <font color="#87af5f">int</font> c;<br/>
+    <font color="#87af5f">private</font> <font color="#87af5f">byte</font>[] k = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[<font color="#d7875f">8</font>];<br/>
+<br/>
+    <font color="#87af5f">public</font> F(Activity activity) {<br/>
+        <font color="#87af5f">this</font>.a = activity;<br/>
+        <font color="#ffd75f">for</font> (<font color="#87af5f">int</font> i = <font color="#d7875f">0</font>; i &lt; <font color="#d7875f">8</font>; i++) {<br/>
+            <font color="#87af5f">this</font>.k[i] = (<font color="#87af5f">byte</font>) <font color="#d7875f">0</font>;<br/>
+        }<br/>
+        <font color="#87af5f">this</font>.c = <font color="#d7875f">0</font>;<br/>
+    }<br/>
+<br/>
+    <font color="#87af5f">public</font> <font color="#87af5f">void</font> onReceive(Context context, Intent intent) {<br/>
+        <font color="#87af5f">this</font>.k[<font color="#87af5f">this</font>.c] = (<font color="#87af5f">byte</font>) intent.getExtras().getInt(<font color="#afaf87"><i>"id"</i></font>);<br/>
+        cc();<br/>
+        <font color="#87af5f">this</font>.c++;<br/>
+        <font color="#ffd75f">if</font> (<font color="#87af5f">this</font>.c == <font color="#d7875f">8</font>) {<br/>
+            <font color="#87af5f">this</font>.c = <font color="#d7875f">0</font>;<br/>
+            <font color="#87af5f">this</font>.k = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[<font color="#d7875f">8</font>];<br/>
+            <font color="#ffd75f">for</font> (<font color="#87af5f">int</font> i = <font color="#d7875f">0</font>; i &lt; <font color="#d7875f">8</font>; i++) {<br/>
+                <font color="#87af5f">this</font>.k[i] = (<font color="#87af5f">byte</font>) <font color="#d7875f">0</font>;<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+<br/>
+    <font color="#87af5f">public</font> <font color="#87af5f">void</font> cc() {<br/>
+        <font color="#87af5f">byte</font>[] bArr = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[]{(<font color="#87af5f">byte</font>) <font color="#d7875f">26</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">27</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">30</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">4</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">21</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">2</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">18</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">7</font>};<br/>
+        <font color="#ffd75f">for</font> (<font color="#87af5f">int</font> i = <font color="#d7875f">0</font>; i &lt; <font color="#d7875f">8</font>; i++) {<br/>
+            bArr[i] = (<font color="#87af5f">byte</font>) (bArr[i] ^ <font color="#87af5f">this</font>.k[i]);<br/>
+        }<br/>
+        <font color="#ffd75f">if</font> (<font color="#ffd75f">new</font> String(bArr).compareTo(<font color="#afaf87"><i>"</i></font><font color="#ff5f5f">\u0013\u0011\u0013\u0003\u0004\u0003\u0001\u0005</font><font color="#afaf87"><i>"</i></font>) == <font color="#d7875f">0</font>) {<br/>
+            Toast.makeText(<font color="#87af5f">this</font>.a.getApplicationContext(), <font color="#ffd75f">new</font> String(ℝ.ℂ(flag, <font color="#87af5f">this</font>.k)), <font color="#d7875f">1</font>).show();<br/>
+        }<br/>
+    }<br/>
+}<br/>
+</font>
+</pre>
+
+<p>
+仿佛看到了 flag, F 是在 onReceive 中收到来自 intent 的消息的,可以看到,
+收到消息后对私有成员变量 k 设置了对应的食物 id, 然后调用 cc() 函数,
+看到 cc 函数里面的 if 语句, 如果比较成功, 则调用 R.java 中的方法打印 flag,
+我们看到 cc 函数实际上就是执行了异或操作,这些操作是可逆的,
+所以我们知道 bArr 和 k 进行异或操作后得到的字节数组的字符串形式即为
+"\u0013\u0011\u0013\u0003\u0004\u0003\u0001\u0005" ,
+那么我们得到该字符串的字节数组,再与 bArr 进行同样的异或操作,
+我们便可以得到 k 的值,也就是正确的食物 id 序列, 将该序列带入 R.C 函数即可反向得到 flag.
+我把 R.C 函数提取出来,然后单独写成一个 java 文件(solve.java) 如下:
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#875f87"><i>/*</i></font><br/>
+<font color="#875f87"><i> * makefile</i></font><br/>
+<font color="#875f87"><i>all:</i></font><br/>
+<font color="#875f87"><i>    @javac solve.java</i></font><br/>
+<font color="#875f87"><i>    @java solve</i></font><br/>
+<font color="#875f87"><i>*/</i></font><br/>
+<font color="#87af5f">public</font> <font color="#87af5f">class</font> solve {<br/>
+    <font color="#87af5f">public</font> <font color="#87af5f">static</font> <font color="#87af5f">byte</font>[] C(<font color="#87af5f">byte</font>[] bArr, <font color="#87af5f">byte</font>[] bArr2) {<br/>
+        <font color="#87af5f">byte</font>[] bArr3 = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[<font color="#d7875f">256</font>];<br/>
+        <font color="#87af5f">byte</font>[] bArr4 = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[<font color="#d7875f">256</font>];<br/>
+        <font color="#87af5f">int</font> i = <font color="#d7875f">0</font>;<br/>
+        <font color="#87af5f">int</font> i2 = <font color="#d7875f">0</font>;<br/>
+        <font color="#ffd75f">while</font> (i2 != <font color="#d7875f">256</font>) {<br/>
+            bArr3[i2] = (<font color="#87af5f">byte</font>) i2;<br/>
+            bArr4[i2] = bArr2[i2 % bArr2.length];<br/>
+            i2++;<br/>
+        }<br/>
+        <font color="#87af5f">int</font> i3 = i2 ^ i2;<br/>
+        i2 = <font color="#d7875f">0</font>;<br/>
+        <font color="#ffd75f">while</font> (i3 != <font color="#d7875f">256</font>) {<br/>
+            i2 = ((i2 + bArr3[i3]) + bArr4[i3]) &amp; <font color="#d7875f">255</font>;<br/>
+            bArr3[i2] = (<font color="#87af5f">byte</font>) (bArr3[i2] ^ bArr3[i3]);<br/>
+            bArr3[i3] = (<font color="#87af5f">byte</font>) (bArr3[i3] ^ bArr3[i2]);<br/>
+            bArr3[i2] = (<font color="#87af5f">byte</font>) (bArr3[i2] ^ bArr3[i3]);<br/>
+            i3++;<br/>
+        }<br/>
+        bArr4 = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[bArr.length];<br/>
+        i3 ^= i3;<br/>
+        i2 ^= i2;<br/>
+        <font color="#ffd75f">while</font> (i != bArr.length) {<br/>
+            i3 = (i3 + <font color="#d7875f">1</font>) &amp; <font color="#d7875f">255</font>;<br/>
+            i2 = (i2 + bArr3[i3]) &amp; <font color="#d7875f">255</font>;<br/>
+            bArr3[i2] = (<font color="#87af5f">byte</font>) (bArr3[i2] ^ bArr3[i3]);<br/>
+            bArr3[i3] = (<font color="#87af5f">byte</font>) (bArr3[i3] ^ bArr3[i2]);<br/>
+            bArr3[i2] = (<font color="#87af5f">byte</font>) (bArr3[i2] ^ bArr3[i3]);<br/>
+            bArr4[i] = (<font color="#87af5f">byte</font>) (bArr[i] ^ bArr3[(bArr3[i3] + bArr3[i2]) &amp; <font color="#d7875f">255</font>]);<br/>
+            i++;<br/>
+        }<br/>
+        <font color="#ffd75f">return</font> bArr4;<br/>
+    }<br/>
+<br/>
+    <font color="#87af5f">private</font> <font color="#87af5f">static</font> <font color="#87af5f">byte</font>[] flag = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[]{(<font color="#87af5f">byte</font>) -<font color="#d7875f">19</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">116</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">58</font>,<br/>
+        (<font color="#87af5f">byte</font>) <font color="#d7875f">108</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">1</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">33</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">9</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">61</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">61</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">37</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">108</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">123</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">3</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">35</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">97</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">10</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">15</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">15</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">85</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">66</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">31</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">65</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">17</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">79</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">31</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">25</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">39</font>,<br/>
+        (<font color="#87af5f">byte</font>) <font color="#d7875f">95</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">93</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">1</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">110</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">103</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">118</font>,<br/>
+        (<font color="#87af5f">byte</font>) -<font color="#d7875f">38</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">57</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">58</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">51</font>, (<font color="#87af5f">byte</font>) -<font color="#d7875f">79</font>};<br/>
+<br/>
+    <font color="#87af5f">public</font> <font color="#87af5f">static</font> <font color="#87af5f">void</font> main(String []args) {<br/>
+        <font color="#87af5f">byte</font>[] k = <font color="#afaf87"><i>"</i></font><font color="#ff5f5f">\u0013\u0011\u0013\u0003\u0004\u0003\u0001\u0005</font><font color="#afaf87"><i>"</i></font>.getBytes();<br/>
+        <font color="#875f87"><i>//System.out.println(k.length);</i></font><br/>
+        <font color="#87af5f">byte</font>[] bArr = <font color="#ffd75f">new</font> <font color="#87af5f">byte</font>[]{(<font color="#87af5f">byte</font>) <font color="#d7875f">26</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">27</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">30</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">4</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">21</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">2</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">18</font>, (<font color="#87af5f">byte</font>) <font color="#d7875f">7</font>};<br/>
+        <font color="#ffd75f">for</font> (<font color="#87af5f">int</font> i = <font color="#d7875f">0</font>; i &lt; <font color="#d7875f">8</font>; i++) {<br/>
+            bArr[i] = (<font color="#87af5f">byte</font>) (bArr[i] ^ k[i]);<br/>
+            <font color="#875f87"><i>//System.out.println(k[i]);</i></font><br/>
+        }<br/>
+        System.out.println(<font color="#ffd75f">new</font> String(C(flag,bArr)));<br/>
+    }<br/>
+}<br/>
+</font>
+</pre>
+
+<p>
+运行后即可得到 flag 为 <b class="term">CTF{bacon_lettuce_tomato_lobster_soul}</b>.
+</p>
+
+<!--
+# 小伙子,不错哦 ~
+#! /usr/bin/env python3
+#! -*- coding:utf-8 -*-
+
+def solve(lst):
+    result = []
+    for numstr in lst:
+        num = int(numstr)
+        chaint = ~((~num | ((num & 0xFF00) >> 8)) & (~((num & 0xFF00) >> 8) | num))
+        cha = chaint & 0xff
+        chbint = ((num & 0xFF000000) >> 24) ^ ((num & 0xFF0000) >> 16)
+        chb = chbint & 0xff
+        result.append(chr(cha))
+        result.append(chr(chb))
+    rst = ''.join(result)
+    print(rst)
+    return rst
+
+solve([ 625020704, 274990436, 1534345504, 73731176, 107435040, 208625010, 57547381, 1193298532, 174394722, 174457445, 1331774752, 274992494, 1298351648, 7276911, 1142948971, 141449845, 90774900, 1394608492, 376589666, 326582639, 493161326 ] )
+solve([ 1244547940, 927154464, 1517622130, 56756589, 73734252, 208604960, 140843382, 1193303154, 7277922, 90772085, 1114376556, 443419759, 1298351648, 224531317, 393415269, 1176503084, 40765537, 1394606436, 460610675, 393350505, 1768511520 ] )
+solve([ 1142964590, 493426295, 1248137070, 1092640571, 242161507, 393494894, 57542249, 40196981, 460607264, 1277167727, 1097795171, 527109231, 1214662176, 494012783, 90263328, 6688544, 460786789, 510477600, 24004201, 292819317, 1551048037, 236997166, 292829011, 1920078185 ] )
+solve([ 107561760, 253756270, 124257379, 393216111, 6626416, 1126189924, 158269556, 123814509, 7281524, 1551040869, 539000620 ] )
+solve([ 140577639, 141299826, 241377129, 1394606636, 1852706401 ] )
+solve([ 1327499108, 1081022836, 241240685, 141499252, 359681056, 275992161, 56950900, 1176502574, 174406739, 1551041889, 23996783, 326586144, 393488489, 1226841192, 140576368, 192021616 ] )
+solve([158015081])
+solve([1294730593, 358829088, 40436072, 443106156, 57694496, 309795695, 1248135524, 1227634290, 543381536, 410586465, 493753957, 174400110, 342901024, 40894565 ])
+solve([ 207965296, 1160518770, 1549947936 ])
+solve([ 1064520033, 225182569, 1092639276, 510804079, 157746277, 1097729633, 1479294063, 140595744, 56885358, 1013979936, 326241121, 225183091, 360270437, 1310740270, 1534342227, 108149353, 6902304, 1193279598, 761350259, 359925356, 6379040, 140788078, 510673184, 1601176165, 291840880, 1194197106, 625102368, 627657074, 107414638, 359945760, 1277182063, 1310720097, 1081017698, 7088745, 477053216, 694486390, 1092623730, 208211048, 1399330151, 1047005472 ])
+solve([241240421, 1244534132, 1045586720, 392430693, 1667434101])
+solve([   1814056293, 73728616, 359929697, 410259232, 1310723695, 1248135789, 493434724, 74254197, 191647264, 1584878703, 1243636270, 426713667, 1248139126, 1294737010, 107040288, 660881774, 309546016, 510466665, 1701140077])
+solve([207965296, 1160518770, 1549947936])
+solve([2083524921, 57491744, 476974441, 494148213, 1551040869, 1344294188, 1534329715, 292694121, 6882930, 241637486, 376394784, 1248024675, 1936930657])
+solve([208603241, 140581486, 90970732, 1462635897])
+solve([ 844327968, 224991860, 1327497330, 174981225, 174788384, 342104425, 610615662, 1411390073, 325389154, 443418721, 388762227])
+solve([ 292556645, 258873185, 57610016, 191174518, 253760882, 157625965, 443090276, 560793205, 157830944, 73466213, 774768244 ])
+solve([ 641943328, 1013914479, 1394610795, 393352039, 644155493, 1092616814, 375718768, 527449200, 376570981, 1377847596 ])
+solve([ 1198410081, 1243621476, 409865839, 1081018473, 1294729838, 309677600, 930365806, 225183081, 7557920, 157688687, 23401844, 392498030, 774791012 ])
+solve([358967112, 460591969, 1081033504, 158079593, 258559008, 1293959534, 1344274529, 1633754988])
+solve([1734803570])
+solve([1142966885, 90266995, 459477109])
+
+with open("./lib/armeabi/libcook.so", "rb") as libcook:
+    libcook.seek(0x2f18)
+    patched_ddex = bytearray(libcook.read(0x15a8))
+
+data = [
+0x49, 0x5E, 0x52, 0x5A, 0x79, 0x1B, 0x7B, 0x5A, 0x7C,
+0x5B, 0x66, 0x5A, 0x5A, 0x5A, 0x48, 0x5A, 0x6F, 0x1A,
+0x55, 0x5A, 0x12, 0x58, 0x5B, 0x5A, 0xE, 9, 0x5F, 0x5A,
+0x12, 0x59, 0x59, 0x5A, 0xED, 0x68, 0xD7, 0x78, 0x15,
+0x58, 0x5B, 0x5A, 0x82, 0x5A, 0x5A, 0x5B, 0x72, 0xA8,
+0x78, 0x5A, 0x45, 0x5A, 0x2A, 0x7A, 0x7E, 0x5A, 0x4A,
+0x5A, 0x40, 0x5B, 0x5A, 0x5A, 0x34, 0x7A, 0x7F, 0x5A,
+0x4A, 0x5A, 0x50, 0x5A, 0x63, 0x5A, 0x47, 0x5A, 0xE ,
+0xA, 0x58, 0x5A, 0x34, 0x4A, 0x5B, 0x5A, 0x5A, 0x5A ,
+0x56, 0x5A, 0x78, 0x5B, 0x45, 0x5A, 0x38, 0x58, 0x5E,
+0x5A, 0xE, 9, 0x5F, 0x5A, 0x2B, 0x7A, 0x78, 0x5A, 0x68,
+0x5A, 0x56, 0x58, 0x2A, 0x7A, 0x7E, 0x5A, 0x7B, 0x5A,
+0x48, 0x48, 0x2B, 0x6A, 0x4F, 0x5A, 0x4A, 0x58, 0x56,
+0x5A, 0x34, 0x4A, 0x4C, 0x5A, 0x5A, 0x5A, 0x54, 0x5A,
+0x5A, 0x59, 0x5B, 0x5A, 0x52, 0x5A, 0x5A, 0x5A, 0x40,
+0x41, 0x44, 0x5E, 0x4F, 0x58, 0x48, 0x5D
+]
+for i in range(len(data)):
+    patched_ddex[0x720 + i] = data[i] ^ 0x5A;
+with open("./patached_ddex.dex", "wb") as _:
+    _.write(patched_ddex)
+-->
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <li><a href=https://github.com/tothi/ctfs/tree/master/google-ctf-2017/re/food""><b>Google CTF 2017 : Food</b></a></li>
+</ol>
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Contact me by <b>dXAyZ2Vla0AxNjMuY29tCg==</b><br/>OR<br/>Follow me on <a href="http://weibo.com/bugnofree" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>

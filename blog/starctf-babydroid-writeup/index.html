@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>*ctf babydroid writeup</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">*ctf babydroid writeup</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2018-04-26 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<h3 class="text3d">背景 && 摘要</h3>
+<p>TL;DR</p>
+
+<h3 class="text3d">环境</h3>
+<p>IDA Pro + Jadx + 耐心</p>
+<!--正文-->
+<h1 class="titlebar">初步分(懵)析(逼)</h1>
+
+<p>
+使用 <b class="term">jadx</b> 打开 babydroid.apk 然后进到 <b
+    class="term">MainActivity</b> 中看一下, 大致浏览一下代码
+</p>
+
+<pre class="code">
+package com.q2zy.babyandroid;
+
+public class MainActivity extends AppCompatActivity implements OnClickListener {
+    private static String TAG = "java";
+
+    public static native boolean check(String str);
+
+    public static native boolean check0(String str);
+
+    public static native boolean check1(String str);
+
+    public static native boolean check2(String str);
+
+    public static native boolean check3(String str);
+
+    public static native boolean check4(String str);
+
+    public static native boolean check5(String str);
+
+    public static native String stringFromJNI();
+
+    static {
+        System.loadLibrary("a");
+    }
+
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView((int) R.layout.activity_main);
+        Log.w(TAG, "oncreate");
+    }
+
+    public void onClick(View v) {
+        EditText editText = (EditText) findViewById(R.id.editText);
+        TextView tv = (TextView) findViewById(R.id.sample_text);
+        String input = null;
+        if (editText != null) {
+            input = editText.getText().toString();
+        }
+        if (tv != null) {
+            tv.setText(check0(input) ? "flag is your input" : "failed");
+        }
+    }
+
+    public void xxx() {
+        Log.w(TAG, "enter xxx");
+        try {
+            Log.w(TAG, Thread.currentThread().getContextClassLoader().toString());
+        } catch (Exception e) {
+            Log.w(TAG, e.getClass().getName());
+            Log.w(TAG, e);
+            Log.w(TAG, MainActivity.class.getClassLoader().toString());
+            Log.w(TAG, ClassLoader.getSystemClassLoader().toString());
+        }
+        Log.w(TAG, "exit xxx");
+    }
+
+    public static void load(String libName) {
+        try {
+            Log.w(TAG, "log b in java");
+            Log.w(TAG, Thread.currentThread().getContextClassLoader().toString());
+            Runtime runtime = Runtime.getRuntime();
+            Log.w(TAG, Thread.currentThread().getContextClassLoader().toString());
+            Method method = Runtime.class.getDeclaredMethod("load", new Class[]{String.class, ClassLoader.class});
+            method.setAccessible(true);
+            method.invoke(runtime, new Object[]{libName, classLoader});
+        } catch (Exception e) {
+            Log.w(TAG, e);
+        }
+    }
+
+    public static void loadLibrary(String s) {
+        System.loadLibrary(s);
+    }
+}
+</pre>
+
+
+<p>
+首先,声明了 7 个 <b class="term">checkX</b> native 方法以及一个 <b class="term">stringFromJNI</b>  方法.
+然后看到 <b class="term">onClick</b>
+中调用了 check0 方法来进行 flag 的检测, 所以我们定位到 liba.so 中.
+使用 IDA 打开该 liba.so,查看 check0,如下
+</p>
+
+<img src="./images/check0.png" alt="">
+
+<p>
+    调用了 java 层的 native 函数函数 check, 注意参数 args 就是输入的 flag 值.
+    那么这个 check 函数在哪里实现的呢? 看一下 IDA 的导出表:
+</p>
+
+<img src="./images/exports.png" alt="">
+
+<p>
+    没有 check 函数,那么可能就是在 JNI_OnLoad 里面做了手脚,进 JNI_OnLoad 里面看看.
+    开启 F5 大法, 然后得到如下伪代码:
+</p>
+
+<img src="./images/liba-jnionload.png" alt="">
+
+<p>
+1 处是 JNI 的版本,这是个常量. 然后是 2 中注册了一个 stringFromJNI 方法.
+</p>
+
+<p class="minipara">
+动态注册 native 方法的时候用到了一个结构体 JNINativeMethod.
+为了方便查看,我们可以在 IDA 中导入一个这样的结构体
+(IDA 自带). 我们可以选择 view/subview/structures 打开结构体窗口,
+然后按下 insert 键(macbook pro 2017 害我找了好久,这个快捷键组合是 fn+i)来添加结构体,
+如下图所示.
+<img src="./images/struct.png" alt="">
+然后回到伪代码窗口将 v22 的类型定义为 JNINativeMethod,
+方法命名为 methods, 然后便得到如下结果
+<img src="./images/struct-method.png" alt="">
+</p>
+
+<p>
+3 处是调用 java 层的 load 函数,对 libb.so 进行加载.
+于是用 IDA 打开 libb,会提示 SHT invalid,不用管.
+<img src="./images/sht-invalid.png" alt="">
+里面只有一个能看到的到处函数 JNI_OnLoad 函数. 那就只能分析这个函数看看做了什么.
+然后欣喜的打开 JNI_OnLoad, 结果发现就长这鬼样子.
+<img src="./images/bad-jnionload.png" alt="">
+</p>
+
+<p>
+这个时候差不多就走到第一个死胡同了. 我们理一下思路, 程序运行后会首先加载 liba.so
+库, libba 在 JNI_OnLoad 中注册了一些 native 函数并加载了 libbb.so,
+当用户在文本框输入flag后, 按下按钮,会调用 liba 中的 check0 函数进行检查,
+但是 check0 又调用了一个 check 函数,而这个 check 函数又不在 liba 中,
+那么应该是在 libb 中. 但是我们看一下 libb 中的 JNI_OnLoad 函数又是一团乱七八糟的
+,应该是加密了,所以肯定有代码在 libb 的 JNI_OnLoad 执行之前执行,那会是谁呢?
+</p>
+
+<p>
+看了一下 liba,发现没什么可能,因为当 liba 在其 JNI_OnLoad 中反射调用 Java 层的 load 函数时,
+是直接找到系统的库加载函数 load 然后对库 libb 进行加载的.
+所以应该是在 libb 加载的时候优于 libb 的 JNI_OnLoad 之前做了一些操作.
+比如解密代码.
+</p>
+
+<p>我先想到的是看看是不是在 .init 中做了处理,但是在 IDA 中看一下段分布,
+又是一脸懵逼.
+<img src="./images/libb-segment.png" alt="">
+这样子看着像是直接从内存 dump 出来的库. 再看看 liba 中的段
+<img src="./images/liba-segment.png" alt="">
+gdb/ida 我都试了,只能断到 libba.so, 在 libb.so 加载的过程中,直接闪退. 我一直想知道是什么反调试,
+这么牛逼,连底层函数 fopen 都断不下来.
+事实证明,该程序没办法运行,我在实体机上测试了,没有任何调试的环境,
+就是一个正常使用的 Android 手机,打开改程序也是直接闪退.
+说实话,动态调试以及反调试浪费了我很多时间,后来发现程序本身就不能运行,感觉自己好蠢啊.
+我怀疑是不是出题人写这题目的时候,调试自己写的程序,然后等待 libb.so 加载时,
+在解密函数中下了一个断点,然后直接 dump 内存,把 libb.so dump 出来,放到程序里面,
+然后再打包发给我们.
+</p>
+
+<h1 class="titlebar">解密 libb.so 的 JNI_OnLoad 函数</h1>
+<p>
+好吧,不管怎么样,生活还要继续. 没有 .init 段, 只要逻辑正确,总得有人来解密吧,
+在 IDA 中看看谁引用了 libb 的 JNI_OnLoad 函数, 然后就找到了解密函数.
+通过交叉引用,可以找到如下函数
+<img src="./images/decypt-jnionload.png" alt="">
+该函数中可以明显看到在 2 处进行一些代码解密,但是用到了一个 key 值,
+这个 key 来自 1 处的 sub_9B4 函数,该函数貌是对 libb.so 进行的处理,
+于是进入该函数查看,如下
+<img src="./images/crc.png" alt="">
+这个代码应该是 crc32 值计算,为什么这么说呢? 当队友第一次说是 crc32 时我也很懵逼,
+虽然知道这个东西,但是具体是什么真不太清楚,赛后上网查了查,仔细拜读了这篇文章
+<a href=http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html"">
+Understanding and implementing CRC (Cyclic Redundancy Check) calculation
+</a>
+算是基本上懂了, crc32 的一个典型的生成多项式就是 0x4C11DB7, 这样子就不会很莫名其妙了,
+1 处的数值就很好理解了,另外针对 IDA 中的 off_xxx 变量,这里提供我的一个理解.
+<pre>
+off_xxx 表示偏移为 xxx 处的值
+比如 off_3F5C 处的值为 0x4008,那么 unsgined * pvar = off_3F5C;
+就表示指针 pvar 的值为 0x4008,也就是说 pvar 指向的变量值为 *pvar,
+也就是偏移 0x4008 处的值.
+
+0x4008 处的值是 0x4C11DB7,典型的 crc32 生成多项式
+</pre>
+继续看 2 处的代码,这个代码块里面主要是处理一个字节,
+里面有一个很奇怪的地方是对 sub_D00() 函数的调用,这个函数的内容也在图上,
+看起来又是一脸懵逼, v0 是啥? 咋还 JUMPOUT 了,然后跑到 loc_C56 处看汇编代码,
+我相信你会很崩溃的回来的. 我第一次看到这里真的是不知所措,
+一方面 crc32 具体实现不熟悉,然后 sub_D00() 的函数体又是莫名其妙,
+真做不下去.
+</p>
+
+<p>
+这个坎儿第一次是怎么绕过去的呢? 队友说,这个不是解密 JNI_OnLoad 函数嘛,
+前面几个字节应该是相同的,既然是一个校验值,还是亦或操作,
+找到一个 JNI_OnLoad 完后的 so 文件的前四个字节,然后再找到 libb.so 中 JNI_OnLoad
+的前四个字节,再亦或一下不就得到具体的 key 值了吗? 当时虎躯一震,说了一句:牛逼!
+一试果然可以正确解密. 当时找到 liba.so 的 JNI_OnLoad 的前四个字节,然后写了如下 C
+代码:
+</p>
+
+<pre class="code">
+// liba.so JNI_OnLoad 方法的前四个字节
+unsigned jniload_sig = 0xAF03b5f0;
+// libb.so JNI_OnLoad 方法的前四个字节
+unsigned encry = 0xc977d6da;
+// 得到解密秘钥
+unsigned key = jniload_sig ^ encry;
+printf("%#x\n", key);
+// 输出得到 key = 0x6674632a
+</pre>
+
+<p>
+这个 key 是正确的,当时没继续看. 了解了 crc32 的实现,现在回过头来看,
+上图代码 2 中 sub_D00() 所在的 if 代码块实现是完全多余的, 莫非,
+莫非该代码块是不永远不会执行的? 0x4C11DB7 的最后一个数值是 7, 奇数,
+所以最低位一定是 1, 那么该值与 1 进行与操作结果一定是 1 咯,然后取反为 0.
+执行是不可能的,这辈子都不可能了. 大概这就是出题人的诡计啦.
+所以现在我们可以将 IDA 逆向出来的代码复制出来,做适当修改,就得到了一个求 key 的函数.
+如下.
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#87af5f">unsigned</font>* getkey(<font color="#87af5f">const</font> <font color="#87af5f">char</font> *a1)<br/>
+{<br/>
+  <font color="#87af5f">FILE</font> *v1; <font color="#875f87"><i>// r6</i></font><br/>
+  <font color="#87af5f">signed</font> <font color="#87af5f">int</font> crc; <font color="#875f87"><i>// r4</i></font><br/>
+  <font color="#87af5f">int</font> *pgen1; <font color="#875f87"><i>// r5</i></font><br/>
+  <font color="#87af5f">int</font> *pgen2; <font color="#875f87"><i>// r11</i></font><br/>
+  <font color="#87af5f">size_t</font> end; <font color="#875f87"><i>// r10</i></font><br/>
+  <font color="#87af5f">int</font> i; <font color="#875f87"><i>// r6</i></font><br/>
+  <font color="#87af5f">int</font> j; <font color="#875f87"><i>// r9</i></font><br/>
+  <font color="#87af5f">unsigned</font> <font color="#87af5f">int</font> abyte; <font color="#875f87"><i>// r8</i></font><br/>
+  <font color="#87af5f">int</font> v9; <font color="#875f87"><i>// r0</i></font><br/>
+  <font color="#87af5f">int</font> v10; <font color="#875f87"><i>// r0</i></font><br/>
+  <font color="#87af5f">int</font> v11; <font color="#875f87"><i>// r1</i></font><br/>
+  <font color="#87af5f">unsigned</font> *result; <font color="#875f87"><i>// r0</i></font><br/>
+  <font color="#87af5f">FILE</font> *stream; <font color="#875f87"><i>// [sp+0h] [bp-8028h]</i></font><br/>
+  <font color="#87af5f">char</font> data[<font color="#d7875f">32768</font>]; <font color="#875f87"><i>// [sp+4h] [bp-8024h]</i></font><br/>
+  <font color="#87af5f">int</font> v15; <font color="#875f87"><i>// [sp+8004h] [bp-24h]</i></font><br/>
+<br/>
+  v1 = fopen(a1, <font color="#afaf87"><i>"rb"</i></font>);<br/>
+  rewind(v1);<br/>
+  crc = -<font color="#d7875f">1</font>;<br/>
+  stream = v1;<br/>
+  <font color="#87af5f">int</font> gen = <font color="#d7875f">0x4C11DB7</font>;<br/>
+  pgen1 = &amp;gen;<br/>
+  pgen2 = &amp;gen;<br/>
+  <font color="#875f87"><i>// printf(</i></font><font color="#afaf87"><i>"condition = %x</i></font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font><font color="#875f87"><i>,(*pgen1) &amp; </i></font><font color="#d7875f">1</font><font color="#875f87"><i>);</i></font><br/>
+  <font color="#ffd75f">do</font><br/>
+  {<br/>
+    end = fread(data, <font color="#d7875f">1u</font>, <font color="#d7875f">0x8000u</font>, v1);<br/>
+    <font color="#ffd75f">if</font> ( end )<br/>
+    {<br/>
+      i = <font color="#d7875f">0</font>;<br/>
+      <font color="#ffd75f">do</font><br/>
+      {<br/>
+        j = <font color="#d7875f">0</font>;<br/>
+        abyte = data[i];<br/>
+        <font color="#ffd75f">do</font><br/>
+        {<br/>
+          v9 = crc ^ (abyte &gt;&gt; j &lt;&lt; <font color="#d7875f">31</font>);<br/>
+          crc *= <font color="#d7875f">2</font>;<br/>
+          <font color="#ffd75f">if</font> ( v9 &lt;= -<font color="#d7875f">1</font> )<br/>
+          {<br/>
+            v10 = *pgen1;<br/>
+            crc ^= v10;<br/>
+          }<br/>
+          ++j;<br/>
+        }<br/>
+        <font color="#ffd75f">while</font> ( j != <font color="#d7875f">8</font> );<br/>
+        ++i;<br/>
+      }<br/>
+      <font color="#ffd75f">while</font> ( i != end );<br/>
+    }<br/>
+    v1 = stream;<br/>
+  }<br/>
+  <font color="#ffd75f">while</font> ( !feof(stream) );<br/>
+  fclose(stream);<br/>
+  result = calloc(<font color="#d7875f">5u</font>, <font color="#d7875f">1u</font>);<br/>
+  *result = ~crc;<br/>
+  <font color="#ffd75f">return</font> result;<br/>
+}<br/>
+</font>
+</pre>
+
+<p>
+好的,我们清除了第一个障碍,回到解密 JNI_OnLoad 的例程,可以写如下解密代码了
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#87af5f">void</font> decrypt_jnionload(<font color="#87af5f">unsigned</font> key) {<br/>
+    <font color="#87af5f">FILE</font>* fso = fopen(<font color="#afaf87"><i>"./libb.so"</i></font>, <font color="#afaf87"><i>"rb"</i></font>);<br/>
+    <font color="#87af5f">char</font> so[<font color="#d7875f">0x40b0</font>];<br/>
+    memset(so, <font color="#d7875f">0</font>, <font color="#d7875f">0x40b0</font>);<br/>
+<br/>
+    <font color="#87af5f">int</font> cnt = fread(so, <font color="#d7875f">1</font>, <font color="#d7875f">0x40b0</font>, fso);<br/>
+<font color="#d7005f">#ifdef DEBUG</font><br/>
+    printf(<font color="#afaf87"><i>"Read </i></font><font color="#ff5f5f">%#x</font><font color="#afaf87"><i> bytes</i></font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font>, cnt);<br/>
+    <font color="#ffd75f">for</font>(<font color="#87af5f">int</font> i = <font color="#d7875f">0</font>;i &lt; <font color="#d7875f">0x10</font>; ++i) {<br/>
+        printf(<font color="#afaf87"><i>"</i></font><font color="#ff5f5f">%x</font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font>,so[i]);<br/>
+    }<br/>
+    printf(<font color="#afaf87"><i>"</i></font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font>);<br/>
+<font color="#d7005f">#endif</font><br/>
+<br/>
+    <font color="#87af5f">unsigned</font>* encry = (<font color="#87af5f">unsigned</font>*)(so + <font color="#d7875f">0xab8</font>);<br/>
+    printf(<font color="#afaf87"><i>"First four bytes: </i></font><font color="#ff5f5f">%#x</font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font>, *encry);<br/>
+    <font color="#ffd75f">for</font>(<font color="#87af5f">unsigned</font>* k = encry; k &lt; encry + <font color="#d7875f">0x420</font>; ++k) {<br/>
+        <font color="#875f87"><i>/*</i></font><font color="#875f87"><i>printf(</i></font><font color="#afaf87"><i>"BEFORE: %x</i></font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font><font color="#875f87"><i>, *k);</i></font><font color="#875f87"><i>*/</i></font><br/>
+        *k ^= key;<br/>
+        <font color="#875f87"><i>/*</i></font><font color="#875f87"><i>printf(</i></font><font color="#afaf87"><i>"AFTER: %x</i></font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font><font color="#875f87"><i>, *k);</i></font><font color="#875f87"><i>*/</i></font><br/>
+    }<br/>
+    fclose(fso);<br/>
+    <font color="#87af5f">FILE</font>* fwso = fopen(<font color="#afaf87"><i>"./libb-decrypt-jnionload.so"</i></font>, <font color="#afaf87"><i>"wb"</i></font>);<br/>
+    fwrite(so, <font color="#d7875f">1</font>, <font color="#d7875f">0x40b0</font>, fwso);<br/>
+    fclose(fwso);<br/>
+}<br/>
+</font>
+</pre>
+
+<p>
+这个代码基本上就是看着 IDA 写的, 很简单. 这样我们调用这两个函数就可以解密了.
+如下所示.
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#87af5f">int</font> main() {<br/>
+    <font color="#87af5f">const</font> <font color="#87af5f">char</font>* fname = <font color="#afaf87"><i>"./libb.so"</i></font>;<br/>
+    <font color="#87af5f">unsigned</font> *key = getkey(fname);<br/>
+    printf(<font color="#afaf87"><i>"Check sum is </i></font><font color="#ff5f5f">%#x</font><font color="#ff5f5f">\n</font><font color="#afaf87"><i>"</i></font>, *key);<br/>
+    <font color="#875f87"><i>// 通过秘钥解密 libb.so 生成 libb-decrypt-jnionload.so</i></font><br/>
+    decrypt_jnionload(*key);<br/>
+    <font color="#ffd75f">return</font> <font color="#d7875f">0</font>;<br/>
+}<br/>
+</font>
+</pre>
+
+
+<h1 class="titlebar">分析 libb 的 JNI_OnLoad</h1>
+<p>
+现在我们打开解密之后的 libb-decrypt-jnionload.so 文件,定位到 JNI_OnLoad 函数,
+开启 F5 大法后有如下图 1 中的一大坨数值:
+<img src="./images/what_memcpy.png" alt="">
+这怎么搞? 我们注意到其中的函数 memcpy 函数原型好像不对,我们修改一下,其原型为:
+<pre class="code">
+int __cdecl _aeabi_memcpy(void *, const void *, size_t)
+</pre>
+我只所以把这个截个图出来,是想说, IDA 有时候自己不能正确识别一个函数,
+导致反编译之后的代码中,有的变量莫名其妙,找不到来源. 当我们修改完 memcpy 的原型后,
+就可以得到了一个有用的变量,另外尽量以变量的十六进制形式显示,比较友好,
+结果如 2 处所示. 另外这些数值是干什么的呢? 我们看一下它们在内存中的位置,
+发现 2 处上半部分的变量位于连续的内存中,下半部分的变量值也位于连续的内存中.
+基本上可以的断点是一个数组.为了方便我重新命名上下部分的数组分别为 aChunk,
+bChunk 而指向它们的指针则分别为 pAChunk,pBChunk.
+</p>
+
+<p>
+下面继续来看代码,解密两个神秘数组,和一个不知道从哪里冒出来的 v23 变量
+(在 IDA 反编译窗口中找不到来源). 如标记 1 处所示.
+<img src="./images/decry-chunk.png" alt="">
+解密数组容易搞定,但是这个没有来源的 v23 怎么办?
+回到汇编代码看来源.如标记2,3 所示. 标记 2 中的 R10 中存放的就是 v23 的地址,
+往上回溯,找到标记 3,可以发现原来是 memcpy 的第一个参数.
+这下就可以去看 memcpy 的第二个参数了,到此为止,上图中的所有解密都可以轻易完成,
+因为这三个解密例程很类似,我们编写一个 idapython 脚本函数来解密. 如下
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#ffd75f">def</font> <font color="#878787">decrypt</font>(addr, initkey, key):<br/>
+    cnt, savedaddr = <font color="#d7875f">0</font>, addr<br/>
+    loopkey = initkey<br/>
+    addr += <font color="#d7875f">1</font><br/>
+    <font color="#ffd75f">while</font> <font color="#878787">True</font>:<br/>
+        cnt += <font color="#d7875f">1</font><br/>
+        b = loopkey ^ key<br/>
+        bb = idc.Byte(addr - <font color="#d7875f">1</font>)<br/>
+        idc.PatchByte(addr - <font color="#d7875f">1</font>, b)<br/>
+        <font color="#878787">print</font>(<font color="#afaf87"><i>'</i></font><font color="#afaf87"><i>[+] %s =&gt; %s</i></font><font color="#afaf87"><i>'</i></font> % (<font color="#878787">hex</font>(bb), <font color="#878787">hex</font>(idc.Byte(addr - <font color="#d7875f">1</font>))))<br/>
+        addr += <font color="#d7875f">1</font><br/>
+        loopkey = idc.Byte(addr)<br/>
+        <font color="#ffd75f">if</font>(<font color="#ffd75f">not</font> idc.Byte(addr - <font color="#d7875f">1</font>)):<font color="#ffd75f">break</font><br/>
+    <font color="#878787">print</font>(<font color="#afaf87"><i>"</i></font><font color="#afaf87"><i>[*] Decrypt and patch %d bytes from %s .</i></font><font color="#afaf87"><i>"</i></font> % (cnt, <font color="#878787">hex</font>(savedaddr)))<br/>
+</font>
+</pre>
+
+<p>
+在 IDA 中导入脚本后,然后依次执行如下三行命令即可
+</p>
+<pre class="code">
+decrypt(0x2010,0xf0,0x93); decrypt(0xcb4,0x73,0x10); decrypt(0x2038,0x3e,0x16)
+</pre>
+
+<p>
+得到如下结果
+<img src="./images/decry-chunk-over.png" alt="">
+尽管 IDA 反编译窗口不能显示完全,但又不是不能看....继续看,对一些变量重命名之后,
+得到的结果如下
+<img src="./images/tail.png" alt="">
+解密代码很清晰了,再写一个 idapython 函数如下,注意其中的 loc_D30.
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#ffd75f">def</font> <font color="#878787">decrypt_tail</font>():<br/>
+    index, end = <font color="#d7875f">0x27c</font>, <font color="#d7875f">0x420</font><br/>
+    base = <font color="#d7875f">0xAB9</font> &amp; <font color="#d7875f">0xFFFFFFFE</font><br/>
+    key = <font color="#d7875f">0x6674632a</font><br/>
+    <font color="#ffd75f">while</font> <font color="#878787">True</font>:<br/>
+        curaddr = base + index<br/>
+        word = idc.Word(curaddr)<br/>
+        idc.PatchWord(curaddr, idc.Word(curaddr + <font color="#d7875f">2</font>))<br/>
+        idc.PatchWord(curaddr + <font color="#d7875f">2</font>, word)<br/>
+        idc.PatchDword(curaddr, idc.Dword(curaddr) ^ key)<br/>
+        index += <font color="#d7875f">4</font><br/>
+        <font color="#ffd75f">if</font>(index &gt;= end):<font color="#ffd75f">break</font><br/>
+</font>
+</pre>
+
+
+<h1 class="titlebar">最后的战役</h1>
+
+<p>
+当运行完解密代码后,loc_D30 处就变成了一个函数 sub_D30(). 因为调用 RegisterNatives 中的 mtd无法追踪到,
+于是我们转而追踪 sub_D30(). 进入该函数,结果如下
+<img src="./images/final.png" alt="">
+标记 1 主要是生成准备读取用户输入的 flag( 特别是 1 中的 input0, 多谢 lu 师傅提醒).
+然后看标记2,主要的解密例程,亦或操作,该过程可逆,所以可反推flag,从哪里反推,
+从secret 变量开始. 编写 idapython 解密函数,如下
+</p>
+
+<pre style="background-color:#272822;color:#d0d0d0;padding:1%;border-radius:20px;line-height:10px;">
+<font face="monospace">
+<font color="#ffd75f">def</font> <font color="#878787">decrypt_final</font>():<br/>
+<br/>
+    <font color="#875f87"><i># 1: 获取加密后的字节数组</i></font><br/>
+    secret = []<br/>
+    secret_base = <font color="#d7875f">0xe54</font><br/>
+    <font color="#ffd75f">while</font> <font color="#878787">True</font>:<br/>
+        b = idc.Byte(secret_base)<br/>
+        <font color="#ffd75f">if</font>(<font color="#ffd75f">not</font> b):<font color="#ffd75f">break</font><br/>
+        secret.append(<font color="#878787">hex</font>(b)[<font color="#d7875f">2</font>:].zfill(<font color="#d7875f">2</font>))<br/>
+        secret_base += <font color="#d7875f">1</font><br/>
+<br/>
+    <font color="#875f87"><i># 2: 从 list 中索引 index 处获得一个整数</i></font><br/>
+    <font color="#ffd75f">def</font> <font color="#878787">getint_fromlist</font>(index, lst):<br/>
+        end = <font color="#878787">len</font>(lst) - <font color="#d7875f">1</font> <font color="#ffd75f">if</font> index + <font color="#d7875f">3</font> &gt; <font color="#878787">len</font>(lst) - <font color="#d7875f">1</font> <font color="#ffd75f">else</font> index + <font color="#d7875f">3</font><br/>
+        num = <font color="#afaf87"><i>""</i></font><br/>
+        <font color="#ffd75f">for</font> i <font color="#ffd75f">in</font> <font color="#878787">range</font>(end, index - <font color="#d7875f">1</font>, -<font color="#d7875f">1</font>):<br/>
+            hx = lst[i]<br/>
+            num += hx<br/>
+        <font color="#ffd75f">return</font> <font color="#878787">int</font>(num,<font color="#d7875f">16</font>)<br/>
+<br/>
+    <font color="#875f87"><i># 3: 在 list 索引 index 处放入一个整数 num</i></font><br/>
+    <font color="#ffd75f">def</font> <font color="#878787">setint_tolist</font>(index, lst, num):<br/>
+        num = <font color="#878787">hex</font>(num)[<font color="#d7875f">2</font>:].zfill(<font color="#d7875f">8</font>)<br/>
+        numlst = re.findall(<font color="#afaf87"><i>r"</i></font><font color="#afaf87"><i>.{1,2}</i></font><font color="#afaf87"><i>"</i></font>, num)<br/>
+        lsb = numlst[-<font color="#d7875f">1</font>::-<font color="#d7875f">1</font>]<br/>
+        end = <font color="#878787">len</font>(lst) - <font color="#d7875f">1</font> <font color="#ffd75f">if</font> index + <font color="#d7875f">3</font> &gt; <font color="#878787">len</font>(lst) - <font color="#d7875f">1</font> <font color="#ffd75f">else</font> index + <font color="#d7875f">3</font><br/>
+        lst[index:end + <font color="#d7875f">1</font>] = lsb[<font color="#d7875f">0</font>:end + <font color="#d7875f">1</font> - index]<br/>
+<br/>
+<br/>
+    <font color="#875f87"><i># 4: 模拟加密(a)</i></font><br/>
+    key = <font color="#d7875f">0x6674632a</font><br/>
+    square_key = key * key<br/>
+<br/>
+    v = getint_fromlist(<font color="#d7875f">19</font>, secret)<br/>
+    setint_tolist(<font color="#d7875f">19</font>, secret, (square_key &gt;&gt; <font color="#d7875f">32</font>) ^ v)<br/>
+    vv = getint_fromlist(<font color="#d7875f">15</font>, secret)<br/>
+    setint_tolist(<font color="#d7875f">15</font>, secret, vv ^ square_key)<br/>
+<br/>
+    <font color="#875f87"><i># 5: 模拟加密(b)</i></font><br/>
+    <font color="#ffd75f">for</font> i <font color="#ffd75f">in</font> <font color="#878787">range</font>(<font color="#d7875f">8</font>):<br/>
+        v = getint_fromlist(i, secret)<br/>
+        num = getint_fromlist(i + <font color="#d7875f">4</font>, secret)<br/>
+        setint_tolist(i, secret, v ^ square_key)<br/>
+        setint_tolist(i + <font color="#d7875f">4</font>, secret, num ^ (square_key &gt;&gt; <font color="#d7875f">32</font>))<br/>
+<br/>
+    <font color="#875f87"><i># 6: 打印 flag</i></font><br/>
+    flag = [<font color="#878787">chr</font>(<font color="#878787">int</font>(c,<font color="#d7875f">16</font>)) <font color="#ffd75f">for</font> c <font color="#ffd75f">in</font> secret]<br/>
+    <font color="#878787">print</font>(<font color="#afaf87"><i>"</i></font><font color="#afaf87"><i>[+] flag is %s</i></font><font color="#afaf87"><i>"</i></font> % (<font color="#afaf87"><i>''</i></font>.join(flag)))<br/>
+</font>
+</pre>
+
+<p>
+好吧,我知道你看到这个函数可能很头疼,写的是什么意思啊,本着写东西就是为了让别人看懂的原则,
+我来解说一下这个函数的意思.
+</p>
+
+<p>
+#1 节用于获取加密后的字节数组, 其基地址是 0x54,存放时要保证存放每个字符的十六进
+制形式,不包括前缀 0x,且长度为2. 比如一个字节为 0xf,则应该去掉 '0x' 并补 0 得到
+"0f" 放入列表中,该列表诸如 lst = ["01","00","0a","1b","2c"] 等形式,
+以实际内存存储字节的方式来存储字节序列.
+</p>
+
+<p>#2 和 #3 主要用于从列表中获取一个整数,由于是小段序列,所以我们获取整数时,
+需要从后往前读取. 比如说从 lst 中获取索引 0 处的整数,得到的是
+0x1b0a0001. 则 getint_fromlist(0,lst) 返回一个整数 0x1b0a0001.
+而setint_tolist 恰好相反, 对输入的数值,先转换为十六进制字符串,
+然后 0 填充至长度为 8,写入 lst 的时候要按照小段序列填充.
+</p>
+
+<p>
+#4 和 #5 就是按照加密顺序在反向加密一下,这个对照 IDA 的反编译代码和 #2,#3 处的辅助函数,
+不是很难理解.
+</p>
+
+<p>#5 处就是打印输出 flag.</p>
+
+<p>执行该函数后输出如下</p>
+<pre class="code">
+Python>decrypt_final()
+[+] flag is 1nTr3stIng-AnDr0id-A&D!
+</pre>
+
+<p>
+
+</p>
+
+<h1> P.S.</h1>
+<p>
+Any question? 欢迎联系我,交朋友或者探讨问题,都 OK!
+</p>
+<p>
+最后感谢 swing 我才得以能够加入这个战队,并参加 *ctf 这个比赛,虽然我是猪队友,
+但是收获很多,非常感谢. 在做 babydroid 这道题时,也十分感谢 lu 师傅对我的指导.
+</p>
+
+<h1>代码下载</h1>
+<a href="./solve.c">C 代码</a> && <a href="./autoida.py">idapython 脚本函数</a>
+
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <li><a href="http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html"><b>Understanding and implementing CRC (Cyclic Redundancy Check) calculation</b></a></li>
+    <!--<li><a href=""><b></b></a></li>-->
+</ol>
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Contact me by <b>dXAyZ2Vla0AxNjMuY29tCg==</b><br/>OR<br/>Follow me on <a href="http://weibo.com/bugnofree" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>

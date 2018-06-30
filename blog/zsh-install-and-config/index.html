@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>ZSH shell configuration</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>ZSH Shell配置|Bugnofree|2016-03-01 Tue 03:52 PM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/>
+Update 2016-04-04 Mon 10:45 PM<br/>
+ZSH Shell太慢了,难以忍受,已卸载(卸载完后,系统各种问题...于是重装系统..悲剧).
+<hr/>
+环境:<br/>
+Ubuntu 14.04 x64
+<hr/>
+<img src="0x01.png"></img>
+<h3 class="subtitle">#1.安装ZSH</h3>
+<pre class="cornor">
+安装:<b>apt-get install zsh</b>
+设置为默认shell:<b>chsh -s $(which zsh)</b>
+登出并再次登入,查看默认shell:<b> echo $SHELL </b>
+查看zsh版本: <b>zsh --version</b>
+
+<i>P.S.配置文件位于~/.zshrc</i>
+</pre>
+<h3 class="subtitle">#2.安装oh my zsh</h3>
+<pre class="cornor">
+curl方式:
+sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+wget方式:
+sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+<i>安装完之后,目录位于:~/.oh-my-zsh/,其下含有plugins,themes等目录</i>
+</pre>
+
+<h3 class="subtitle">#3.环境变量配置</h3>
+<pre class="cornor">
+vim /etc/profile
+最后一行写入:
+export TERM="screen-256color" 
+</pre>
+
+<h3 class="subtitle">#4.安装字体</h3>
+<pre class="cornor">
+git clone https://github.com/powerline/fonts.git /opt/powerline-fonts
+cd powerline-fonts
+./install.sh
+</pre>
+然后进入shell的首选参数设置中选择一个powerline的字体,比如我这里选择Dejavu Sans Mono for Powerline,注意如果字体选择不对,将会影响显示.
+打开终端测试字体:
+<pre>
+<b>echo "\ue0b0 \u00b1 \ue0a0 \u27a6 \u2718 \u26a1 \u2699"</b>
+</pre>
+<h3 class="subtitle">#5.设置zsh主题</h3>
+zsh的所有主题截图地址:https://github.com/robbyrussell/oh-my-zsh/wiki/themes,我这里自定义安装的主题位于:https://github.com/zakaziko99/agnosterzak-ohmyzsh-theme,
+安装方法如下:
+<pre class="cornor">
+wget https://raw.githubusercontent.com/zakaziko99/agnosterzak-ohmyzsh-theme/master/agnosterzak.zsh-theme
+mv agnosterzak.zsh-theme  ~/.oh-my-zsh/themes
+修改.zshrc中的ZSH_THEME为agnoster,即ZSH_THEME="agnoster"
+</pre>
+对于本主题,我修改了一个着色的地方:
+<pre class="cornor"> 
+# Context: user@hostname (who am I and where am I)
+prompt_context() {
+  if [[ -n "$SSH_CLIENT" ]]; then
+    prompt_segment magenta white "$fg_bold[white]%(!.%{%F{white}%}.)$USER@%m$fg_no_bold[white]"
+  else
+    prompt_segment yellow magenta "$fg_bold[magenta]%(!.%{%F{black}%}.)@$USER$fg_no_bold[magenta]"
+  fi
+}
+</pre>
+参考:https://github.com/robbyrussell/oh-my-zsh/wiki/Installing-ZSH
+
+<hr/>
+</body>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

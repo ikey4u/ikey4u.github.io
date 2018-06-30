@@ -1,0 +1,133 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Magic Numbers</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+ 
+<!-- 代码高亮:不再使用 2016-06-16 Thu 02:27 PM -->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">-->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">-->
+<!--<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>-->
+<!--<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>-->
+<!--<script type="text/javascript">-->
+  <!--hljs.initHighlightingOnLoad();-->
+<!--</script>-->
+
+
+<!--数学公式-->
+    <!--MathJax路径:-->
+    <script type="text/javascript" async 
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_CHTML">
+    </script>
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>魔数|bugnofree|2016-06-24 Fri 09:27 AM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+<br/><b>本文所涉及的文件(如果有的话)大部分可以通过文章末尾的链接下载.</b> <br/>
+<hr/>
+<i>某一道CTF题目(题目下载见文末)RE4中的提示如下:
+<pre>
+DbgPrint("Hint:This value is a widely used hex value in computer science.\n");
+DbgPrint("it consists of two words of 4 characters with hex letters of 'A' to 'F'(inclusive).\n");
+DbgPrint("The first word has the same meaning as \"deceased\"\n");
+DbgPrint("The second word represents a kind of meat.\n");
+</pre>
+有人写了个WriteUp,说'很容易'得出这四字节的十六进制是0xDEADBEEF.当时我就震惊了,这尼玛,我居然根本不知道.赶快上网搜索总结一下.
+这道题到现在我还没有做出来....谁能给我讲会了...我可以请你吃饭撒...-_-</i>
+<br/> <br/> <br/>
+<!--文章正文-->
+<h3 class="subtitle">简介</h3>
+计算机领域内有许多魔数,这些魔数一般是一个常量值,用来表示一个文件格式,协议类别或者文件签名等等,
+这种魔数之所以会产生,我觉得是必然的,这个我是深有体会,在安天实验室实习的时候,写过一个OllyDbg调试器的插件,
+当时在CERT部门实习,就用到了CERT作为一个魔数,代码片段如下:<br/>
+<br/><img src="0x01.png"></img><br/>
+有些魔数比较容易看出其意义所在,就比如文章开头所提到的0xDEADBEEF,而有些给人则是一头雾水,就比如下面这个平方根倒数快速算法:<br/>
+<br/><img src="0x02.png"></img><br/>
+上面的注释就是原有注释,看见这种代码简直莫名其妙,然而它还是完美工作的.这很让人抓狂.<br/>
+<h3 class="subtitle">常见的魔数</h3>
+现在就让我们来总结一些常见的魔数.
+<ul>
+    <li>Java的GUID魔数CAFEEFAC</li>
+    <li>GPT的GUID魔数21686148-6449-6E6F-744E-656564454649:Hah!IdontNeedEFI</li>
+    <li>..FACADE:Facade</li> 
+    <li>1BADB002:1 bad boot</li> 
+    <li>8BADF00D:Ate bad foot(8的英语发音取前边得Ate)</li> 
+    <li>A5A5A5A5</li> 
+    <li>ABABABAB</li> 
+    <li>ABADBABE:A bad babe</li> 
+    <li>ABBABABE:ABBA babe</li> 
+    <li>ABADCAFE:A bad cafe</li> 
+    <li>0DEFACED:Defaced</li> 
+    <li>BAADF00D:Bad food</li> 
+    <li>BAAAAAAD:Baaaaaad</li> 
+    <li>BAD22222:Bad too repeatedly</li> 
+    <li>BADDCAFE:Bad Cafe</li> 
+    <li>BBADBEEF:Bad Beef</li> 
+    <li>BEEFCACE:Beef cake</li> 
+    <li>C00010FF:Cool off</li> 
+    <li>CAFEBABE:Cafe babe</li> 
+    <li>CAFED00D:Cafe dude</li> 
+    <li>CAFEFEED:Cafe feed</li> 
+    <li>CCCCCCCC:</li> 
+    <li>CDCDCDCD:</li> 
+    <li>D15EA5E	:Disease</li> 
+    <li>DDDDDDDD:</li> 
+    <li>DEAD10CC:Dead lock</li> 
+    <li>DEADBABE:Dead babe</li> 
+    <li>DEADBEEF:Dead beef</li> 
+    <li>DEADC0DE:Dead Code</li> 
+    <li>DEADFA11:Dead fail</li> 
+    <li>DEADF00D:Dead Food</li> 
+    <li>DEFEC8ED:Defecated</li> 
+    <li>EBEBEBEB:</li> 
+    <li>FADEDEAD:Fade dead</li> 
+    <li>FDFDFDFD:</li> 
+    <li>FEE1DEAD:Feel dead</li> 
+    <li>FEEDFACE:Feed face</li> 
+    <li>FEEEFEEE:Fee fee</li> 
+    <li>BADBADBADBAD:Bad bad bad bad</li>
+    <li>BADC0FFEE0DDF00D:Bad coffee odd food</li>
+</ul>
+</body>
+相关文件下载:http://pan.baidu.com/s/1o7WPuuI
+<hr/>
+参考链接:<br/>
+<ol>
+    <li> https://en.wikipedia.org/wiki/Fast_inverse_square_root</li>
+    <li> http://www.howtogeek.com/201059/magic-numbers-the-secret-codes-that-programmers-hide-in-your-pc/</li>
+    <li> https://en.wikipedia.org/wiki/Magic_number_(programming)#Magic_debug_values</li>
+</ol>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>

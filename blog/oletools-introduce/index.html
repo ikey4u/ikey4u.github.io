@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>OLE文档分析工具之oletools介绍</title>
+<style>
+/** 设置pre标签元素为4个圆角且能够自动换行 **/
+pre{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+/** 设置图片居中显示 **/
+img{
+display: block;
+margin-left: auto;
+margin-right: auto 
+}
+/** 背景色渐变,兼容Chrome,IE,Firefox,Opera,Safari **/
+html{
+width:99%;
+background: -webkit-gradient(linear,0 0, 0 100%, from(rgba(250,250,250,1)), to(rgba(210,210,210,1))); /** Chrome Safari **/
+background: -moz-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1)); /** FireFox **/
+background: -o-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1));  /** Opera **/
+background: -ms-linear-gradient(rgba(250,250,250,1) 0%,rgba(210,210,210,1) 100%);  /** IE9 IE10 **/
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE8 **/
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE7 **/
+padding:10px;
+line-height: 32px;　　　          　/* 设定文字行距 */
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+</head>
+<body>
+    <h1 style="text-align:center">OLE文档分析工具之oletools介绍</h1>
+    <p style="font-size:14px;text-align:center"><a href="http://www.ahageek.com">www.ahageek.com</a></p>
+<pre>
+仅仅在Python2下运作:
+oletools目录包含有以工具:
+├── doc:文档部分 
+├── ezhexviewer.py
+├── olebrowse.py
+├── oleid.py
+├── olemeta.py
+├── oletimes.py
+├── olevba.py
+├── pyxswf.py
+├── rtfobj.py
+└── thirdparty:一些必要的组件
+
+
+运行前需要首先安装以下工具:
+apt-get install python python-tk idle python-pmw python-imaging
+
+
+ezhexviewer.py:以图形化的方式显示16禁止的OLE文件
+olebrowse.py:以图形化的方式显示OLE文件架构,并可以以流的形式保存到本地
+oleid.py:以ASCII字符表格的形式显示OLE文件信息,如下:
+    Filename:xxx 
+    +-------------------------------+-----------------------+
+    | Indicator                     | Value                 |
+    +-------------------------------+-----------------------+
+    | OLE format                    | True                  |
+    | Has SummaryInformation stream | True                  |
+    | Application name              | Microsoft Office Word |
+    | Encrypted                     | False                 |
+    | Word Document                 | True                  |
+    | VBA Macros                    | True                  |
+    | Excel Workbook                | False                 |
+    | PowerPoint Presentation       | False                 |
+    | Visio Drawing                 | False                 |
+    | ObjectPool                    | False                 |
+    | Flash objects                 | 0                     |
+    +-------------------------------+-----------------------+
+olemeta.py:宏文件meta信息
+    Properties from SummaryInformation stream:
+    - codepage: 1251
+    - title: ''
+    - subject: ''
+    - author: 'rUmjP'
+    - keywords: ''
+    - comments: ''
+    - template: 'Normal.dotm'
+    - last_saved_by: 'BDKe2ic'
+    - revision_number: '1'
+    - total_edit_time: 0L
+    - last_printed: None
+    - create_time: datetime.datetime(2015, 8, 11, 2, 14)
+    - last_saved_time: datetime.datetime(2015, 8, 11, 7, 31)
+    - num_pages: 1
+    - num_words: 8367
+    - num_chars: 47692
+    - thumbnail: None
+    - creating_application: 'Microsoft Office Word'
+    - security: 0
+    Properties from DocumentSummaryInformation stream:
+    - codepage_doc: 1251
+    - category: None
+    - presentation_target: None
+    - bytes: None
+    - lines: 397
+    - paragraphs: 111
+    - slides: None
+    - notes: None
+    - hidden_slides: None
+    - mm_clips: None
+    - scale_crop: False
+    - heading_pairs: None
+    - titles_of_parts: None
+    - manager: None
+    - company: ''
+    - links_dirty: False
+    - chars_with_spaces: 55948
+    - unused: None
+    - shared_doc: False
+    - link_base: None
+    - hlinks: None
+    - hlinks_changed: False
+    - version: 983040
+    - dig_sig: None - content_type: None - content_status: None
+    - language: None
+    - doc_version: None
+oletimes.py:ASCII字符格式显示OLE文件的组成框架以及修改创建时间
++----------------------------+---------------------+---------------------+
+| Stream/Storage name        | Modification Time   | Creation Time       |
++----------------------------+---------------------+---------------------+
+| Root                       | 2015-08-11 07:31:01 | None                |
+| '\x01CompObj'              | None                | None                |
+| '\x05DocumentSummaryInform | None                | None                |
+| ation'                     |                     |                     |
+| '\x05SummaryInformation'   | None                | None                |
+| '1Table'                   | None                | None                |
+| 'Data'                     | None                | None                |
+| 'Macros'                   | 2015-08-11 07:31:00 | 2015-08-11 07:31:00 |
+| 'Macros/PROJECT'           | None                | None                |
+| 'Macros/PROJECTwm'         | None                | None                |
+| 'Macros/VBA'               | 2015-08-11 07:31:00 | 2015-08-11 07:31:00 |
+| 'Macros/VBA/Module1'       | None                | None                |
+| 'Macros/VBA/Module2'       | None                | None                |
+| 'Macros/VBA/ThisDocument'  | None                | None                |
+| 'Macros/VBA/_VBA_PROJECT'  | None                | None                |
+| 'Macros/VBA/dir'           | None                | None                |
+| 'WordDocument'             | None                | None                |
++----------------------------+---------------------+---------------------+
+olevba.py:提取并打印宏代码,可以通过重定向将宏代码保存到本地.
+pyxswf.py:从文档中提取swf文件(flash)文件
+rtfobj.py:从RTF文档中提取嵌入的文件.
+
+网站:http://www.decalage.info/python/oletools
+
+olefile文件主要包含的是olefile.py和olefile2.py.
+两个文件的作用是一样的,均提供以下信息:
+文档内嵌文件框架
+属性信息
+所有目录文件的创建修改信息
+文件流属性
+
+网站:http://www.decalage.info/olefile
+
+
+PS:个人觉得olefile比较积累,还是oletools用处比较全面而且强大.
+</pre>
+希望本文对从事恶意软件分析的人士有所帮助.
+    <p style="text-align:right">By KillerLegend</p>
+</body>
+</html>

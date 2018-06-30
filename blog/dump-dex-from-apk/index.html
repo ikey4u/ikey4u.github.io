@@ -1,0 +1,177 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Android APK dump DEX实践</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="../../home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="../../home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../blog-assets/blog-style.css" type="text/css">
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+        <p><a href="http://www.ahageek.com/blog/dump-dex-from-apk/index.html" target="_blank">Android APK dump DEX实践</a>|bugnofree|2016.1.9|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/><br/><br/><br/><br/>
+
+<h2 class="titlebar"> 实验环境 </h2>
+<hr/>
+宿主机:Ubuntu 14.04 x64,配置了Android SDK,NDK环境<br/>
+虚拟机:Windows XP SP3,安装有IDA Pro 6.8              <br/>
+实体手机:华为U882525D Android 4.04                       <br/>
+WiFi ADB以及用到的工具AliCTF.apk都可以从<a href="http://pan.baidu.com/s/1eR0KE8y" target="_blank">http://pan.baidu.com/s/1eR0KE8y</a>下载.
+<hr/>
+<h2 class="titlebar">0x01:手机处理</h2>
+<h4 class="subtitle">1.获取root权限</h4>
+可以手动刷,也可以使用刷机精灵即可,推荐使用后者了,毕竟我们不打算玩刷机.<br/>
+<h4 class="subtitle">2.打开USB调试</h4>
+依次[设置-&gt;开发人员选项],设置如下:                                             <br/>
+<img src="0x01.png"></img><br/>
+<h4 class="subtitle">3.设置WiFi ADB</h4>
+安装WiFi ADB,安装之后,打开WiFi,打开WiFi ADB,界面如下,在shell中输入adb connect 192.168.1.4:5555即可连接:<br/><br/>
+<img src="0x02.png"></img><br/>
+<h2 class="titlebar">0x02:连接IDA Pro与Android手机</h2>
+<h4 class="subtitle">1.启动IDA Android远程服务器</h4>
+进入IDA Pro的dbgsrv目录下,如下:<br/><br/>
+<img src="0x03.png"></img><br/>
+注意IDA Pro6.8的dbgsrv还有的Android服务器端包括android_server以及android_server_nonpie.<br/>
+<p>
+自从Android4.1之后,Android系统已经完全支持ASRL技术,这些技术包括了栈,堆,可执行程序等的地址空间分配随机化(具体可以看<a href="https://jon.oberheide.org/blog/2012/02/27/aslr-in-android-ice-cream-sandwich-4-0/">这里</a>:).
+PIE( Position Independent Executable )是指让可执行程序分配的空间地址随机化.是否使用了PIE编译可以简单的通过file来鉴别,如下:<br/><br/>
+<img src="0x04.png"></img><br/>
+<p>
+注意其中的 shared object便指明使用了PIE技术编译.由于使用的真机系统为Android 4.04,尚部支持PIE编译的程序.
+因此应该使用nonpie版本的android_server.稍后我也将展示在非PIE编译的Android系统上运行PIE编译的android_server将会出现何种错误.
+</p>
+我将android_server和android_server_nonpie拷贝到宿主的工作目录,然后上传到/data/local/tmp目录下面.<br/>
+执行命令为:<b>adb push android_server /data/local/tmp</b>以及<b>adb push android_server_nonpie /data/local/tmp</b>,如下:<br/><br/>
+<img src="0x05.png"></img><br/>
+然后<b>adb shell</b>进入Android系统,使用<b>su</b>获取root权限,然后进入/data/local/tmp目录,首先应确定Android服务器具有可执行权限,如下:<br/><br/>
+<img src="0x06.png"></img><br/>
+现在我们分别运行PIE编译的android_server和非PIE编译的android_server_nonpie,如下:<br/><br/>
+<img src="0x07.png"></img><br/>
+可以清楚的看到当PIE编译的Android服务器在不支持PIE的Android系统上,将会出现Segmentation fault错误.因此应该运行android_server_nonpie.<br/>
+<h4 class="subtitle">2.端口转发</h4>
+现在我们的Android远程服务器已经运行起来了,监听端口是23946.接下来进行端口转发.在Google的<a href="http://developer.android.com/tools/help/adb.html#forwardports">开发文档</a>
+提到了端口转发如下:<br/><br/>
+<img src="0x08.png"></img><br/>
+我们这里使用的是第一种<b>adb forward tcp:host-port tcp:device-port</b>,其作用是将宿主机的端口host-port转发到设备或者模拟器的端口device-port.<br/>
+我用Dia简单的画了个示意图(看起来不太优雅...)如下:<br/><br/>
+<img src="0x09.png"></img><br/>
+一般情况下,IDA Pro,设备PHONE以及Android环境(以ADB表示)一同安装在宿主机上(Ubuntu Linux)面,IDA的Android远程服务器运行在PHONE上面,
+IDA Pro无法直接和PHONE上的服务器进行通信,需要通过安装在宿主机上的ADB进行端口转发.<br/>
+我们已经知道IDA Pro的Android服务器监听的端口是23946,因此IDA Pro发起的访问端口也是23946.实现端口转发的命令如下:<br/>
+<p style="text-align:center">adb forward tcp:23946 tcp:23946</p>
+但是在我的Android分析环境中,IDA是安装在虚拟机VMware中的,如下:<br/><br/>
+<img src="0x10.png"></img><br/>
+那么仅仅通过上述端口转发还不够,还需使用一次TCP流重定向.我使用的工具是redir,Ubuntu的安装方式<b>apt-get install redir</b>.<br/>
+通过ifconfig查看本机的ip地址,在我此时的机器上获知为192.168.1.102,则TCP流重定向命令如下:<br/>
+<p style="text-align:center">redir --lport=23946 --laddr=192.168.1.102 --cport=23946 --caddr=localhost</p>
+这个命令将使宿主机(宿主机IP即为192.168.1.102)监听来自23496端口的连接请求(即来自虚拟机XP的TCP流),然后重定向到宿主机的lo网卡(环路网卡).<br/>
+我们可以使用<b>netstat -lapute | grep 23946</b>命令来查看转发结果,如下:
+<pre>
+tcp        0      0 localhost:23946         *:*                     LISTEN      root       63772826    10212/adb
+tcp        0      0 pwn.lan:23946           *:*                     LISTEN      root       63761390    17237/redir
+</pre>
+截图如下:<br/><br/>
+<img src="0x11.png"></img><br/>
+<h2 class="titlebar">0x03:开始调试</h2>
+<h4 class="subtitle">1.确定启动Activity</h4>
+以阿里CTF的某届比赛中的一个APK为例,将其命名为AliCTF.apk(你可以从这里<a href="http://pan.baidu.com/s/1eR0KE8y" target="_blank">下载</a>),然后安装到手机上如下:<br/><br/>
+<img src="0x12.png"></img><br/>
+然后接下来需要启动程序,那么启动那个Activity呢?我们需要先反编译一下APK,通过查看AndroidManifest.xml来决定.<br/>
+使用的工具为apktool,安装方式就不说了,直接反编译并查看AndroidManifest.xml文件如下:<br/><br/>
+<img src="0x13.png"></img><br/>
+因此我们要启动的Activity为com.ali.tg.testapp.MainActivity,包为com.ali.tg.testapp,使用adb shell进入android,启动命令如下,其中-D指定为调试(Debug)模式:<br/>
+<p style="text-align:center">am start -D -n com.ali.tg.testapp/com.ali.tg.testapp.MainActivity</p>
+正确启动后应如下图所示:<br/><br/>
+<img src="0x14.png"></img><br/>
+此时手机屏幕显示如下:<br/><br/>
+<img src="0x15.png"></img><br/>
+<h4 class="subtitle">2.IDA 依附目标进程</h4>
+进入IDA,Debugger-&gt;Attach-&gt;Remote ARMLinux/Android debugger:<br/><br/>
+<img src="0x16.png"></img><br/>
+在Debug application setup界面中设置Debug Options以及Hostname,Hostname为你主机的IP地址(在这里为宿主机Ubuntu Linux的IP地址),如下图所示:<br/><br/>
+<img src="0x17.png"></img><br/>
+然后会弹出Choose Process to attach to界面,选择对应进程,并记下PID,如下图:<br/>
+<br/><img src="0x18.png"></img><br/>
+可以看到PID为4302.点击OK后,稍等片刻进入如下界面:<br/>
+<br/><img src="0x19.png"></img><br/>
+直接点击OK即可.稍等片刻执行如下操作打开模块列表,如下:<br/>
+<br/><img src="0x20.png"></img><br/>
+然后转到Modules栏,Ctrl+F输入libdvm.so文件:<br/>
+<br/><img src="0x21.png"></img><br/>
+搜索得到如下:<br/>
+<br/><img src="0x22.png"></img><br/>
+双击进入,同样的方法查找dvmDexFileOpenPartial函数,并按F2下断点如下:<br/>
+<br/><img src="0x23.png"></img><br/>
+<br/><img src="0x24.png"></img><br/>
+然后开启JDB调试,同样的原理,我们需要进行转发,执行三条命令如下,其中7788为自定义的一个端口,4302为你在IDA中看到的PID(这个时候手机屏幕上仍是在等待调试状态),
+192.168.1.102为你宿主机的IP地址:<br/>
+<pre >
+adb forward tcp:7788 jdwp:4302
+redir --lport=7788 --laddr=192.168.1.102 --cport=4302 --caddr=localhost
+jdb -connect com.sun.jdi.SocketAttach:port=7788,hostname=localhost
+</pre>
+回到IDA界面,F9运行,然后IDA会弹出Add map对话框,此时上述三条指令的执行情况如下(其中redir和jdb都处于等待状态):<br/>
+<br/><img src="0x25.png"></img><br/>
+弹出的Add map界面如下<br/>
+<br/><img src="0x26.png"></img><br/>
+点击取消(cancel)弹出下图:<br/>
+<br/><img src="0x27.png"></img><br/>
+点击应用(apply)即可.随后IDA将会在断点处断下(此时手机屏幕上的wating for debugger界面会消失)如下:<br/>
+<br/><img src="0x28.png"></img><br/>
+而且jdb也有了输出,如下:<br/>
+<br/><img src="0x29.png"></img><br/>
+<h2 class="titlebar">0x04:Dump Dex</h2>
+依次File -&gt;Script command...<br/>
+<br/><img src="0x30.png"></img><br/>
+在弹出的界面中输入如下脚本:<br/>
+<pre>
+auto fp, dex_addr,end_addr;
+fp =fopen("C:\\dump.dex","wb");
+end_addr =r0 +r1;
+for (dex_addr =r0; dex_addr &lt; end_addr; dex_addr++) fputc(Byte(dex_addr),fp);
+</pre>
+如下:<br/>
+<br/><img src="0x31.png"></img><br/>
+点击run,稍后将会在C:\下面出现dump.dex.至此全部完成.
+<h2 class="titlebar">0x05:接下来干什么?</h2>
+在后续文章中将会研究如下几个问题:<br/>
+<ul>
+    <li>为什么是在函数dvmDexFileOpenPartial处下断点?</li>
+    <li>Dex该如何反编译分析?</li>
+    <li>.so文件该如何打补丁并回编译?</li>
+    <li>介绍基本的android系统命令,如am,pm,screencap等等</li>
+    <li>流量转发与端口转发的原理</li>
+</ul>
+
+</body>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

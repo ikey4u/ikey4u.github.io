@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title> Compress and Decompress </title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="#">首页</a></li>
+		<li><a href="#">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">Compress and Decompress</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2017-04-13 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<hr/>
+<h3 class="text3d">背景 && 摘要</h3>
+<p> Linux下有各种压缩以及解压文件的方法,有时候记不清楚到底那个是哪个,本文将逐步完善这
+些解压缩命令,并给出说明.</p>
+
+<h3 class="text3d">环境</h3>
+<p> 一般Linux发行版本均可.</p>
+<hr/>
+<!--正文-->
+<h1 class="titlebar">tar</h1>
+<p>常用参数如下:</p>
+<ul>
+    <li><b>-c</b>:创建一个归档文件</li>
+    <li><b>-C</b>:执行 tar 命令前切换到指定目录</li>
+    <li><b>-f</b>:其后指定归档文件的名称</li>
+    <li><b>-v</b>:输出详细信息</li>
+    <li><b>-x</b>:解压缩文件</li>
+    <li><b>-z</b>:压缩文件(tar.gz格式)</li>
+    <li><b>-t</b>:列出归档文件所包含的文件</li>
+</ul>
+
+<h1 class="titlebar">zip</h1>
+<p>压缩多个文件:</p>
+<pre class="code"> zip output.zip  file_1 file_2 file_3 </pre>
+<p>递归的压缩目录:</p>
+<pre class="code"> zip -r output.zip dir </pre>
+<p>解压:</p>
+<pre class="code">
+unzip input.zip
+unzip input.zip -d output_dir
+</pre>
+
+<h1 class="titlebar">tar.gz</h1>
+<p>压缩为 <b class="term"> tar.gz </b>文件:</p>
+<pre class="code"> tar zcvf output.tar.gz dir_1 dir_2 </pre>
+<p>解压:</p>
+<pre class="code"> tar zxvf input.tar.gz output_dir </pre>
+
+
+<h1 class="titlebar">查看文件或目录大小</h1>
+<p>查看文件大小:</p>
+<pre class="code">
+ls -al --block-size=M
+du -ah   #列出文件以及文件的大小
+</pre>
+<p>查看目录大小:</p>
+<pre class="code">
+du -h #递归的显示所有目录的大小
+du -sh * #列出当前所有目录的大小
+</pre>
+<h1 class="titlebar">显示进度条</h1>
+<p>这里我们使用 <a href="https://github.com/Xfennec/progress">process</a>来监视耗时任务的执行进度,
+一个命令行窗口中执行如 cp,mv 等命令,另一个窗口使用 progress 来监视进度:</p>
+<pre class="code">
+sudo apt install progress # Ubuntu 16.04
+progress -M
+</pre>
+
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <li><a href=""><b></b></a></li>
+    <li><a href=""><b></b></a></li>
+    <li><a href=""><b></b></a></li>
+</ol>
+</body>
+ <!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

@@ -1,0 +1,11 @@
+@title Easy2Boot U 盘启动
+@date 2018-02-13
+
+Download and unzip the Easy2Boot file to a folder on your internal linux hard disk (rename .exe to .rar or .zip first - ensure no spaces in folder path) - use unrar, or 7Zip to extract the files if there are any problems (sudo apt-get install 7zip).
+Open a Terminal session at the \_ISO\docs\linux_utils folder (contains utilities and scripts)
+Use chmod to make the files in linux_utils executable (sudo chmod 777 *)
+Type ./fmt.sh  or ./fmt_ntfs.sh  (this requires the bash shell - if you are using the sh shell you will get errors - or try sudo bash ./fmt.sh)
+Note: be sure to select the correct partition such as sdb1 or you will get a 'MISSING MBR HELPER' error message when you boot!).
+
+
+Read more: http://www.easy2boot.com/make-an-easy2boot-usb-drive/make-using-linux/

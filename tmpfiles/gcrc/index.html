@@ -1,0 +1,188 @@
+<html>
+<head> </head>
+<body>
+    <p> <b>src:http://qiita.com/kusano_k/items/e264227b4de9298cfa40#introspective-crc</b></p>
+    <p>
+    GIF image https://shells.aachen.ccc.de/~spq/md5.gif is introduced in the problem
+    statement. MD5 hash of this image is displayed in this image!
+    </p>
+    <img src="./md5.gif" alt="">
+    <p>
+ Behavior of the specified server is as follows.
+    </p>
+    <pre>
+$ nc selfhash.ctfcompetition.com 1337
+Give me some data: a
+
+Check failed.
+Expected:
+    len(data) == 82
+Was:
+    1
+
+$ nc selfhash.ctfcompetition.com 1337
+Give me some data: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+Check failed.
+Expected:
+    set(data) <span class="Function">&lt;=</span><span class="String"> set(&quot;01&quot;)</span>
+<span class="Function">Was:</span>
+<span class="Function">    set([</span><span class="String">'a'</span><span class="Function">])</span>
+
+<span class="Function">$ nc selfhash.ctfcompetition.com 1337</span>
+<span class="Function">Give me some </span><span class="Type">data</span><span class="Function">: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000</span>
+
+<span class="Function">Check failed.</span>
+<span class="Function">Expected:</span>
+<span class="Function">    crc_82_darc(</span><span class="Type">data</span><span class="Function">) =</span><span class="String">=</span><span class="Function"> int(</span><span class="Type">data</span><span class="Function">, 2)</span>
+<span class="Function">Was:</span>
+<span class="Function">    1021102219365466010738322L</span>
+<span class="Function">    0</span>
+</pre>
+<p>
+ This problem requires me submit "Introspective CRC". crc_82_darc is CRC of width 82,
+ polynomial is 0x308c0111011401440411, input data is reflected byte-wise and output
+ data is reflected (not byte-wise).
+</p>
+<p>
+ At first, I feelt that this problem is SAT problem. So, I tried to solve using
+ Microsoft's SAT solver Z3
+</p>
+<pre id='vimCodeElement'>
+from z3 import *
+
+n = 82
+poly = 0x308c0111011401440411
+
+P = [poly<span class="Error">&gt;&gt;</span>(n-i-1)<span class="Error">&amp;</span>1 for i in range(n)]
+
+s = Solver()
+# data
+D = BoolVector(&quot;d&quot;, n*8)
+# CRC
+C = BoolVector(&quot;c&quot;, n*8+n)
+# xor poly
+X = BoolVector(&quot;x&quot;, n*8)
+
+for i in range(n*8+n):
+    T = Xor(D[i], X[i]) if i<span class="Function">&lt;</span>n<span class="Function">*8 else False</span>
+<span class="Function">    </span><span class="Type">for</span><span class="Function"> j in range(n):</span>
+<span class="Function">        if 0</span><span class="Error">&lt;</span><span class="Function">=</span><span class="String">i-j-1&lt;n*8</span><span class="Function"> and P[j]:</span>
+<span class="Function">            T =</span><span class="String"> Xor(T,</span><span class="Function"> X[i-j-1])</span>
+<span class="Function">    s.add(C[i] =</span><span class="String">=</span><span class="Function"> T)</span>
+
+<span class="Type">for</span><span class="Function"> i in range(n):</span>
+<span class="Function">    </span><span class="Type">for</span><span class="Function"> j in range(8):</span>
+<span class="Function">        s.add(C[i*8+j] =</span><span class="String">=</span><span class="Function"> False)</span>
+<span class="Function">    s.add(D[i*8] =</span><span class="String">=</span><span class="Function"> C[-i-1])</span>
+<span class="Function">    s.add(D[i*8+1] =</span><span class="String">=</span><span class="Function"> False)</span>
+<span class="Function">    s.add(D[i*8+2] =</span><span class="String">=</span><span class="Function"> False)</span>
+<span class="Function">    s.add(D[i*8+3] =</span><span class="String">=</span><span class="Function"> False)</span>
+<span class="Function">    s.add(D[i*8+4] =</span><span class="String">=</span><span class="Function"> True)</span>
+<span class="Function">    s.add(D[i*8+5] =</span><span class="String">=</span><span class="Function"> True)</span>
+<span class="Function">    s.add(D[i*8+6] =</span><span class="String">=</span><span class="Function"> False)</span>
+<span class="Function">    s.add(D[i*8+7] =</span><span class="String">=</span><span class="Function"> False)</span>
+
+<span class="Function">print s.check()</span>
+<span class="Function">m =</span><span class="String"> s.model()</span>
+<span class="Function">print </span><span class="String">&quot;D&quot;</span><span class="Function">, </span><span class="String">&quot;&quot;</span><span class="Function">.join(</span><span class="String">&quot;1&quot;</span><span class="Function"> if m[d] else </span><span class="String">&quot;0&quot;</span><span class="Function"> </span><span class="Type">for</span><span class="Function"> d in D)</span>
+<span class="Function">print </span><span class="String">&quot;C&quot;</span><span class="Function">, </span><span class="String">&quot;&quot;</span><span class="Function">.join(</span><span class="String">&quot;1&quot;</span><span class="Function"> if m[c] else </span><span class="String">&quot;0&quot;</span><span class="Function"> </span><span class="Type">for</span><span class="Function"> c in C)</span>
+<span class="Function">print </span><span class="String">&quot;X&quot;</span><span class="Function">, </span><span class="String">&quot;&quot;</span><span class="Function">.join(</span><span class="String">&quot;1&quot;</span><span class="Function"> if m[x] else </span><span class="String">&quot;0&quot;</span><span class="Function"> </span><span class="Type">for</span><span class="Function"> x in X)</span>
+<span class="Function">print </span><span class="String">&quot;answer&quot;</span><span class="Function">, </span><span class="String">&quot;&quot;</span><span class="Function">.join(</span><span class="String">&quot;1&quot;</span><span class="Function"> if m[D[i*8]] else </span><span class="String">&quot;0&quot;</span><span class="Function"> </span><span class="Type">for</span><span class="Function"> i in range(n))</span>
+</pre>
+<p>
+This code did not finish in several hours. Microsoft could not beat Google
+</p>
+<p>
+The assumed solution is linear algebra. Let us denote ii-th digit in CRC by xixi and calculate CRC of CRC.
+</p>
+
+<img src="./crc.gif" alt="">
+
+<p>
+ Finally, we get CRC represented by xixi. Since this CRC required to be equal to the
+ original CRC, they form simultaneous equations, which can be solved by a row
+ reduction method.
+</p>
+<pre>
+x0 = x0 ^      x2 ^ x3 ^ x4 ^ x5 ^ x6 ^           x9 ^ x10 ^ x11 ^      x13 ^...
+x1 = x0 ^      x2 ^           x5 ^      x7 ^      x9 ^      x11 ^ x12 ^      ...
+x2 =                x3 ^                x7 ^                     x12 ^       ...
+x3 = x0 ^ x1 ^ x2 ^ x3 ^      x5 ^ x6 ^                x10 ^ x11 ^ x12 ^     ...
+x4 = x0 ^                x4 ^ x5 ^           x8 ^      x10 ^           x13 ^ ...
+x5 = x0 ^ x1 ^      x3 ^ x4 ^      x6 ^ x7 ^      x9 ^ x10 ^ x11 ^ x12 ^ x13 ...
+x6 = x0 ^                x4 ^ x5 ^      x7 ^      x9 ^ x10 ^      x12 ^      ...
+x7 = x0 ^      x2 ^ x3 ^ x4 ^ x5 ^ x6 ^ x7 ^                x11 ^            ...
+x8 =      x1 ^           x4 ^ x5 ^ x6 ^                x10 ^ x11 ^ x12 ^     ...
+x9 =           x2 ^ x3 ^      x5 ^           x8 ^           x11 ^      x13 ^ ...
+x10 =                                                                  x13 ^ ...
+x11 =                                                                        ...
+x12 =                     x4 ^                     x9 ^                      ...
+x13 =      x1 ^                               x8 ^ x9 ^                      ...
+x14 =           x2 ^      x4 ^                                               ...
+x15 =                                                                  x13 ^ ...
+ :
+</pre>
+
+<p>My solution is</p>
+<pre>
+n = 82
+P = 0x308c0111011401440411
+
+# i-th bit is x_i, n-th bit is a constant
+D = [0]*(n*8+n)
+for i in range(n*8):
+    D[i] = [1<span class="Function">&lt;</span><span class="Error">&lt;</span><span class="Function">(i/8), 0, 0, 0, 1</span><span class="Error">&lt;</span><span class="Function">&lt;</span>n<span class="Function">, 1</span><span class="Error">&lt;</span><span class="Function">&lt;</span>n<span class="Function">, 0, 0][i%8]</span>
+
+<span class="Type">for</span><span class="Function"> i in range(n*8):</span>
+<span class="Function">    </span><span class="Type">for</span><span class="Function"> j in range(n):</span>
+<span class="Function">        if P&gt;</span><span class="Error">&gt;</span>(n-1-j)<span class="Error">&amp;</span>1:
+            D[i+j+1] ^= D[i]
+    D[i] = 0
+
+T = D[n*8:][::-1]
+for i in range(n):
+    T[i] ^= 1<span class="Function">&lt;</span><span class="Error">&lt;</span><span class="Function">i</span>
+<span class="Type">for</span><span class="Function"> i in range(n):</span>
+<span class="Function">    p =</span><span class="String"> i</span>
+<span class="Function">    while p</span><span class="Error">&lt;</span><span class="Function">n and not T[p]&gt;</span><span class="Error">&gt;</span>i<span class="Error">&amp;</span>1:
+        p += 1
+    if p==n:
+        continue
+    T[i],T[p] = T[p],T[i]
+    for j in range(n):
+        if j!=i and T[j]<span class="Error">&gt;&gt;</span>i<span class="Error">&amp;</span>1:
+            T[j] ^= T[i]
+for t in T:
+    print bin(t|1<span class="Function">&lt;</span><span class="Error">&lt;</span><span class="Function">(n+1))[-n-1:][::-1]</span>
+
+<span class="Function">ans = </span><span class="String">&quot;&quot;</span><span class="Function">.join(str(t&gt;</span><span class="Error">&gt;</span>n<span class="Error">&amp;</span>1) for t in T)
+print &quot;ans&quot;, ans
+</pre>
+<pre>
+10000000000000000000000000000000000000000000000000000000000000000000000000000000001
+01000000000000000000000000000000000000000000000000000000000000000000000000000000100
+00100000000000000000000000000000000000000000000000000000000000000000000000000000001
+00010000000000000000000000000000000000000000000000000000000000000000000000000000100
+00001000000000000000000000000000000000000000000000000000000000000000000000000000100
+00000100000000000000000000000000000000000000000000000000000000000000000000000000001
+  :
+00000000000000000000000000000000000000000000000000000000000000000000000000000001000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000010
+ans 1010010010111000110111101011101001101011011000010000100001011100101001001100000000
+</pre>
+<p>
+Second last line means that for x_80 both of '0' and '1' are acceptable.
+</p>
+<pre>
+$ nc selfhash.ctfcompetition.com 1337
+Give me some data: 1010010010111000110111101011101001101011011000010000100001011100101001001100000000
+
+CTF{i-hope-you-like-linear-algebra}
+</pre>
+<p>
+Answer: CTF{i-hope-you-like-linear-algebra}
+</p>
+</body>
+</html>

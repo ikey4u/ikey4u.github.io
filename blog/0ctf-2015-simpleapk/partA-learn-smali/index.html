@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title> 0ctf 2015 simple.apk </title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name"> Analysis of 0ctf 2015 simple.apk </h1>
+      <h2> partA-learn-smali </h2>
+      <h3 class="project-tagline">2017-05-08 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<hr/>
+<h3 class="text3d">背景 && 摘要</h3>
+<p>本文将主要分析 smali 语法,已经熟悉的朋友可以直接略过就好.
+可以直接查看第二篇: <a href="../partB-analysis-solib/">partB-analyze-solib</a></p>
+
+<h3 class="text3d">环境</h3>
+<p>
+1.Ubuntu 16.04 x64 Host + Windows 10 x64 VMware + IDA Pro 6.8 + Android Phone 4.2<br/>
+2.分析样本 <b class="term">simple.apk</b>:<a href="http://pan.baidu.com/s/1jGXeNOE" target="_blank">下载</a>.
+</p>
+<hr/>
+<body>
+<h3 class="titlebar">0x01.实践smali语法</h3>
+首先使用apktool反编译(命令:<b>apktool d simple.apk</b>):<br/>
+解析AndroidManifest.xml文件,确定主入口:<br/>
+<pre>
+cat simple/AndroidManifest.xml | grep -E "&lt;activity"
+&lt;activity android:label="@string/app_name" android:name="easyre.sjl.gossip.easyre.EasyRe" &gt;
+</pre>
+可以看到主启动activity为: easyre.sjl.gossip.easyre.EasyRe,因此我们首先考虑 easyre/sjl/gossip/easyre下的EasyRe.smali文件.<br/>
+当然看反编译出来的java代码更快捷一点,但是为了更好的理解smali语法,我这里迫使自己阅读smali文件,我会对其详细解析,smali内容逐步解释如下:<br/>
+<pre>
+.class public Leasyre/sjl/gossip/easyre/EasyRe;
+.super Landroid/support/v7/app/ActionBarActivity;
+.source "EasyRe.java"
+# interfaces
+.implements Landroid/view/View$OnClickListener;
+</pre>
+这几句很好理解了,就是<b>public class EasyRe  extends ActionBarActivity implements OnClickListener</b><br/>
+<pre>
+# instance fields
+.field bt1:Landroid/widget/Button;
+.field et1:Landroid/widget/EditText;
+.field iv1:Landroid/widget/ImageView;
+</pre>
+类字段定义,就是<b>Button bt1;EditText et1;ImageView iv1;</b><br/>
+先来大致看一下构造方法:<br/>
+<pre>
+# direct methods
+.method public constructor <init>()V
+    .locals 2
+    move-object v0, p0  # <b> move-object vx,vy是将对vy的引用移入到vx中去</b>
+    .local v0, "this":Leasyre/sjl/gossip/easyre/EasyRe;
+    move-object v1, v0
+    invoke-direct {v1}, Landroid/support/v7/app/ActionBarActivity;-><init>()V
+    return-void
+.end method
+</pre>
+方法调用,从constructor可以看出,这是类的构造方法,使用.locals指明有两个(v0和v1)局部变量,
+函数包括一个隐含参数p0(非静态方法中当仅有一个参数时该参数为this),然后调用了其父类中的初始化函数,我们不需要关注:<br/>
+<pre>
+public Easy(){return 0;}
+</pre>
+<p>我们知道android的activity的生命周期大致如下: </p>
+<pre>
+public class Activity extends ApplicationContext
+{
+     protected void onCreate(Bundle savedInstanceState);
+     protected void onStart();
+     protected void onRestart();
+     protected void onResume();
+     protected void onPause();
+     protected void onStop();
+     protected void onDestroy();
+ }
+</pre>
+即onCreate永远都是第一个执行的(相当于C语言中的main()函数,因此在具体查看其他函数之前我们需要先查看onCreate函数,
+遇到其他函数再具体深入查看理解,onCreate函数的代码如下()(删除了.prologue以及.line等对于我们无用的指令):<br/>
+<pre>
+#void protected onCreate(Bundle p1)
+.method protected onCreate(Landroid/os/Bundle;)V
+
+#5个局部变量
+    .locals 5
+
+#p0在非静态方法中为this,这里将指向EasyRe类的this指针存放入v0中
+    move-object v0, p0
+    .local v0, "this":Leasyre/sjl/gossip/easyre/EasyRe;
+
+#p1函数的参数,保存函数参数,存入v1中
+    move-object v1, p1
+    .local v1, "savedInstanceState":Landroid/os/Bundle;
+
+#声明参数”antidebug”,存入v2中
+    const-string v2, "antidebug"
+
+#库函数调用,参数放入花括号{}中:System->loadLibrary("antidebug")
+    invoke-static {v2}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
+
+#调用EasyRe类中的init函数(仅有一个隐式参数this):init()
+    move-object v2, v0
+    invoke-virtual {v2}, Leasyre/sjl/gossip/easyre/EasyRe;->init()V
+
+#将v0放入v2,v1放入v3,然后v2,v3作为参数调用EasyRe父类中的onCreate()函数
+#v0此时是this指针,v1是EasyRe中onCreate的参数
+#也就是说 {v2,v3} v2 表示 this,而 v3 则表示函数的参数p1.
+#this.super.onCreate(p1)
+    move-object v2, v0
+    move-object v3, v1
+    invoke-super {v2, v3}, Landroid/support/v7/app/ActionBarActivity;->onCreate(Landroid/os/Bundle;)V
+
+#v0仍然是this指针,后序不再赘述了,移入v3的是一个资源ID,我们可以在反编译的根目录下通过执行如下命令:
+#grep -Eir "0x7f030017"
+#输出:simple/res/values/public.xml:    &lt;public type="layout" name="activity_easy_re" id="0x7f030017" /&gt;
+#可知:ID为 0x7f030017的资源实际上是一个布局文件(layout),其名字为 activity_easy_re
+#对应的文件位置为:res/layout/activity_easy_re.xml
+# <b>v2.setContentView(v3) == this.setContentView(R.layout.activity_easy_re)</b>
+    move-object v2, v0
+    const v3, 0x7f030017
+    invoke-virtual {v2, v3}, Leasyre/sjl/gossip/easyre/EasyRe;->setContentView(I)V
+
+#v4作为参数传入 findViewById函数,v4是值0x7f09003f,使用grep来查找: grep -Eir “0x7f09003f”
+#可知名称为button,因此为findViewById(R.id.button)
+#返回值先存放在v3中,然后进行类型转换(转换为Button类型)
+#接下来将转换后的对象v3放入v2的引用实例(即this),this引用的实例为input-object指令的最后一个参数(这里即为Button bt1)
+# <b> v3 = v3->findViewById(v4)</b>
+# <b> v3 = (Button) v3</b>
+# <b> v2->bt1 = v3</b>
+# 总体来说就是:<b> this.bt1=(Button)findViewById(R.id.button) </b>
+    move-object v2, v0
+    move-object v3, v0
+    const v4, 0x7f09003f
+    invoke-virtual {v3, v4}, Leasyre/sjl/gossip/easyre/EasyRe;->findViewById(I)Landroid/view/View;
+    move-result-object v3
+    check-cast v3, Landroid/widget/Button;
+    iput-object v3, v2, Leasyre/sjl/gossip/easyre/EasyRe;->bt1:Landroid/widget/Button;
+
+#与上面分析类似
+#<b>this.iv1=(ImageView)findViewById(R.id.imageView)</b>
+    move-object v2, v0
+    move-object v3, v0
+    const v4, 0x7f090040
+    invoke-virtual {v3, v4}, Leasyre/sjl/gossip/easyre/EasyRe;->findViewById(I)Landroid/view/View;
+    move-result-object v3
+    check-cast v3, Landroid/widget/ImageView;
+    iput-object v3, v2, Leasyre/sjl/gossip/easyre/EasyRe;->iv1:Landroid/widget/ImageView;
+
+# <b>this.et1=(EditText)findViedById(R.id.editText)</b>
+    move-object v2, v0
+    move-object v3, v0
+    const v4, 0x7f090041
+    invoke-virtual {v3, v4}, Leasyre/sjl/gossip/easyre/EasyRe;->findViewById(I)Landroid/view/View;
+    move-result-object v3
+    check-cast v3, Landroid/widget/EditText;
+    iput-object v3, v2, Leasyre/sjl/gossip/easyre/EasyRe;->et1:Landroid/widget/EditText;
+
+#取得this.bt1的引用
+    move-object v2, v0
+    iget-object v2, v2, Leasyre/sjl/gossip/easyre/EasyRe;->bt1:Landroid/widget/Button;
+
+#我们知道非静态函数参数列表的第一个参数为this,也就是调用对象,这里v2为this.bt1,即调用方法的调用对象为this.bt1
+#实际向函数传递的参数为v3,我们可以看到v3实际上为this
+# <b>this.bt1.setOnClickListener(this)</b>
+    move-object v3, v0
+    invoke-virtual {v2, v3}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+# <b>return 0;</b>
+    return-void
+.end method
+</pre>
+因而实际上,onCreate的源码就出来了,如下:<br/>
+<pre>
+void protected onCreate(Bundle p1)
+{
+    System->loadLibrary("antidebug")
+    init()
+    super.onCreate(p1)
+    setContentView(R.layout.activity_easy_re)
+    this.bt1=(Button)findViewById(R.id.button)
+    this.iv1=(ImageView)findViewById(R.id.imageView)
+    this.et1=(EditText)findViedById(R.id.editText)
+    this.bt1.setOnClickListener(this)
+    return 0;
+}
+</pre>
+启动onCreate之后,将会加载库libantidebug.so,然后启动init()函数,初始化Activity界面并获取界面上的句柄,然后绑定按钮的监听器(onClick).<br/>
+我们暂且先跳过加载的库libantidebug.so,先来分析一下init()函数.<br/>
+接下来是自定义的init()方法,从方法名大致可以推出,该方法用于初始化:<br/>
+<pre>
+#public void init()
+# virtual methods
+.method public init()V
+    .locals 9
+
+#this指针初始化
+    move-object v0, p0
+    .local v0, "this":Leasyre/sjl/gossip/easyre/EasyRe;
+
+#常量值flag.txt的定义:
+# <b>const string filename = "flag.txt"</b>
+    const-string v6, "flag.txt"
+    move-object v1, v6
+    .local v1, "filename":Ljava/lang/String;
+
+# <b>v6 = v6->getResources()</b>
+# 即:<b>v6=this->getResources() </b>
+    move-object v6, v0
+    :try_start_0
+    invoke-virtual {v6}, Leasyre/sjl/gossip/easyre/EasyRe;->getResources()Landroid/content/res/Resources;
+    move-result-object v6
+
+# <b>InputStream fin=v6->openRawResource(R.id.flag)</b>,0x7f050000使用grep可以查看得知为raw目录下的flag.txt文件
+    const/high16 v7, 0x7f050000
+    invoke-virtual {v6, v7}, Landroid/content/res/Resources;->openRawResource(I)Ljava/io/InputStream;
+    move-result-object v6
+    move-object v2, v6
+    .local v2, "fin":Ljava/io/InputStream;
+    move-object v6, v2
+#上面合起来就是：InputStream fin = this.getResources().openRawResource("flag.txt")
+
+
+#这里v6就是fin,因此下面的汇编码是用来检测可以向输入流读取的字节数,并将该值放入局部变量length中,然后创建字节数组
+# <b>int length=fin.available();Byte[] buffer=new Byte[length];</b>
+    invoke-virtual {v6}, Ljava/io/InputStream;->available()I
+    move-result v6
+    move v3, v6
+    .local v3, "length":I
+    move v6, v3
+    #注意:new-array vx,vy,type_id 表示生成一个数组 type_id vx[vy];
+    new-array v6, v6, [B
+    move-object v4, v6
+    .local v4, "buffer":[B
+
+#v2这时候为fin,v4为声明的数组引用buffer,接着调用read函数,其参数为数组buffer,因此读取数据到数组buffer中
+# <b>fin.read(buffer)</b>
+    move-object v6, v2
+    move-object v7, v4
+    invoke-virtual {v6, v7}, Ljava/io/InputStream;->read([B)I
+    move-result v6
+
+#这里v1为filename,v8为常量0,调用openFileOutputStream(String fname,int mode),返回对象赋予fout
+# <b>FileOutputStream fout = openFileOutputStream(filename,0)</b> ,filename实际上就是flag.txt
+    move-object v6, v0
+    move-object v7, v1
+    const/4 v8, 0x0
+    invoke-virtual {v6, v7, v8}, Leasyre/sjl/gossip/easyre/EasyRe;->openFileOutput(Ljava/lang/String;I)Ljava/io/FileOutputStream;
+    move-result-object v6
+    move-object v5, v6
+    .local v5, "fout":Ljava/io/FileOutputStream;
+
+#上面以v5引用输出流fout,v4这里是buffer
+# <b>fout.write(buffer)</b>
+    move-object v6, v5
+    move-object v7, v4
+    invoke-virtual {v6, v7}, Ljava/io/FileOutputStream;->write([B)V
+
+#v2这里为fin, <b>fin.close()</b>
+    move-object v6, v2
+    invoke-virtual {v6}, Ljava/io/InputStream;->close()V
+
+#v5这里为fout, <b>fout.close()</b>
+    move-object v6, v5
+    invoke-virtual {v6}, Ljava/io/FileOutputStream;->close()V
+    :try_end_0
+
+#异常处理分支
+    .catch Ljava/io/IOException; {:try_start_0 .. :try_end_0} :catch_0
+
+#局部变量范围结束边界
+    .end local v2    # "fin":Ljava/io/InputStream;
+    .end local v3    # "length":I
+    .end local v4    # "buffer":[B
+    .end local v5    # "fout":Ljava/io/FileOutputStream;
+    :goto_0
+    return-void
+
+#异常处理代码,printStackTrace()
+    :catch_0
+    move-exception v6
+    move-object v2, v6
+    .local v2, "e":Ljava/io/IOException;
+    move-object v6, v2
+    invoke-virtual {v6}, Ljava/io/IOException;->printStackTrace()V
+    goto :goto_0
+.end method
+</pre>
+所以以上代码反编译之后就是:<br/>
+<pre >
+public void init()
+{
+    const string filename = "flag.txt"
+    try
+    {
+        InputStream fin = this.getResources().openRawResource("flag.txt")
+        int length=fin.available();Byte[] buffer=new Byte[length];
+        fin.read(buffer)
+        FileOutputStream fout = openFileOutputStream(filename,0)
+        fout.write(buffer)
+        fin.close()
+        fout.close()
+    }
+    catch xxx
+    {
+        printStackTrace()
+    }
+}
+</pre>
+可以看出这个init()函数打开flag.txt,然后读到缓冲区,然后又打开flag.txt,再将缓冲区中的内容写到flag.txt中(模式默认为0,
+写入操作将会覆盖原文内容,而写入的内容正好为从原文件读入的内容).<br/>
+嗯.它在玩我们.<br/>
+接下来看看主要看看点击按钮后所触发的事件了:<br/>
+<pre>
+#public void onClick(View p1)
+.method public onClick(Landroid/view/View;)V
+    .locals 10
+#初始化this
+    move-object v0, p0
+    .local v0, "this":Leasyre/sjl/gossip/easyre/EasyRe;
+
+# <b>View v = p1</b>
+    move-object v1, p1
+    .local v1, "v":Landroid/view/View;
+
+# <b>const String filaName="flag.txt"</b>
+    const-string v7, "flag.txt"
+    move-object v2, v7
+    .local v2, "fileName":Ljava/lang/String;
+
+# <b>const String flag=""</b>
+    const-string v7, ""
+    move-object v3, v7
+    .local v3, "flag":Ljava/lang/String;
+
+# <b>FileInputStream fin = this.openFileInput("flag.txt")</b>
+    move-object v7, v0
+    move-object v8, v2
+    :try_start_0
+    invoke-virtual {v7, v8}, Leasyre/sjl/gossip/easyre/EasyRe;->openFileInput(Ljava/lang/String;)Ljava/io/FileInputStream;
+    move-result-object v7
+    move-object v4, v7
+    .local v4, "fin":Ljava/io/FileInputStream;
+
+# <b>int length=fin.avaible()</b>
+    move-object v7, v4
+    invoke-virtual {v7}, Ljava/io/FileInputStream;->available()I
+    move-result v7
+    move v5, v7
+    .local v5, "length":I
+
+# <b>Byte[] buffer = new Byte[length]</b>
+    move v7, v5
+    new-array v7, v7, [B
+    move-object v6, v7
+    .local v6, "buffer":[B
+
+#v4为fin,v6为buffer
+# <b>fin.read(buffer)</b>
+    move-object v7, v4
+    move-object v8, v6
+    invoke-virtual {v7, v8}, Ljava/io/FileInputStream;->read([B)I
+    move-result v7
+
+#v6为buffer,注意静态方法调用时{}内的参数均为显式参数,这里调用了一个静态方法,没有this参数
+# <b>getString(buffer,"UTF-8")</b>
+    move-object v7, v6
+    const-string v8, "UTF-8"
+    invoke-static {v7, v8}, Lorg/apache/http/util/EncodingUtils;->getString([BLjava/lang/String;)Ljava/lang/String;
+    :try_end_0
+
+#异常跳转语句
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    move-result-object v7
+    move-object v3, v7
+    .end local v4    # "fin":Ljava/io/FileInputStream;
+    .end local v5    # "length":I
+    .end local v6    # "buffer":[B
+    :goto_0
+
+#这里v3的值为getString的结果,也就是flag.txt中的内容,v0为this
+#通过this.et1.getText().toString()获取输入编辑框的字符串
+    move-object v7, v3
+    move-object v8, v0
+    iget-object v8, v8, Leasyre/sjl/gossip/easyre/EasyRe;->et1:Landroid/widget/EditText;
+    invoke-virtual {v8}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
+    move-result-object v8
+    invoke-virtual {v8}, Ljava/lang/Object;->toString()Ljava/lang/String;
+    move-result-object v8
+
+#编辑框的字符串放在v8中,v7为flag.txt中的内容
+#也就是将编辑输入框中的内容和flag.txt中的内容进行比较
+# <b>if(getString(buffer,"UTF-8").equals(et1.getText().toString))</b>
+    invoke-virtual {v7, v8}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v7
+
+#如果相等, <b>Toast.makeText(this.getApplicationContext(),"That\'s the flag!",0).show()</b>,如果不等,则跳转到cond_0
+    if-eqz v7, :cond_0
+    move-object v7, v0
+    invoke-virtual {v7}, Leasyre/sjl/gossip/easyre/EasyRe;->getApplicationContext()Landroid/content/Context;
+    move-result-object v7
+    const-string v8, "That\'s the flag!"
+    const/4 v9, 0x0
+    invoke-static {v7, v8, v9}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v7
+    invoke-virtual {v7}, Landroid/widget/Toast;->show()V
+
+#结束
+    :goto_1
+    return-void
+
+#catch分支,打印异常回溯栈printStackTrace()
+    :catch_0
+    move-exception v7
+    move-object v4, v7
+    .local v4, "e":Ljava/lang/Exception;
+    move-object v7, v4
+    invoke-virtual {v7}, Ljava/lang/Exception;->printStackTrace()V
+    goto :goto_0
+    .end local v4    # "e":Ljava/lang/Exception;
+
+#如果不相等
+# <b>Toast.makeText(this.getApplicationContext(),"0ops!That\'s wrong!",0).show()</b>
+    :cond_0
+    move-object v7, v0
+    invoke-virtual {v7}, Leasyre/sjl/gossip/easyre/EasyRe;->getApplicationContext()Landroid/content/Context;
+    move-result-object v7
+    const-string v8, "0ops!That\'s wrong!"
+    const/4 v9, 0x0
+    invoke-static {v7, v8, v9}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v7
+    invoke-virtual {v7}, Landroid/widget/Toast;->show()V
+    goto :goto_1
+.end method
+</pre>
+因此上述代码源码即为:<br/>
+<pre>
+public void onClick(View p1)
+{
+    View v = p1
+    const String filaName="flag.txt"
+    const String flag=""
+    try
+    {
+        FileInputStream fin = this.openFileInput("flag.txt")
+        int length=fin.avaible()
+        Byte[] buffer = new Byte[length]
+        fin.read(buffer)
+    if(getString(buffer,"UTF-8").equals(et1.getText().toString))
+    {
+        Toast.makeText(this.getApplicationContext(),"That\'s the flag!",0).show()
+    }
+    else
+    {
+        Toast.makeText(this.getApplicationContext(),"0ops!That\'s wrong!",0).show()
+    }
+    }catch
+    {
+        printStackTrace()
+    }
+}
+</pre>
+这个便是点击button按钮后所触发的代码,代码就是简单的比较了flag.txt中的内容和文本编辑框中的输入内容,如果正确则提示That's the flag!否则将会提示That's wrong!<br/>
+剩下还有onCreateOptionsMenu和onOptionsItemSelected,这些都没有什么用,不用追究.<br/>
+因此整体来看,主要的核心源码如下:<br/>
+<pre>
+void protected onCreate(Bundle p1)
+{
+    System->loadLibrary("antidebug")
+    init()
+    super.onCreate(p1)
+    setContentView(R.layout.activity_easy_re)
+    this.bt1=(Button)findViewById(R.id.button)
+    this.iv1=(ImageView)findViewById(R.id.imageView)
+    this.et1=(EditText)findViedById(R.id.editText)
+    this.bt1.setOnClickListener(this)
+    return 0;
+}
+public void init()
+{
+    const string filename = "flag.txt"
+    try
+    {
+        InputStream fin = this.getResources().openRawResource("flag.txt")
+        int length=fin.available();Byte[] buffer=new Byte[length];
+        fin.read(buffer)
+        FileOutputStream fout = openFileOutputStream(filename,0)
+        fout.write(buffer)
+        fin.close()
+        fout.close()
+    }catch
+    {
+        printStackTrace()
+    }
+}
+public void onClick(View p1)
+{
+    View v = p1
+    const String filaName="flag.txt"
+    const String flag=""
+    try
+    {
+        FileInputStream fin = this.openFileInput("flag.txt")
+        int length=fin.avaible()
+        Byte[] buffer = new Byte[length]
+        fin.read(buffer)
+    if(getString(buffer,"UTF-8").equals(et1.getText().toString))
+    {
+        Toast.makeText(this.getApplicationContext(),"That\'s the flag!",0).show()
+    }
+    else
+    {
+        Toast.makeText(this.getApplicationContext(),"0ops!That\'s wrong!",0).show()
+    }
+    }catch
+    {
+        printStackTrace()
+    }
+}
+</pre>
+
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Find me by <a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>   <b>or</b> <a href="http://weibo.com/u/5293648175/home" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>
+
+
+

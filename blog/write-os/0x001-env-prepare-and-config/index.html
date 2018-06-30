@@ -1,0 +1,172 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>环境搭建与配置</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>操作系统编写-0x001.环境搭建与配置|bugnofree|2016-01-31 Sun 07:37 PM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/> <br/>
+操作环境:Ubuntu 14.04 x64
+<hr/>
+<h3 class="titlebar">1.编译安装Bochs和Nasm</h3>
+<h4 class="subtitle">0x01.编译安装Bochs</h4>
+首先下载安装Bochs:<br/>
+首页地址:http://bochs.sourceforge.net/,下载地址:http://sourceforge.net/projects/bochs/files/bochs/2.6.8/<br/>
+写此文章时最新版本位2.6.8,我们选择从源码编译(以启用调试功能).<br/>
+安装依赖项:<br/>
+<pre>
+apt-get install build-essential g++ 
+apt-get install libx11-dev libxrandr-dev libgtk2.0-dev 
+apt-get install xorg-dev bison  vgabios bximage
+</pre>
+我下载的源码为:bochs-2.6.8.tar.gz,解压并进入源码目录:<br/>
+<pre>
+tar -zxvf bochs-2.6.8.tar.gz 
+cd bochs-2.6.8
+</pre>
+配置编译选项:可以使用 ./configure --help来查看帮助.我的配置选项如下:<br/>
+<pre>
+./configure \
+--enable-debugger \
+--enable-disasm \
+--enable-x86-64 \
+--enable-smp \
+--with-all-libs \
+--enable-x86-debugger \
+--enable-ltdl-install \
+--enable-idle-hack \
+--enable-debugger-gui \
+--enable-all-optimizations \
+--enable-pcidev \
+--enable-repeat-speedups \
+--enable-fast-function-calls \
+--enable-handlers-chaining \
+--enable-trace-linking \
+--enable-iodebug \
+--enable-usb \
+--enable-usb-ohci \
+--enable-usb-xhci
+</pre>
+最后进行编译并安装(注意不要作死启用--enable-plugins,否则死活启动不起来):
+<pre>
+make && make install
+</pre>
+默认安装的位置位于/usr/local/share/bochs/,样例配置文件(bochsrc-sample.txt)位于/usr/local/share/doc/bochs/
+安装完成后,设置环境变量,打开/etc/profile,再最后面加入bochs的路径(默认编译安装的路径即为/usr/local/share/bochs):
+<pre>
+export BXSHARE=/usr/local/share/bochs
+</pre>
+然后在命令行中使用<b>[. /etc/profile]</b>启用即可.
+我们将以bochsrc-sample.txt为模板参照来制作bochsrc配置文件.我的配置文件如下:<br/>
+<pre>
+#内存分配为128MB
+megs: 128
+#ROM镜像文件名称,需要设置环境变量BXSHARE
+romimage: file=$BXSHARE/BIOS-bochs-latest
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+# 磁盘镜像
+floppya: 1_44=os.img,status=inserted
+# 引导介质
+boot: floppy
+#日志信息,将会再工作目录下生成bochslog.txt文件
+log: bochs.log
+#启用鼠标
+mouse: enabled=1
+#键盘设置
+keyboard: type=mf, serial_delay=250
+</pre>
+其中磁盘镜像是os.img,我们稍后将会进行编译.其他的都不需要做修改.将上述配置文件保存为bochsrc文件到工作目录即可.
+<h4 class="subtitle">0x02.编译安装nasm</h4>
+官方网站:http://www.nasm.us/,下载地址:http://www.nasm.us/pub/nasm/releasebuilds/<br/>
+选择最新版本(写此文章时最新稳定版本为2.11.08),直接下载:wget http://www.nasm.us/pub/nasm/releasebuilds/2.11.08/nasm-2.11.08.tar.gz,执行如下命令进行编译安装:
+<pre>
+tar -zxvf nasm-2.11.08.tar.gz
+cd nasm-2.11.08
+./configure
+make 
+make install
+</pre>
+<h3 class="titlebar">2.编译并运行OS</h3>
+os源码如下:
+<pre>
+    org 07c00h
+    mov ax,cs
+    mov ds,ax
+    mov es,ax
+    call DispStr
+    jmp $
+DispStr:
+    mov ax,BootMessage
+    mov bp,ax
+    mov cx,16
+    mov ax,01301h
+    mov bx,000ch
+    mov dl,0
+    int 10h
+    ret
+BootMessage: db "Hello, OS world!"
+times 510-($-$$) db 0
+dw 0xaa55
+</pre>
+然后我们来编译系统并刻录系统:
+<pre>
+#编译源码
+nasm os.asm -o os.bin
+#制作1.44M的空白软盘
+dd if=/dev/zero of=os.img bs=512 count=2880
+#将系统刻录到软盘上
+dd if=os.bin of=os.img bs=512 count=1 conv=notrunc
+</pre>
+接下来再工作目录输入命令:<b>bochs</b>即可启动,如下图所示:<br/>
+<br/><img src="0x01.png"></img><br/>
+我们选择6,将会启动模拟,如下图:<br/>
+<br/><img src="0x02.png" width="98%"></img><br/>
+显示是一个黑框,这是因为我们编译的Bochs具有调试功能,在系统启动时给断了下来,只需要在控制台输入<b>c</b>,然后按下回车即可正常运行,运行界面如下:<br/>
+<br/><img src="0x03.png" width="98%"></img><br/>
+哈哈,我们的第一个迷你OS便是编译并成功运行了,除了使用Bochs,我们当然也可以使其运行在其他虚拟机下面,我已VirtualBox为例(其安装从略):<br/>
+打开VBox后,选择新建虚拟机,第一步中的Type选项Other,Version选择Other/Unknown.如下图:<br/>
+<br/><img src="0x04.png"></img><br/>
+然后依次Next..Next...你懂得.....最后我们来到如下界面:<br/>
+<br/><img src="0x05.png"></img><br/>
+如下图所示删除默认的IDE控制器(绿色减号图标):<br/>
+<br/><img src="0x06.png"></img><br/>
+然后新添加Floppy(绿色加号)并选择添加我们的os.img,如下图:<br/>
+<br/><img src="0x07.png"></img><br/>
+最后回到VBox主界面点击Start,稍等片刻就可以启动了,如下图:<br/>
+<br/><img src="0x08.png"></img><br/>
+</body>
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>vim字体设置</title>
+<style>
+/** 设置pre标签元素为4个圆角且能够自动换行 **/
+pre{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+/** 设置图片居中显示 **/
+img{
+display: block;
+margin-left: auto;
+margin-right: auto 
+}
+/** 背景色渐变,兼容Chrome,IE,Firefox,Opera,Safari **/
+html{
+background: -webkit-gradient(linear,0 0, 0 100%, from(rgba(250,250,250,1)), to(rgba(210,210,210,1))); /** Chrome Safari **/
+background: -moz-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1)); /** FireFox **/
+background: -o-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1));  /** Opera **/
+background: -ms-linear-gradient(rgba(250,250,250,1) 0%,rgba(210,210,210,1) 100%);  /** IE9 IE10 **/
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE8 **/
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE7 **/
+padding:10px;
+line-height: 32px;　　　          　/* 设定文字行距 */
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+</head>
+<body>
+    <h1 style="text-align:center">vim字体设置</h1>
+    <p style="font-size:14px;text-align:center"><a href="http://www.ahageek.com">www.ahageek.com</a></p>
+    一直使用gvim写东西,然而很长的一段时间里都是使用gvim默认提供的字体.着实难看,但是由于曾经探索很久都无法解决在gvim中设置很漂亮的字体,没有办法遂将就这用到今天.<br/>
+    我的意思就是说,TMD从今天起再也不用将就gvim的蹩脚字体了.<br/>
+    曾经在网上寻觅许久,很多人对于vim中字体的设置都是类似于<b/>set guifont=Yahei_Consolas_Hybrid:h11</b>,然而在我设置之后就变成了这个样子:<br/>
+    <img width=99% src="0x01.png">
+    这种画面惹人醉.都神马玩意儿...默默的换回默认字体了...<br/>
+    今天突发奇想,gvim不是提供GUI界面嘛,那我就通过GUI菜单设置然后再看看字体配置是什么,再将其加入到.vimrc不就可以了吗?也正是通过这种方法解决了字体问题.<br/>
+    首先调出gvim的菜单,依次Edit-&gt;Select font...,弹出如下菜单:<br/>
+    <img src="0x01-01.png">
+    选择你喜爱的字体,比如这里我选择Yahei Consolas Hybrid,大小为11号,点击OK,这个时候回到了vim的编辑界面,在命令行里输入<b>:set guifont</b>,然后自动会显示当前的字体设置如下:<br/>
+    <img src="0x01-02.png">
+    就是这个,然后直接放到.vimrc文件中,不过有一个问题需要注意,其中的空格需要用反斜线来转移,就像这样<b>set guifont=YaHei\ Consolas\ Hybrid\ 10</b> 
+    重新用vim打开一个文本文件吧,和第一幅图对比一下,这是修改后的效果:<br/>
+    <img src="0x02.png" width=99%>
+    <p style="text-align:right">By KillerLegend 2015.09.04</p>
+</body>
+</html>

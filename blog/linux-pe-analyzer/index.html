@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Linux下的PE文件分析工具</title>
+<style>
+/** 设置pre标签元素为4个圆角且能够自动换行 **/
+pre.cornor{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+pre
+{
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 2px solid;
+    padding: 10px;
+    line-height: 20px;　　　          　/* 设定文字行距 */
+}
+/** 设置图片居中显示 **/
+img{
+display: block;
+margin-left: auto;
+margin-right: auto 
+}
+/** 背景色渐变,兼容Chrome,IE,Firefox,Opera,Safari **/
+html{
+background: -webkit-gradient(linear,0 0, 0 100%, from(rgba(250,250,250,1)), to(rgba(210,210,210,1))); /** Chrome Safari **/
+background: -moz-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1)); /** FireFox **/
+background: -o-linear-gradient(top, rgba(250,250,250,1), rgba(210,210,210,1));  /** Opera **/
+background: -ms-linear-gradient(rgba(250,250,250,1) 0%,rgba(210,210,210,1) 100%);  /** IE9 IE10 **/
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE8 **/
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='rgba(250,250,250,1)',endColorstr='rgba(210,210,210,1)',grandientType=1); /** IE7 **/
+padding:10px;
+line-height: 32px;　　　          　/* 设定文字行距 */
+}
+
+a{
+    text-decoration:none;
+}
+</style>
+</head>
+<body>
+    <h1 style="text-align:center">Linux下的PE文件分析工具</h1>
+    <p style="font-size:14px;text-align:center"><a href="http://www.ahageek.com">www.ahageek.com</a></p>
+    <p>
+    <a href="http://pev.sourceforge.net/">pev</a>是Linux,Windows,Mac OS下一款分析Windows平台上PE文件的套件.包含的工具如下:
+    <pre class="cornor">
+
+            readpe   :读取PE信息,比如导入导出表.
+            pehash   :查看程序的整体,全部或某个节区的md5,sha1,ssdeep,支持的HASH算法包括:
+                      md4, md5, ripemd160, sha, sha1, sha224, sha256 sha384, sha512, whirlpool,ssdeep
+            peres    :对程序的资源进行处理,查看提取等,很有用.
+            --------------------------------------------------------------------------------------------------------
+            pedis    :反汇编程序,可以指定从某个地址开始.
+            pesec    :检测ASLR,DEP/NX,SEH,Stack cookies (EXPERIMENTAL).
+            pestr    :查看程序中的字符串,类似于windows下的Strins程序.
+            --------------------------------------------------------------------------------------------------------
+            pescan   :扫描程序的一些关键信息是否正常,通常可以用于预先判断程序是否有恶意意图.
+            ofs2rva  :将指定文件偏移值(offset)转换为相对虚拟地址(RVA).其中ofs=offset,rva=relative virtual address.
+            rva2ofs  :与rva2ofs功能相反.
+            pepack   :查看程序的打包工具.
+            --------------------------------------------------------------------------------------------------------
+            cpload   :处理cpl文件,即控制面板程序,官方文档中介绍含有此组件.但很不幸的是,此文件似乎并不存在.
+    </pre>
+    <h2>1.安装</h2>
+    >>>下载地址:<a href="http://sourceforge.net/projects/pev/files/pev-0.70/">http://sourceforge.net/projects/pev/files/pev-0.70/</a><br/>
+    >>>Linux下Debian系列,比如Ubuntu,的安装方法是下载.deb安装包,然后使用dpkg -i xx.deb即可完成安装.<br/>
+    >>>Windows下下载zip压缩包,然后解压缩就可以了.<br/>
+    <h2>2.组件介绍</h2>
+    由于工具使用非常简单,这里只简要的给出前三个工具的用法以及用法示例截图,具体的用法都可以通过xxx --help来获取帮助.
+        <h3>1.readpe</h3>
+        <pre>
+Usage: readpe OPTIONS FILE
+Show PE file headers
+
+Example: readpe --header optional winzip.exe
+
+Options:
+ -A, --all                              full output (default)
+ -H, --all-headers                      print all PE headers
+ -S, --all-sections                     print all PE sections headers
+ -f, --format &lt;text|csv|xml|html&gt;       change output format (default: text)
+ -d, --dirs                             show data directories
+ -h, --header &lt;dos|coff|optional&gt;       show specific header
+ -i, --imports                          show imported functions
+ -e, --exports                          show exported functions
+ -v, --version                          show version and exit
+ --help                                 show this help and exit
+        </pre>
+        <img src="0x01.png">
+        <center><b>读取DOS头信息+显示数据目录</b></center>
+        <h3>2.pehash</h3>
+        <pre>
+Usage: pehash OPTIONS FILE
+Calculate hashes of PE pieces
+
+Example: pehash -s '.text' winzip.exe
+
+Options:
+ -f, --format &lt;text|csv|xml|html&gt;    change output format (default: text)
+ -a, --algorithm &lt;algorithm&gt;         generate hash using one of the following algorithms:
+                                       md4, md5, ripemd160, sha, sha1, sha224, sha256
+                                       sha384, sha512, whirlpool or ssdeep
+
+ -h, --header &lt;dos|coff|optional&gt;    hash only the header with the specified name
+ -s, --section &lt;section_name&gt;        hash only the section with the specified name
+ --section-index &lt;section_index&gt;     hash only the section at the specified index (1..n)
+ -v, --version                       show version and exit
+ --help                              show this help and exit
+        </pre>
+        <img src="0x02.png">
+        <center><b>计算整体以及各个节区的md5,sha1和ssdeep</b></center>
+        <img src="0x03.png">
+        <center><b>以html的形式输出结果.text节区的信息+采用whirlpool算法计算索引为3的节区的HASH+计算DOS头信息</b></center>
+        <h3>3.peres</h3>
+        <pre>
+Usage: peres OPTIONS FILE
+Show information about resource section and extract it
+
+Example: peres -a putty.exe
+
+Options:
+ -a, --all                              Show all information, statistics and extract resources
+ -x, --extract                          Extract resources
+ -i, --info                             Show informations
+ -s, --statistics                       Show statistics
+ -v, --version                          Show version and exit
+ --help                                 Show this help and exit
+        </pre>
+        <img src="0x04.png">
+        <center><b>显示统计信息+提取资源</b></center>
+<p>文件(Ubuntu以及Windows安装文件)备份下载地址:<a href="http://pan.baidu.com/s/1ntsyUfR">http://pan.baidu.com/s/1ntsyUfR</a>
+<br/>
+    </p>
+    <p style="text-align:right">By KillerLegend</p>
+</body>
+</html>

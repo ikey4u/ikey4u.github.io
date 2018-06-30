@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>SHACTF-2017</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">SHACTF-2017</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2017-08-12 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<h3 class="text3d">Background && Abstract</h3>
+<p>Some writeups for SHACTF-2017 just for the purpose of learing.
+You could download the attachment from
+<a href="https://github.com/ikey4u/BlogStuffs/tree/master/blog/shactf-2017">here</a>.
+</p>
+
+<h3 class="text3d">Environment</h3>
+<p>Host:Ubuntu 16.04 x64<br/>
+Virtual Machine:Virtual Box / Ubuntu 16.04 Server / Kali Linux installed in Virtual Box<br/>
+Tools: GDB/IDA Pro 6.8</p>
+<hr/>
+<!--正文-->
+<h1 class="titlebar">Binary asby (100)</h1>
+<p style="color:blueviolet"> <i> Eindbazen team member asby has by far been putting the most energy and time in
+creating the SHA2017 CTF. To honor his dedication and all his effort we created this
+challenge as an ode to him.  You can choose to reverse engineer this challenge or you
+can "asby" it. Good luck with the option you choose.  </i> </p>
+
+<p>Download the attachment asby.tgz and uncompress it we get a win32 application
+named asby.exe.I throw it into the powerful IDA disassmebler and begin to analyze it.
+</p>
+<h2>Dynamic Analysis</h2>
+<p>In general,dynamic analysis will help us get the flag quickly.
+Here,let we run the program firstly:</p>
+<img src="./images/asby-run.png" alt="">
+<center>Running The Asby</center>
+<p>As the image showed above,some interesting strings show up! Press shift+F12 in
+IDA to open Strings Windows,then we find those strings in IDA,showed as following image: </p>
+<img src="./images/asby-str.png" alt="">
+<center>Asby Strings</center>
+<p>We could locate where the string 'WRONG' is used through the crossed reference supplied
+by IDA,then we are guided to here:</p>
+
+<img src="./images/asby-wrongcorrect.png" alt="">
+<center>Asby Wrong Correct</center>
+
+<p>Then we know here is the key location where the program will check if we have
+got the right char.For quickly understanding the codes,we could press F5
+to open the pseudocode window:</p>
+
+<img src="./images/asby-pseudocode.png" alt="">
+<center>IDA's pseudocode</center>
+
+<p>So,we could easily figure out the input is xored with 0x2A then is compared to
+something unknowed stuff which is also xored with 0x2A.
+However,it is not necessary to know the unknow is what exactly.
+We can set a conditional breakpoint in the location where the comparation
+happens(here is 0x4017A7).
+Codes for conditional breakpoint is as follow:</p>
+<pre class="code">
+import idc
+import idautils
+import idaapi
+eax = idc.GetRegValue("EAX")
+print chr(eax ^ 0x2A)
+</pre>
+<p>Then we now could run the program and input some random char and get corrsponding
+right char,showed as the following short video(2.5 MB):</p>
+
+<video src="./videos/asby-dynamic.mp4" controls></video>
+
+<p>Everytime you input a wrong char,the output window of IDA will give you the
+right char.Repeat this process until all the right char has given,then you have the
+flag.</p>
+
+<h2>Static Analysis</h2>
+<p>The routine is not complex so we could figure out what it does without running
+it.OK lets begin!</p>
+<p>Firstly,we can find the main function of asby.exe.This is a easy task,
+a clever guy like you will finish it without striking a blowing,right?
+Now we are in main function,lets find out what the program does step by step through reading
+the assembly codes.</p>
+<img src="./images/asby-init.png" alt="">
+<center>Prepare the mysterious HEX values</center>
+<p> <b>1:</b> The codes move a unknowned data block unk_489004 to a local string variable
+which I rename it to secret. Notice that unk_489004 is passed as the first argument
+and index the second argument.After the string constructor is called,secret holds the data
+block.</p>
+<p><b>2:</b>
+Here is an arrary with a length of 0xF initilized with the value "ABCDEFGHIJKMLMNO".
+We should not be confused with these values since they will be changed in some small
+routine function looking like <b class="term">__Z2v[xx]Pc</b>.I rename the array to
+<b class="term">arr</b>.
+</p>
+<p><b>3,4:</b>
+Yeah,a small routine function named <b class="term">__Z2v9Pc</b>appears here,its codes is showed in the float window
+which marked as 4.We could easily figure out that this small routine changes
+the array's values at index 1,8,2 to 0x20,0x6A,0x15,respectively.
+</p>
+
+<p><b>5:</b>
+As the comments point out,we in fact do not need to care this long jmp because
+it is just to check if the upper bound is reached and then will come back and continue from loc_401679.
+</p>
+<p>OK,Next one is showed as below:</p>
+<img src="./images/asby-getinput.png" alt="">
+<center>Get user's input</center>
+<p><b>1:</b>
+Small routines to change the value of <b class="term">arr</b>.
+The first one sets arr[5] = 0x62,arr[9] = 0x7d,arr[4] = 0x53,the second
+sets arr[0xa] = 0xf7,arr[6]=0x14,arr[0xe]=0x12.
+</p>
+<p><b>2:</b>
+Initilize the <b class="term">input</b> string variable which is used to store the
+string user inputs.
+</p>
+<p><b>3:</b>
+Well, <b class="icmd">cout&lt;&lt;"what is the flag?"</b>
+</p>
+<p><b>4:</b>
+<b class="icmd">cin&gt;&gt;input</b>
+</p>
+<p><b>5,6:</b>
+I am not sure what is the enssential difference between <b>5</b> and <b>6</b>,
+they seem action as the same role being responsible for getting the current char from user's input.
+</p>
+<p>Now,the last step! We will reveal the hidden secret!</p>
+<img src="./images/asby-decode.png" alt="">
+<center>The Secret</center>
+<p><b>1:</b>
+The codes get the current char of the user's input and xor the char with 0x2A then assign
+the xored value back to the input.Notice that what <b class="term">tmp</b> stored is
+the address of the current processing char of the input string.
+</p>
+<p><b>2,3:</b>
+Get corresponding char from <b class="term">input</b> and <b class="term">secret</b>
+at location <b class="term">index</b>.
+</p>
+<p><b>4:</b>
+We know that the length of <b class="term">arr</b> is 0xF.From the instruction
+<b class="icmd">div ebx;mov eax,edx</b> we get that <b class="term">eax = index % 15</b>,
+then eax is used as a new index,say it <b class="term">i</b>,to retrive a char from
+arrary <b class="term">arr</b>.
+</p>
+<p> Now the decode logic is clear: </p>
+<p><b>Firstly:</b>Initilizing <b class="term">arr</b> with its real values which
+could be summrized as below: </p>
+<pre>
+v6 : arr[0]=0x10 arr[3]=0x44 arr[7]=0x33
+v9 : arr[1]=0x20 arr[8]=0x6A arr[2]=0x15
+v32: arr[5]=0x62 arr[9]=0x7D arr[4]=0x53
+v14: arr[0xA]=0xF7  arr[6]=0x14 arr[0xE]=0x12
+v58: arr[0xD]=0xA7  arr[0xB]=0xC5 arr[0xC]=0xAB
+</pre>
+<p><b>Secondly:</b>xoring the <b class="term">input[i]</b> with <b class="term">0x2A</b> and assign the result back.</p>
+<p> <b>Thirdly:</b>xoring <b class="term">arr[i % 0xF]</b> with <b class="term">secret[i]</b></p>
+<p> <b>Finally:</b>comparing <b class="term">input[i] ^ 0x2A</b> with
+<b class="term"> arr[i % 0xF] ^ secret[i] ^ 0x2A </b>.
+</p>
+<p>All is over? Nope! Why? But how long is the <b>for</b> loop?
+Well,if you scroll the assembly codes down a little,you will find a line codes
+looking like <b class="icmd">cmp     [ebp+index+1], 25h</b>.
+Yeap,this is the final index of the <b>for</b> loop.
+OK,Now everthing goes well so let we write a segment code of Python to get the flag:</p>
+<pre class="code">
+#! /usr/bin/env python3
+#! -*- coding:utf-8 -*-
+
+import re
+rawsecret = '''
+76 4C 74 23 28 52 26 07  08 1C 96 FD CA C4 22 23
+45 73 76 61 04 70 57 0F  4B C6 A6 9B C1 23 21 10
+23 7D 35 50 72 4E
+'''.replace('\n','').replace(" ",'')
+secret = re.findall('.{1,2}',rawsecret)
+rawarr = "10 20 15 44 53 62 14 33  6A 7D F7 C5 AB A7 12".replace(' ','')
+arr = re.findall('.{1,2}',rawarr)
+
+for i in range(0x25+1):
+    print(chr(int(arr[i % 0xF],16) ^ int(secret[i],16)),end = '')
+print()
+</pre>
+<p>Run the codes listed above and it will give you the flag:</p>
+<b class="term">flag{024baa8ac03ef22fdde61c0f11069f2f}</b>
+
+<h1 class="titlebar">Forenisics/WannaFly</h1>
+<p class="term">Posted on 2017-10-29 </p>
+<p style="color:blueviolet"><i>
+My daughter Kimberly her computer got hacked. Now she lost all her favorite images.
+Can you please help me recover those images?
+</i> </p>
+<p>So,this is a forenisic challenge,firstly let's uncompress the .tgz file:</p>
+<pre class="code">
+root@kali:~# tar zxvf wannafly.tgz
+kimberly.img
+</pre>
+<p>and look what exactly <b class="term">kimberly.img</b> is:</p>
+<pre class="code">
+root@kali:~# file kimberly.img
+kimberly.img: Linux rev 1.0 ext4 filesystem data, UUID=56e89f54-c4da-4c5e-a3c6-67398d341788 (extents) (large files) (huge files)
+</pre>
+<p>Well,not so bad,it is an ext4 filesystem data,mount it:</p>
+<pre class="code">
+root@kali:~# mount -t ext4 -o loop kimberly.img  /mnt/tmp/
+cd /mnt/tmp
+</pre>
+<p>Now let see what is hold in the mouted file system,we use <b class="term">tree</b>
+command with <b class="term">-a</b> option to show all possible files:</p>
+<pre>
+root@kali:~# tree -a /mnt/tmp/
+/mnt/tmp/
+├── ...
+├── .bash_history
+├── .cache
+│   └── motd.legal-displayed
+├── Desktop
+├── Documents
+├── Downloads
+├── lost+found
+├── Music
+├── Pictures
+│   ├── 78d14f37ae413511b119776c2294c414.png
+│   ├── 8210680-Palomino-Shetland-pony-Equus-caballus-3-years-old-standing-in-front-of-white-background-Stock-Photo.png
+│   ├── 8210722-Palomino-Shetland-pony-Equus-caballus-3-years-old-standing-in-front-of-white-background-Stock-Photo.png
+│   ├── bay_pony_cantering_2_by_tamacilo.png
+│   ├── bay_pony_rolling2_by_tamacilo.png
+│   ├── connemara_pony2_750.png
+│   ├── dappled-pony.png
+│   ├── f09086061f03f080d0851d9154e11653.png
+│   ├── Het-verschil-tussen-een-pony-en-een-shetland-pony.png
+│   ├── oli.png
+│   ├── Peppermint-Pony.png
+│   ├── pony.png
+│   ├── pony_shutterstock_50279794.png
+│   ├── shetlander-pony.png
+│   ├── shutterstock_146544482-680x400.png
+│   ├── white-pony-951772_960_720.png
+│   └── Wild_Pony_Assateague.png
+├── Public
+├── Templates
+└── Videos
+</pre>
+<p>Look it carefully,you will notice that there are two interesting files
+<b class="term">...</b>, <b class="term">.bash_history</b> and
+a directory <b class="term">.cache</b>. Let we <b>cat</b> the .bash_history file,
+and we have these stuffs:
+</p>
+<img src="./images/wannacry-bash.png" alt="">
+<p>You will immediately notice that a weird string <b class="term">Hb8jnSKzaNQr5f7p</b> appears.
+Without any hesitation,we open the file <b class="term">...</b>,it turns out that the
+file is a python script.The code is a few  long,so I just select a snippet and put it here:
+</p>
+<pre>
+def get_iv():
+    iv = ""
+    random.seed(int(time()))
+    for i in range(0,16):
+        iv += random.choice(string.letters + string.digits)
+    return iv
+
+# m:plaintext p:key == Hb8jnSKzaNQr5f7p
+def encrypt(m, p):
+    iv=get_iv()
+    aes = AES.new(p, AES.MODE_CFB, iv)
+    return base64.b64encode(aes.encrypt(m))
+
+def decrypt(m, p, i):
+    aes = AES.new(p, AES.MODE_CFB, i)
+    return aes.decrypt(base64.b64decode(m))
+def encrypt_image(img):
+   data = open(img, 'r').read()
+   # Open original data and encrypt
+   encrypted_img = encrypt(data, sys.argv[1])
+   blurred_img = open('/tmp/sha.png', 'r').read()
+   # Zeros the original image
+   stat = os.stat(img)
+   with open(img, 'r+') as of:
+       of.write('\0' * stat.st_size)
+       of.flush()
+   # The encrypted image is appended to the tail
+   open(img, 'w').write(blurred_img + "\n" + encrypted_img)
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print "Usage: %s <pass>" % sys.argv[0]
+    else:
+        encrypt_images()
+</pre>
+<p>I have added some comments into it.The code shows us that
+the author has encrypted the original image with three part in order:
+<b>data of blurred image</b> + <b>a line feed character</b> + <b>base64 encoded data with AES encryption
+of the original image</b>.
+<p> The first thing we should do is to extract the encrypted data of the original image.  </p>
+<p> We know that base64 is consist of 64 printable
+characters:alphabet(a-zA-Z),numbers(0~9) and two optional equation symbols which are
+depended on the system(they are '/' and '+' in most of the time).Anohter one optional symbol
+is "=" which are used to pad the base64 string if necessary.  </p>
+<p>For this reason,we could regard '\n' as a boundary and
+split the encrpyted image with '\n' and get the last element.
+The code is as below: </p>
+<pre class="code">
+def get_encrypted_data(img):
+    with open(img,'r') as _:
+        return _.read().split('\n')[-1]
+</pre>
+<p>In AES CFB encryption,there are three input: <b class="term">key,iv,plaindata</b>.To decryption,
+three paramters is needed: <b class="term">the same key as the input,key,the same iv as the input,cipherdata</b>.
+</p>
+<p>From the <b class="term">.bash_history</b> file we could get the encryption key is
+<b class="term">Hb8jnSKzaNQr5f7p</b>,cipherdata could be extracted.But how to get the
+<b class="term">iv</b>? If we examine the encryption code,we can figure out how the
+<b class="term">iv</b> is generaged.The author used a "current" time as random's
+seed. If we could find out what is the time when the code encrypted the image then we are
+able to get the same iv! How to find time info of the image,you can use <b class="term">stat</b> command
+in linux and <b class="term">os.stat()</b> in python.Notice that you should retrive
+change or modify time but not access time. The retrived time is roughly closed to the
+real encryption time,so we plus/minus a delta time value in the rough time to produce
+an interval including the real time:[rough time - delta,rough time + delta].
+For each time value(epoch),we check if the first four
+bytes are PNG image signature,if it dose then we find a real iv value so we can
+decrypt the image.  </p>
+
+<p>The solution code is as follow:</p>
+<pre class="code">
+#!/usr/bin/env python
+
+import random, string, sys, os
+from time import time
+from Crypto.Cipher import AES
+import base64
+import struct
+
+
+def get_iv(epoch):
+    iv = ""
+    random.seed(epoch)
+    for i in range(0,16):
+        iv += random.choice(string.letters + string.digits)
+    return iv
+
+# m:encrypted message p:key,Hb8jnSKzaNQr5f7p i:iv
+def decrypt(m, p, i):
+    aes = AES.new(p, AES.MODE_CFB, i)
+    return aes.decrypt(base64.b64decode(m))
+
+def get_encrypted_data(img):
+    with open(img,'r') as _:
+        return _.read().split('\n')[-1]
+
+def find_images():
+    i = []
+    #for r, d, f in os.walk(os.environ['HOME']):
+    for r, d, f in os.walk("."):
+        for g in f:
+            if(g.endswith(".rec.png")):continue
+            if g.endswith(".png"):
+                i.append((os.path.join(r, g)))
+    return i
+
+def solve():
+    for i in find_images():
+        encrypted_data = get_encrypted_data(i)
+        ctime = int(os.stat(i).st_ctime)
+        beg = ctime - 60
+        end = ctime + 60
+        print "There are %d times loops ... " % (end - beg)
+        epoch = beg
+        print "Images : %s" % i
+        while epoch &gt;= end:
+            iv = get_iv(epoch)
+            data = decrypt(encrypted_data,"Hb8jnSKzaNQr5f7p",iv)
+            d = struct.unpack("Bccc",data[0:4])
+            meta = ''.join(d[1:4])
+            if('PNG' == meta):
+                open(i + ".rec.png","w").write(data)
+                print "Restore is Done!"
+                break
+            epoch += 1
+if __name__ == '__main__':
+    solve()
+</pre>
+
+<p>After the decryption,we can browser the decrypted images,we find the flag is this
+image:</p>
+<img src="./images/wannacry-flag.png" alt="">
+
+<h1 class="titlebar">Binary/Suspect File 1 (100)</h1>
+<p class="term">Posted on ??? </p>
+<p style="color:blueviolet"><i>
+</i> </p>
+<b class="term">TODO</b>
+<p>I will continue to write binary,pwn,crypto writeups of sha2017 ctf if I have time.</p>
+<p>Stay tuned!</p>
+
+<h1 class="titlebar">Suspect File 1 (100)</h1>
+<p class="term">Posted on ??? </p>
+<p style="color:blueviolet"><i>
+</i> </p>
+<b class="term">TODO</b>
+<p>I will continue to write binary,pwn,crypto writeups of sha2017 ctf if I have time.</p>
+<p>Stay tuned!</p>
+
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <!--<li><a href=""><b></b></a></li>
+    <li><a href=""><b></b></a></li>
+    <li><a href=""><b></b></a></li>-->
+</ol>
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Contact me by <b>dXAyZ2Vla0AxNjMuY29tCg==</b><br/>OR<br/>Follow me on <a href="http://weibo.com/bugnofree" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>

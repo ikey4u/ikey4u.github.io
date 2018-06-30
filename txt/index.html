@@ -1,0 +1,45 @@
+<html lang="zh-cn">
+    <head>
+        <!-- 网页头部信息 -->
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+        <meta charset="UTF-8">
+        <script src="jquery-2.2.0.min.js"></script>
+        <!-- 网页标题 -->
+        <title>TXT</title>
+    </head>
+    <body>
+        <center> <h1>TEXT IS SIMPLE BUT POWERFOR THING</h1> </center>
+        <center> <h3> by bugnofree </h3> </center>
+        <script type="text/javascript">
+            // This code is modified from
+            //      https://codepen.io/KryptoniteDove/post/load-json-file-locally-using-pure-javascript
+             function loadJSON(callback) {
+                 var xobj = new XMLHttpRequest();
+                 xobj.overrideMimeType("application/json");
+                 xobj.open('GET', 'entry.json', true);
+                 xobj.onreadystatechange = function () {
+                 if(xobj.readyState == 4 && xobj.status == "200") {
+                     return callback(xobj.responseText);
+                   }
+                 };
+                 xobj.send(null);
+             }
+             function genentry() {
+                 loadJSON(function(response) {
+                     var entry = JSON.parse(response);
+                     var ol = document.createElement('ol');
+                     for(var i = 0;i < entry.length - 1; i++) {
+                         var li = document.createElement('li');
+                         li.innerHTML = "<a href=" + entry[i]["src"] + ">" +
+                             "<b>" + entry[i]["title"] + "</b>" +
+                             "</a>" + " " +entry[i]["date"];
+                          ol.appendChild(li);
+                     }
+                 document.body.append(ol);
+                 });
+             }
+            genentry();
+        </script>
+    </body>
+</html>

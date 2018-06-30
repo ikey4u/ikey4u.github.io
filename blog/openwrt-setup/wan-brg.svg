@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="170.35336mm"
+   height="71.709mm"
+   viewBox="0 0 170.35337 71.709"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 (unknown)"
+   sodipodi:docname="wan-brg.svg">
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 105 : 1"
+       inkscape:vp_y="0 : 999.99998 : 0"
+       inkscape:vp_z="297.00001 : 105 : 1"
+       inkscape:persp3d-origin="148.5 : 69.999999 : 1"
+       id="perspective932" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.5368973"
+     inkscape:cx="385.81899"
+     inkscape:cy="109.3016"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1137"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-62.635574,-183.23438)">
+    <g
+       id="g944"
+       transform="matrix(0.71355349,0,0,0.67458082,34.794891,68.642937)">
+      <rect
+         y="171.3609"
+         x="97.669182"
+         height="34.06015"
+         width="74.887215"
+         id="rect817"
+         style="fill:none;fill-opacity:1;stroke:#008000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         y="196.84962"
+         x="97.669182"
+         height="8.5714283"
+         width="16.691729"
+         id="rect819"
+         style="fill:none;fill-opacity:1;stroke:#008000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         y="196.84962"
+         x="114.36092"
+         height="8.5714283"
+         width="16.691729"
+         id="rect819-3"
+         style="fill:none;fill-opacity:1;stroke:#008000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <rect
+         y="171.3609"
+         x="155.86467"
+         height="8.5714283"
+         width="16.691729"
+         id="rect819-3-6"
+         style="fill:none;fill-opacity:1;stroke:#008000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         id="text872"
+         y="202.82007"
+         x="99.591019"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="202.82007"
+           x="99.591019"
+           id="tspan870"
+           sodipodi:role="line">WAN</tspan></text>
+      <text
+         id="text872-7"
+         y="202.83702"
+         x="117.05185"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="202.83702"
+           x="117.05185"
+           id="tspan870-5"
+           sodipodi:role="line">LAN</tspan></text>
+      <text
+         id="text872-7-3"
+         y="177.29381"
+         x="158.80267"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="stroke-width:0.26458332px"
+           y="177.29381"
+           x="158.80267"
+           id="tspan870-5-5"
+           sodipodi:role="line">USB</tspan></text>
+    </g>
+    <ellipse
+       style="fill:none;fill-opacity:1;stroke:#008000;stroke-width:0.26458332;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path910"
+       cx="101.28108"
+       cy="233.2009"
+       rx="37.003483"
+       ry="12.919319" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="79.429886"
+       y="253.13812"
+       id="text914"><tspan
+         sodipodi:role="line"
+         id="tspan912"
+         x="79.429886"
+         y="253.13812"
+         style="stroke-width:0.26458332px">172.20.109.x</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="77.834908"
+       y="232.56291"
+       id="text918"><tspan
+         sodipodi:role="line"
+         id="tspan916"
+         x="77.834908"
+         y="232.56291"
+         style="stroke-width:0.26458332px">printer</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="97.931633"
+       y="239.5808"
+       id="text926"><tspan
+         sodipodi:role="line"
+         id="tspan924"
+         x="97.931633"
+         y="239.5808"
+         style="stroke-width:0.26458332px">pc1,...,pcN</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="106.86351"
+       y="229.05396"
+       id="text930"><tspan
+         sodipodi:role="line"
+         id="tspan928"
+         x="106.86351"
+         y="229.05396"
+         style="stroke-width:0.26458332px">pc</tspan></text>
+    <ellipse
+       style="fill:none;fill-opacity:1;stroke:#008080;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:0.26499999, 0.26499999;stroke-dashoffset:0;stroke-opacity:1"
+       id="path910-6"
+       cx="194.26828"
+       cy="232.2439"
+       rx="37.003483"
+       ry="12.919319" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#55ddff;fill-opacity:1;stroke:#55ddff;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="157.7433"
+       y="219.16508"
+       id="text963"><tspan
+         sodipodi:role="line"
+         id="tspan961"
+         x="157.7433"
+         y="219.16508"
+         style="fill:#55ddff;stroke:#55ddff;stroke-width:0.26458332px">WiFi Network</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="175.60704"
+       y="234.31737"
+       id="text967"><tspan
+         sodipodi:role="line"
+         id="tspan965"
+         x="175.60704"
+         y="234.31737"
+         style="stroke-width:0.26458332px">Mobiles,Laptops</tspan></text>
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#808000;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect971"
+       width="7.9748888"
+       height="5.5824218"
+       x="105.74702"
+       y="225.06651" />
+    <ellipse
+       style="fill:none;fill-opacity:1;stroke:#800080;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path975"
+       cx="96.575897"
+       cy="224.74751"
+       rx="1.1962333"
+       ry="1.2759821" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#6f8a91;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 97.453137,223.63103 110.21296,206.88376"
+       id="path977"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#6f8a91;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 109.41547,225.22601 12.60032,-18.34225"
+       id="path979"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#6f8a91;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 156.9458,232.40341 0.97731,-25.18737 59.63185,14.97951"
+       id="path981"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="117.70935"
+       y="195.24043"
+       id="text985"><tspan
+         sodipodi:role="line"
+         id="tspan983"
+         x="117.70935"
+         y="195.24043"
+         style="stroke-width:0.26458332px">OpenWRT</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.9609375px;line-height:125%;font-family:'Segoe Print';-inkscape-font-specification:'Segoe Print, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="84.374321"
+       y="225.06651"
+       id="text993"><tspan
+         sodipodi:role="line"
+         id="tspan991"
+         x="84.374321"
+         y="229.3223"
+         style="stroke-width:0.26458332px" /></text>
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.26499999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4704"
+       width="170.08836"
+       height="71.444"
+       x="62.768074"
+       y="183.36688" />
+  </g>
+</svg>

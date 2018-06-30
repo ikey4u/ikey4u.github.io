@@ -1,0 +1,362 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>An Introduction to Windows Kernel Debugging</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+<!-- 代码高亮 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">
+<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>
+<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>
+<script type="text/javascript">
+  hljs.initHighlightingOnLoad();
+</script>
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>Windows内核调试入门|bugnofree|2016-06-04 Sat 07:59 PM - 2016-06-12 Sun 12:06 AM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+<br/><b>本文所涉及的文件(如果有的话)大部分可以通过文章末尾的链接下载.</b> <br/>
+<hr/>
+实验环境:<br/>
+物理机:Ubuntu 14.04  x64 <br/>
+虚拟机VMWare Workstation Pro 12:Windows工作机VHost(Windows XP SP3) Windows被调试机VGuest(Windows XP SP3)<br/>
+<br/>
+<p> <i>
+由于个人习惯原因,我现在热衷于在Linux平台上工作.所以没有像网上大多数文章描述的那样:
+物理机作为工作机,然后开一个虚拟机作为调试机.像我的这种调试Windows内核的方式,
+在网上实在是少见,因此,我也为此而付出了许多代价.诸多摸索之后,终于搞定.写下此文,
+以供后来有像我这种工作方式的人以参考.
+</i> </p>
+由于我使用的是Windows XP SP3,调试内核需要用到WDK工具套装,
+点击<a  href="https://msdn.microsoft.com/en-us/windows/hardware/hh852365.aspx" target="_blank">这里</a>从微软的官方网站下载.
+这里应该下载适用于Windows XP的驱动工具,找到下面的位置:<br/>
+<br/><img src="0x01.png"></br/>
+下载得到一个GRMWDK_EN_7600_1.ISO的文件,你可以解压也可以使用UltraISO来加载为虚拟光驱,我推荐使用后面的方式.
+加载为光驱后,双击光驱盘标就会出现下图:<br/>
+<br/><img src="0x02.png"></br/>
+然后稍后就会弹出如下界面:
+<br/><img src="0x03.png"></br/>
+包含的组件有四大部分:
+<pre>
+#1:完整的开发环境,包括编译环境,样例,工具以及帮助文档
+Full Development Environment
+    Build Environments 
+    Samples
+    Tools
+    Help (Documentation Collection)
+#2:调试工具,如WinDbg
+Debugging Tools for Windows
+#3.设备模拟框架(这里不推荐安装)
+Device Simulation Framework
+#4.Windows设备测试框架
+Windows Device Testing Framework
+</pre>
+按照上图所选,然后就是一路Next下去...和漫长的等待安装完成...安装完成后,
+测试是否安装成功什么的乱七八糟我就不管了,如果你以前没安装过,一般都不会出错.
+另外需要注意的是,VHosht和VGuest都需要进行该WDK的安装.<br/>
+oK,在调试开始之前我们需要配置两个虚拟机.我们大致需要做以下几件事情:
+<h4 class="subtitle">1.建立虚拟机间通信管道</h4>
+先是VHost,这是你的Windows工作机,也就是用于调试另一个Windows虚拟机的虚拟机:<br/>
+<hr/>
+将虚拟机关机,然后依次[VM/Settings],在该界面点击左下方的Add按钮,弹出Hardware Type界面:<br/>
+<br/><img src="0x04.png"></br/>
+选择序列端口(Serial Port),然后Next,弹出Serial Port Type界面:<br/>
+<br/><img src="0x05.png"></br/>
+这里我们需要选择Output to socket选项,然后Next,弹出Specify Socket界面:<br/>
+<br/><img src="0x06.png"></br/>
+在这里我们需要声明命名管道的名称,这是任意的,这里我取名为dport(言外之意,debug port),
+<b style="color:red">但是,你需要注意的是管道的根路径,对于linux,管道路径为/tmp/,而在Windows下管道路径为\\.\pipe\</b>.
+因此如果这里应该使用<b>/tmp/dport</b>,如果是windows则需要使用<b>\\.\pipe\dport</b>.
+另外对于VHost需要选择为From <b>Client</b> to <b>A Virtual Machine</b>.然后可以点击Finish按钮完成配置.
+接着你就会回到最初的设置界面:<br/>
+<br/><img src="0x07.png"></br/>
+注意勾选Yield CPU on poll,然后查看整体设置是否正确.<br/><br/>
+经过以上步骤,我们基本上就完成了VHost的设置.<br/><br/>
+
+其次是VGuest,这是你要调试的Windows客户机,也就是被调试的虚拟机:<br/>
+<hr/>
+同样的,将你的VGuest关机,前面几步和VHost一致,最后一步你需要设置VGuest管道的作用类别为:
+From <b>Server</b> to <b>A Virtual Machine</b>.最终的设置效果如下:<br/>
+<br/><img src="0x08.png"></br/>
+另外需要注意的是,这里用到的管道序列端口为1,如上图标记2所示,序列端口号不一定必须为1,
+但至少要保证VHost和VGuest之间的序列端口号是一致的,端口号一般会在Serial Port后面有一个数字,
+这就是端口号的ID,如果没有,则为1.<br/><br/>
+经过以上步骤,我们也就完成了VGuest的虚拟机管道设置.
+<h4 class="subtitle">2.设置调试机(VGuest)的调试模式</h4>
+启动调试机器VGuest,打开命令行,执行以下命令:
+<pre>
+cd c:\
+attrib -s -h -r boot.ini
+notepad boot.ini
+</pre>
+这里,我们使用notepad打开了引导配置文件boot.ini,编辑该文件,使其看起来如下所示:
+<pre>
+[boot loader]
+timeout=30
+default=multi(0)disk(0)rdisk(0)partition(1)\WINDOWS
+[operating systems]
+<b>multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional [DEBUG]" /noexecute=optin /fastdetect /Debug /debugport=com1 /baudrate=115200</b>
+multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /noexecute=optin /fastdetect
+</pre>
+粗体的那一行就是你需要添加的,不过你应根据你自己的情况修改/debugport选项,假如你是端口2,则应修改为/debugport=com2.
+然后保存,并执行命令<b>[attrib +s +h +r boot.ini]</b>恢复boot.ini的原有属性.
+<h4 class="subtitle">3.双机连接测试(VHost通过WinDbg连接VGuest)</h4>
+现在将VGuest关机,然后启动VHost,等待VHost启动完毕,打开命令行,输入如下命令(#1命令,#2是仅仅是为了做个参考)启动WinDbg:
+<pre>
+#1.虚拟机调试虚拟机:
+"C:\Program Files\Debugging Tools for Windows (x86)\windbg.exe" -b -k com:port=com1,resets=0,reconnect
+
+P.S.
+#2.物理机调试虚拟机(这种情况下适用于Windows物理机调试虚拟Windows机):
+"C:\Program Files\Debugging Tools for Windows (x86)\windbg.exe" -b -k com:pipe,port=\\.\pipe\dport,resets=0,reconnect
+</pre>
+启动后如下图所示:<br/>
+<br/><img src="0x09.png"></br/>
+然后启动VGuest,首先会进入下面的界面:<br/>
+<br/><img src="0x10.png"></br/>
+选择第一项(debugger enabled),然后启动,进入VHost,稍等片刻,你就会发现Windbg已经输出了如下连接信息:<br/>
+<br/><img src="0x11.png"></br/>
+先来解决这个错误: *** ERROR: Symbol file could not be found,这个错误是由于没有设置符号路径而造成的.
+有两种方式设置符号搜索路径,一种是设置环境变量_NT_SYMBOL_PATH,
+另一种就是依次在Windbg中[File/Symbol File Path]打开符号路径设置窗口.
+符号路径的格式为[srv*符号存储路径*http://msdl.microsoft.com/download/symbols],多个符号路径之间用分号隔开.
+这里我的符号路径设置为C:\WindbgSymbols,然后打开路径设置窗口输入如下路径:
+<pre>
+srv*C:\WindbgSymbols*http://msdl.microsoft.com/download/symbols
+</pre>
+如下图所示:<br/>
+<br/><img src="0x12.png"></br/>
+注意勾选Reload选项.如果你遇到下面的问题Your debugger is not using the correct symbols:
+<pre>
+*************************************************************************
+***                                                                   ***
+***                                                                   ***
+***    Your debugger is not using the correct symbols                 ***
+***                                                                   ***
+***    In order for this command to work properly, your symbol path   ***
+***    must point to .pdb files that have full type information.      ***
+***                                                                   ***
+***    Certain .pdb files (such as the public OS symbols) do not      ***
+***    contain the required information.  Contact the group that      ***
+***    provided you with these symbols if you need this command to    ***
+***    work.                                                          ***
+***                                                                   ***
+***    Type referenced: nt!_OBJECT_DIRECTORY                          ***
+***                                                                   ***
+*************************************************************************
+Cannot find _OBJECT_DIRECTORY type.
+*** ERROR: Module load completed but symbols could not be loaded for vmmemctl.sys
+...
+Device object ProcHelper not found
+WARNING: Whitespace at end of path element
+</pre>
+请再手动执行一次.reload命令,然后等待一段时间,使WinDbg可以下载符号.
+<h4 class="subtitle">4.简单实战:调试驱动(VHost调试VGuest中的驱动程序)</h4>
+此时,VGuest处于暂停状态,我们需要在WinDbg中输入g命令,使VGuest继续执行.
+本次我们使用的驱动程序来自于Practical Malware Analysis这本书中的Lab-10里的第三个例子,包含以下两个文件:<br/>
+<br/><img src="0x13.png"></br/>
+其中驱动文件(sys)需要放到C:/WINDOWS/SYSTEM32目录下面.
+我们首先使用IDA打开exe程序来简单看一下:<br/>
+<br/><img src="0x14.png"></br/>
+在EXE执行之前会创建一个服务,服务显示名称为Process Helper,
+服务实体为驱动Lab10-03.sys(需要你自己拷贝到VGuest的system32目录去),然后启动服务,其他的打开浏览器等动作,
+这里就不分析了,因为这里我们主要调试的就是Lab10-03.sys这个驱动文件.在该服务启动后,exe才会继续执行,
+exe的行为是打开浏览器转到广告页面,如果你手动关闭浏览器,等待几秒后就会自动再次打开.
+而你是无法在进程管理器中找到进程实体的,这个正是该驱动所做的事情.<br/>
+接下来,我们就是主要通过调试该驱动,来看看是否如此.不过在此之前,同样的,我们最好用IDA来静态查看一下sys文件.
+在驱动入口处是这些代码:
+<pre>
+DriverObject= dword ptr  8
+RegistryPath= dword ptr  0Ch
+
+mov     edi, edi
+push    ebp
+mov     ebp, esp
+call    sub_10794
+pop     ebp
+jmp     sub_10706
+DriverEntry endp
+</pre>
+一般的我们不需要关注其中的CALL只需要关注其跳转地址即可,双击jmp处的地址,跳转到这里:
+<pre>
+SymbolicLinkName= UNICODE_STRING ptr -14h
+DestinationString= UNICODE_STRING ptr -0Ch
+DeviceObject= dword ptr -4
+DriverObject= dword ptr  8
+
+mov     edi, edi
+push    ebp
+mov     ebp, esp
+sub     esp, 14h
+and     [ebp+DeviceObject], 0
+push    esi
+push    edi
+mov     edi, ds:RtlInitUnicodeString
+push    offset aDeviceProchelp ; "\\Device\\ProcHelper"
+lea     eax, [ebp+DestinationString]
+push    eax             ; DestinationString
+call    edi ; RtlInitUnicodeString
+mov     esi, [ebp+DriverObject]
+lea     eax, [ebp+DeviceObject]
+push    eax             ; DeviceObject
+push    0               ; Exclusive
+push    100h            ; DeviceCharacteristics
+push    22h             ; DeviceType
+lea     eax, [ebp+DestinationString]
+push    eax             ; DeviceName
+push    0               ; DeviceExtensionSize
+push    esi             ; DriverObject
+call    ds:IoCreateDevice
+test    eax, eax
+jl      short loc_10789
+</pre>
+这基本上就是所有我们需要关注的信息了,该驱动会创建一个设备,设备名称为ProcHelper,我们需要调试的就是该设备,
+看看该设备做了什么.调试该设备需要通过VHost调试VGuest来实现.这就是我们接下来要做的.
+<br/>
+如果现在你的VGuest处于暂停状态,你在VHost中输入命令g使其运行,
+然后将exe程序放到VGuest中去,sys放到System32中,然后双击exe执行,再回到VHost中去,在WinDbg中暂停VGuest.
+接着我们需要找到上述设备地址.在WinDbg中执行如下操作(命令为kd&gt;后面的,以后表达方式类同,不再赘述):
+<pre>
+kd> !devobj ProcHelper
+Device object (81fcf310) is for:
+ ProcHelper*** ERROR: Module load completed but symbols could not be loaded for Lab10-03.sys
+ \Driver\Process Helper DriverObject 82141be0
+Current Irp 00000000 RefCount 1 Type 00000022 Flags 00000040
+Dacl e144f4d4 DevExt 00000000 DevObjExt 81fcf3c8 
+ExtensionFlags (0000000000)  
+Device queue is not busy.
+</pre>
+从第四行,我们可得知驱动对象的基地址为0x82141be0.然后我们借助该驱动的基地址获取该驱动的详细信息:
+<pre>
+ kd> dt nt!_DRIVER_OBJECT 82141be0
+   +0x000 Type             : 0n4
+   +0x002 Size             : 0n168
+   +0x004 DeviceObject     : 0x81fcf310 _DEVICE_OBJECT
+   +0x008 Flags            : 0x12
+   +0x00c DriverStart      : 0xf8cc6000 Void
+   +0x010 DriverSize       : 0xe00
+   +0x014 DriverSection    : 0x8208fe60 Void
+   +0x018 DriverExtension  : 0x82141c88 _DRIVER_EXTENSION
+   +0x01c DriverName       : _UNICODE_STRING "\Driver\Process Helper"
+   +0x024 HardwareDatabase : 0x80670ae0 _UNICODE_STRING "\REGISTRY\MACHINE\HARDWARE\DESCRIPTION\SYSTEM"
+   +0x028 FastIoDispatch   : (null) 
+   +0x02c DriverInit       : 0xf8cc67cd     long  +0
+   +0x030 DriverStartIo    : (null) 
+   +0x034 DriverUnload     : 0xf8cc662a     void  +0
+   +0x038 MajorFunction    : [28] 0xf8cc6606     long  +0
+</pre>
+可以看到我们可以得到驱动的起始地址,大小,名称,初始化,卸载以及主函数.
+首先为了结合IDA进行分析,可以通过其实地址来在IDA中设置基准地址,具体为依次[Edit/Segments/Rebase Program/Value],
+将Values设置为0xf8cc6000即可.这样IDA中的地址就和WinDbg中的地址显示一致了,方便大家调试.
+我们主要关注主函数部分,驱动的主函数由如下几种类型(位于Path2DDK\WinDDk\version\inc\ddk\wdm.h):
+<pre>
+ // Define the major function codes for IRPs.
+#define IRP_MJ_CREATE                   0x00
+#define IRP_MJ_CREATE_NAMED_PIPE        0x01
+#define IRP_MJ_CLOSE                    0x02
+#define IRP_MJ_READ                     0x03
+#define IRP_MJ_WRITE                    0x04
+#define IRP_MJ_QUERY_INFORMATION        0x05
+#define IRP_MJ_SET_INFORMATION          0x06
+#define IRP_MJ_QUERY_EA                 0x07
+#define IRP_MJ_SET_EA                   0x08
+#define IRP_MJ_FLUSH_BUFFERS            0x09
+#define IRP_MJ_QUERY_VOLUME_INFORMATION 0x0a
+#define IRP_MJ_SET_VOLUME_INFORMATION   0x0b
+#define IRP_MJ_DIRECTORY_CONTROL        0x0c
+#define IRP_MJ_FILE_SYSTEM_CONTROL      0x0d
+#define IRP_MJ_DEVICE_CONTROL           0x0e
+#define IRP_MJ_INTERNAL_DEVICE_CONTROL  0x0f
+#define IRP_MJ_SHUTDOWN                 0x10
+#define IRP_MJ_LOCK_CONTROL             0x11
+#define IRP_MJ_CLEANUP                  0x12
+#define IRP_MJ_CREATE_MAILSLOT          0x13
+#define IRP_MJ_QUERY_SECURITY           0x14
+#define IRP_MJ_SET_SECURITY             0x15
+#define IRP_MJ_POWER                    0x16
+#define IRP_MJ_SYSTEM_CONTROL           0x17
+#define IRP_MJ_DEVICE_CHANGE            0x18
+#define IRP_MJ_QUERY_QUOTA              0x19
+#define IRP_MJ_SET_QUOTA                0x1a
+#define IRP_MJ_PNP                      0x1b
+#define IRP_MJ_PNP_POWER                IRP_MJ_PNP      // Obsolete....
+#define IRP_MJ_MAXIMUM_FUNCTION         0x1b
+</pre>
+一共由0x1C个,所以我们在WinDbg中用如下命令显示:
+<pre>
+kd> dd 82141be0+0x038 L1C
+82141c18  f8cc6606 804f354a f8cc6606 804f354a
+82141c28  804f354a 804f354a 804f354a 804f354a
+82141c38  804f354a 804f354a 804f354a 804f354a
+82141c48  804f354a 804f354a f8cc6666 804f354a
+82141c58  804f354a 804f354a 804f354a 804f354a
+82141c68  804f354a 804f354a 804f354a 804f354a
+82141c78  804f354a 804f354a 804f354a 804f354a
+</pre>
+每一个对应于一个主函数,我们主要关注偏移0xE处的管理设备的函数(IRP_MJ_DEVICE_CONTROL),由上面的结果可以得知,
+该函数的地址为0xf8cc6666,在IDA中按下g,输入f8cc6666转到该函数处:
+<pre>
+Irp= dword ptr  0Ch
+
+mov     edi, edi
+push    ebp
+mov     ebp, esp
+call    ds:IoGetCurrentProcess
+mov     ecx, [eax+8Ch]
+add     eax, 88h
+mov     edx, [eax]
+mov     [ecx], edx
+mov     ecx, [eax]
+mov     eax, [eax+4]
+mov     [ecx+4], eax
+mov     ecx, [ebp+Irp]  ; Irp
+and     dword ptr [ecx+18h], 0
+and     dword ptr [ecx+1Ch], 0
+xor     dl, dl          ; PriorityBoost
+call    ds:IofCompleteRequest
+xor     eax, eax
+pop     ebp
+retn    8
+sub_F8CC6666 endp
+</pre>
+该段代码执行了进程的脱链操作,类似与链表中删去一个节点的操作.
+进程管理器会通过一个进程链表来检测进程,该恶意程序通过驱动级代码将其自身进程从进程链表中剔除掉,
+进而可以比较彻底的隐藏自身.
+
+<br/>
+<br/>
+<b>本文用到的附件下载链接:链接: http://pan.baidu.com/s/1c2LUa7A 密码: 1x7v</b>
+</body>
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>

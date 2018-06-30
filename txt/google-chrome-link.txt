@@ -1,0 +1,15 @@
+@title Google Chrome Offline Download Link
+@date 2017-12-31
+If you want to install Chrome for your own user account:
+    https://www.google.com/chrome/eula.html?standalone=1&platform=win64
+If you want to install Chrome for all user accounts:
+    https://www.google.com/chrome/eula.html?system=true&standalone=1&platform=win64
+
+Some other config files you may need: switchy omega + omega.bak ssand.apk sswin.exe
+
+https://raw.githubusercontent.com/ikey4u/BlogStuffs/master/disk/wtf/omega.bak
+https://raw.githubusercontent.com/ikey4u/BlogStuffs/master/disk/wtf/sswin.exe
+https://raw.githubusercontent.com/ikey4u/BlogStuffs/master/disk/wtf/ssand.apk
+https://github.com/FelisCatus/SwitchyOmega/releases
+
+Do not do anything that violate national law! You have been warned!

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<title>SSH on Windows</title>
+<link rel="stylesheet" type="text/css" href="style/normalize.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/stylesheet.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/github-light.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/menu.css" media="screen">
+<link rel="stylesheet" type="text/css" href="style/special.css" media="screen">
+</head>
+<body>
+<!-- 文章导航条 -->
+<nav class="nav">
+	<ul>
+		<li class="current"><a href="http://www.ahageek.com/">首页</a></li>
+		<li><a href="http://www.ahageek.com/blog/blog-index.html">文章目录</a></li>
+	</ul>
+</nav>
+<!--文章标题-->
+<section class="page-header">
+      <h1 class="project-name">SSH on Windows</h1>
+      <!--<h2>SUBTITLE</h2>-->
+      <h3 class="project-tagline">2017-11-08 by Bugnofree</h3>
+</section>
+<!--文章概览-->
+<!--<div class="treebox">-->
+    <!--<ul class="tree">-->
+        <!--<li><a>一级标题</a>-->
+            <!--<ul>-->
+                <!--<li><a>二级标题</a>-->
+                    <!--<ul>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                        <!--<li><a>三级标题</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+                <!--<li><a>二级标题</a></li>-->
+            <!--</ul>-->
+       <!--</li>-->
+    <!--</ul>-->
+<!--</div>-->
+<!--以下开始写文章-->
+<!--=================================================================-->
+<!--背景信息-->
+<h3 class="text3d">背景 && 摘要</h3>
+<p>尽管 windows 下已经有多种非官方的途径提供 SSH 远程访问功能,
+但无论如何,都感觉颇为鸡肋.近些年,微软已经有拥抱 Linux 的趋势,并意识到了 SSH 的重要,
+官方开始在 OpenSSH 的基础上提供 Windows 可用的 SSH 工具.
+微软官方提供的 OpenSSH 地址在这里 <a href="https://github.com/PowerShell/Win32-OpenSSH">PowerShell/Win32-OpenSSH</a>,
+访问此地址下载最新编译好的发行版本. 在本文我将说明如何在 Windows 下安装 OpenSSH.</p>
+
+<h3 class="text3d">环境</h3>
+<p>Windows 10 x64</p>
+<!--正文-->
+<h1 class="titlebar">OpenSSH 的安装</h1>
+<p>
+在开始之前,我们需要知道两个东西:powershell 和 cmd.如果不知道的请自行查找.
+此外,powershell 和 cmd 都是以管理员权限打开运行.我们可以鼠标邮件这些程序,
+然后选择以管理员运行,但是这稍显麻烦.一个比较快捷的方式是按下 Windows 键,
+然后输入 powershell 或者 cmd ,然后按下 ctrl+shift+enter ,就可以以管理员权限运行这些工具.
+好的,现在我们开始.
+</p>
+<h2>下载 OpenSSH</h2>
+<p>从<a href="https://github.com/PowerShell/Win32-OpenSSH/releases ">这里</a>下载release版本的 OpenSSH.
+下载后解压到 <b>C:\Program Files\OpenSSH</b>,解压后 OpenSSH 目录下面有这些东西(仅仅列出了一部分): </p>
+<pre>
+-a----       2017/10/17     21:10        1462907 libcrypto-41.dll
+-a----       2017/10/17     21:10           1053 OpenSSHUtils.psd1
+-a----       2017/10/17     21:10          27831 OpenSSHUtils.psm1
+-a----       2017/10/17     21:10         329728 scp.exe
+-a----       2017/10/17     21:10         346624 sftp-server.exe
+-a----       2017/10/17     21:10         397824 sftp.exe
+-a----       2017/10/17     21:10         528384 ssh-add.exe
+-a----       2017/10/17     21:10         620032 ssh-agent.exe
+-a----       2017/10/17     21:10         652288 ssh-keygen.exe
+-a----       2017/10/17     21:10         584704 ssh-keyscan.exe
+-a----       2017/10/17     21:10         148992 ssh-shellhost.exe
+-a----       2017/10/17     21:10         880128 ssh.exe
+-a----       2017/10/17     21:10         930304 sshd.exe
+</pre>
+<p>注意必须解压到这个目录.在其他目录无法成功.充分证明了,windows 大爷还是 widnows 大爷.</p>
+<h2>安装</h2>
+打开 powershell,然后执行如下命令:
+<pre class="code">
+cd 'C:\Program Files\OpenSSH'
+powershell -ExecutionPolicy Bypass -File install-sshd.ps1
+</pre>
+<h2>本地秘钥生成</h2>
+<pre class="code">
+.\ssh-keygen.exe -A
+.\FixHostFilePermissions.ps1 -Confirm:$false
+</pre>
+<p>如果提示由于签名问题,脚本无法执行用下面命令修复签名问题 set-executionpolicy remotesigned </p>
+
+<h2>添加秘钥(可选)</h2>
+<pre class="code">
+Start-Service ssh-agent
+ssh-add ssh_private_key
+</pre>
+<p>其中 ssh_private_key 是你的远程登录秘钥.结合 config 文件会更好,
+稍后会提到.</p>
+<h2>打开 22 端口</h2>
+<p>如果 22 端口没有打开,可以通过如下命令打开: </p>
+<pre class="code">
+服务器端可以尝试:
+New-NetFirewallRule -Protocol TCP -LocalPort 22 -Direction Inbound -Action Allow -DisplayName SSH
+桌面版本可以尝试:
+netsh advfirewall firewall add rule name=SSHPort dir=in action=allow protocol=TCP localport=22
+</pre>
+<h2>设置 ssh 自动启动</h2>
+<pre class="code">
+Set-Service sshd -StartupType Automatic
+Set-Service ssh-agent -StartupType Automatic
+</pre>
+
+<h2>启动 sshd 和 ssh-agent </h2>
+<pre class="code">net start sshd</pre>
+
+<h2>加到 SSH 工具集到环境变量 </h2>
+<p>打开 cmd,然后执行下面的命令(这条命令在 powershell 中无法执行): </p>
+<pre class="code"> wmic ENVIRONMENT where "username='<system>' and name='PATH'" set VariableValue="%PATH%;C:\Program Files\OpenSSH" </pre>
+<p>执行完这条命令后, ssh 路径就添加到系统变量中去了,
+注意,这些命令只允许管理员权限的执行,所以你要执行这些命令,需要以管理员权限打开 cmd 或者 powershell.
+</p>
+
+<h1 class="titlebar">配置 SSH Config</h1>
+<p>打开 powershell,执行: <b class="icmd">mkdir ~/.ssh</b>,并在 ~/.ssh 目录下放入远程秘钥如 hadoop_rsa,
+添加一个 config 文件,注意,名称为 <b class="term">config</b>,没有后缀,位于 ~/.ssh 目录中.
+Windows 用户可能不知道 <b class="term">~</b> 对应与哪个目录.
+在 powershell 中执行<b class="icmd">cd ~</b> 即可进入到 <b class="term">~</b> 目录.
+然后在 powershell 中就可以看到 <b class="term">~</b> 具体是哪个位置.  </p>
+<p>
+打开 ~/.ssh 后输入以下内容:
+</p>
+<pre>
+Host server
+    HostName 192.168.56.102
+    User server
+    Port 22
+    IdentityFile ~/.ssh/hadoop_rsa
+</pre>
+<p>
+这里面 Host 后面的 server 名字可以按照你自己的喜好来书写, HostName 后写入服务器 IP 地址,
+User 写入你在服务器上的用户名,Port 是SSH端口,一般为22,IdentityFile 是登录服务器的秘钥.
+这样配置完毕后,重新打开 cmd 或 powershell,然后执行 ssh server 即可登录配置的服务器.
+</p>
+
+
+<h1 class="titlebar">Reference</h1>
+<ol>
+    <li><a href="https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH"><b>Install Win32 OpenSSH</b></a></li>
+</ol>
+</body>
+ <!-- ===========================================联系方式 & 版权============================================ -->
+<br/><br/><br/>
+<hr/>
+<center>Contact me by <b>dXAyZ2Vla0AxNjMuY29tCg==</b><br/>OR<br/>Follow me on <a href="http://weibo.com/bugnofree" target="_blank">Sinablog</a> </center>
+<hr/>
+<center>Copyright &copy;2017 by bugnofree All rights reserved.</center>
+<hr/>
+</html>

@@ -1,0 +1,104 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>隐写术</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+<!-- 代码高亮 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">
+<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>
+<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>
+<script type="text/javascript">
+  hljs.initHighlightingOnLoad();
+</script>
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>隐写术|bugnofree|2016-05-26 Thu 11:45 PM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+<br/><b>本文所涉及的文件大部分可以通过文章末尾的链接下载.</b> <br/>
+<hr/>
+这篇文章将会不断更新,在不断学习隐写术的过程中,我将会逐步添加内容到这篇文章里.<br/><br/>
+
+<h4 class="subtitle">前言:什么是隐写术</h4>
+隐写术,英语单词是Steganography,这个单词很长,可以拆为两部分:<br/>
+第一部分是stegano,希腊语里的意思是"覆盖"<br/>
+第二部分graphy,英语中的常用词根,表示"写".<br/>
+那么这两部分连起来就是"将写的覆盖起来",就可以理解为隐写术.<br/>
+<hr/>
+
+<h3 class="titlebar">待补充...</h3>
+这一部分待补充...
+<h3 class="titlebar">相关软件安装</h3>
+<h4 class="subtitle">编译安装stegdetect</h4>
+该软件的开源地址为:<a href="https://github.com/abeluck/stegdetect" target="_blank">https://github.com/abeluck/stegdetect</a>,下载编译安装的方式如下:
+<pre>
+apt-get install automake1.4
+git clone https://github.com/abeluck/stegdetect
+cd stegdetect
+#如果该地址失效,可切换为:http://www.ahageek.com/blog/stegano-graphy/varied.out
+wget -O file/Magdir/varied.out https://raw.githubusercontent.com/file/file/master/magic/Magdir/varied.out
+linux32 ./configure
+linux32 make
+</pre>
+一般的,按照上面的步骤,一般是不会出错的,如果你简单的按照官方上的指导编译,那么你可能遇到的一个问题如下:
+<pre>
+cd . && /root/Downloads/stegdetect/missing aclocal-1.4
+WARNING: `aclocal-1.4' is needed, and you do not seem to have it handy on your
+         system.  You might have modified some files without having the
+         proper tools for further handling them.  Check the `README' file,
+         it often tells you about the needed prerequirements for installing
+         this package.  You may also peek at any GNU archive site, in case
+         some other package would contain this missing `aclocal-1.4' program.
+make: *** [aclocal.m4] Error 1
+</pre>
+这个说明的automake版本不对,你需要安装automake 1.4版本,你可以使用如下命令查看automake版本:
+<pre>
+dpkg -l | grep automake
+#样例输出:ii  automake 1:1.14.1-2ubuntu1  all Tool for generating GNU Standards-compliant Makefiles
+</pre>
+<p>输出的信息中,冒号后面断横线之前的数字即为版本号,这里为1.14.1.你也可以在shell中输入automake然后按下tab键,
+系统一般会自动补全列出已经安装的版本,使用automake --version会列出默认的automake版本.</p>
+<p>上述的编译环境是ubuntu 14.04 x64,其他基于Debian的系统也应该是适应的.但是我没有测试.你可以下载我已经编译好的stegdetect-linux-bin.zip.
+对于Windows的版本,你同样可以下载,名字为stegdetect-0.4.zip.</p>
+<h3 class="subtitle">stegdetecti的用法</h3>
+可参考:<br/>
+http://digital-forensics-student.blogspot.jp/2015/02/stegdetect-stegbreak-update.html<br/>
+http://ftp.mirrorservice.org/sites/ftp.wiretapped.net/pub/security/steganography/stegdetect/stegdetect-README.txt<br/>
+http://theevilbit.blogspot.jp/2013/01/backtrack-forensics-steganoghraphy.html<br/>
+</body>
+
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本文的所有文件下载地址:链接: http://pan.baidu.com/s/1bEp7iA 密码: z74p<br/><br/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>

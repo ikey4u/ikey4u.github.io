@@ -1,0 +1,29 @@
+@title tmux configuration
+@date 2018-01-10
+
+[配置 @ config]
+https://github.com/gpakosz/.tmux
+$ cd
+$ git clone https://github.com/gpakosz/.tmux.git
+$ ln -s -f .tmux/.tmux.conf
+$ cp .tmux/.tmux.conf.local .
+
+[使用 @ usage]
+前缀组合键: C-a 作为第二级前缀(prefix)组合键,第一级组合键是C-b(默认组合键).
+
+最大化当前窗口: <prefix> +
+<prefix> - splits the current pane vertically
+<prefix> _ splits the current pane horizontally
+<prefix> e opens ~/.tmux.conf.local with the editor defined by the $EDITOR environment variable (defaults to vim when empty)
+<prefix> r reloads the configuration
+<prefix> h, <prefix> j, <prefix> k and <prefix> l let you navigate panes ala Vim
+<prefix> H, <prefix> J, <prefix> K, <prefix> L let you resize panes
+<prefix> < and <prefix> > let you swap panes
+<prefix> + maximizes the current pane to a new window
+<prefix> t 显示时间
+
+<prefix> e 打开配置文件(~/.tmux.conf):
+set-window-option -g mode-keys vi #可以设置为vi或emacs
+set-window-option -g utf8 on      #开启窗口的UTF-8支持
+
+

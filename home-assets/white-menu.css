@@ -1,0 +1,64 @@
+#white-menu {
+position:relative;
+list-style:none;
+/*长度为100%*/
+width:100%;
+margin:3px;
+padding:0;
+float:left;
+/*下面填充菜单背景色为渐变*/
+background:#ECECEC;
+background:-webkit-gradient(linear,left top,left bottom,from(#DCDCDC),color-stop(0.50 #ECECEC),to(#F1F1F1));
+background:-webkit-linear-gradient(top,#DCDCDC 0%,#ECECEC 50%,#F1F1F1 100%);
+background:-moz-linear-gradient(top,#DCDCDC 0%,#ECECEC 50%,#F1F1F1 100%);
+background:-o-linear-gradient(top,#DCDCDC 0%,#ECECEC 50%,#F1F1F1 100%);
+background:-ms-linear-gradient(top,#DCDCDC 0%,#ECECEC 50%,#F1F1F1 100%);
+background:linear-gradient(top,#DCDCDC 0%,#ECECEC 50%,#F1F1F1 100%);
+-moz-transition:all 0.4s ease-out;
+-webkit-transition:all 0.4s ease-out;
+-o-transition:all 0.4s ease-out;
+transition:all 0.4s ease-out;
+}
+#white-menu li {
+margin:0;
+padding:0;
+float:left;
+}
+#white-menu li a {
+display:inline;
+float:left;
+margin:0;
+padding:11px 14px;
+text-decoration:none;
+text-align:center;
+text-transform:capitalize;
+font-size:26px;
+font-weight:bold;
+color:#555452;
+border-right:1px solid #F1F1F1;
+font-family:Cambria,'Times New Roman','Nimbus Roman No9 L','Freeserif',Times,serif;
+font-style:normal;
+}
+/*设置鼠标划过时的效果*/
+#white-menu li a:hover,#white-menu li a:focus {
+background:#ECECEC;
+background:-webkit-gradient(linear,left top,left bottom,from(#C2C2C2),color-stop(0.50 #ECECEC),to(#DEDEDE));
+background:-webkit-linear-gradient(top,#C2C2C2 0%,#ECECEC 50%,#DEDEDE 100%);
+background:-moz-linear-gradient(top,#C2C2C2 0%,#ECECEC 50%,#DEDEDE 100%);
+background:-o-linear-gradient(top,#C2C2C2 0%,#ECECEC 50%,#DEDEDE 100%);
+background:-ms-linear-gradient(top,#C2C2C2 0%,#ECECEC 50%,#DEDEDE 100%);
+background:linear-gradient(top,#C2C2C2 0%,#ECECEC 50%,#DEDEDE 100%);
+-moz-border-radius:1px;
+-webkit-border-radius:1px;
+border-radius:1px;
+-webkit-box-shadow:inset 0px 0px 5px 0px #777777;
+-moz-box-shadow:inset 0px 0px 5px 0px #777777;
+box-shadow:inset 0px 0px 5px 0px #777777;
+-moz-transition:all 0.4s ease-out;
+-webkit-transition:all 0.4s ease-out;
+-o-transition:all 0.4s ease-out;
+transition:all 0.4s ease-out;
+}
+#white-menu li:last-child a {
+border:none;
+}

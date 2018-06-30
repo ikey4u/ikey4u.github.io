@@ -1,0 +1,208 @@
+/*
+* 本CSS文件是自己根据需要而逐渐增加的样式
+* 最近更新日期:2017.01.30
+*/
+
+
+/* 3d文本 */
+.text3d
+{
+    color: #fafafa;
+    letter-spacing: 0;
+    text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 4px 0px #666, 0px 5px 0px #555, 0px 6px 0px #444, 0px 7px 0px #333, 0px 8px 7px #001135
+}
+/* 子标题 */
+.subtitle
+{
+    color: #390;
+}
+/* 标题框(蓝色) */
+.titlebar
+{
+    background: #2B6695;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+    color: #FFFFFF;
+    font-family: "微软雅黑" , "宋体" , "黑体" ,Arial;
+    font-size: 20px;
+    font-weight: bold;
+    height: 35px; /* box-sizing已经设置为border-box,
+                  因此需要调整总高度,也就是说盒子的宽度和高度包括padding和border区域*/
+    line-height: 25px;
+    margin: 15px 0 !important;
+    padding: 5px 0 5px 20px;
+    text-shadow: 2px 2px 3px #222222;
+    display: block;
+    -webkit-margin-before: 0.67em;
+    -webkit-margin-after: 0.67em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+}
+/* pre标签在指定cornor类时的样式:圆角pre标签,默认是方角标签(在normalize.css中) */
+pre.cornor{
+white-space: pre-wrap;
+word-wrap: break-word;
+border: 2px solid;
+padding: 10px;
+border-radius: 2em;
+line-height: 20px;　　　          　/* 设定文字行距 */
+}
+
+
+/*小节标题样式:*/
+/*用法示例:<p><section class="secstyle">参考</section></p>*/
+.secstyle
+{
+    display: inline-block; 
+    padding: 0.5em; 
+    border-radius: 3px; 
+    color: white; 
+    font-size: 1em; 
+    box-shadow: 0.1em 0.1em 0.2em rgb(165, 165, 165);
+    background-color: #00B271;
+}
+/*代码样式:黑底白字,使用样例 */
+/*<pre class="code cornor"> put your code here...</pre>*/
+.code
+{
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    /*前后均换行*/
+    display:block; 
+    /*background-color: #000;*/
+    background-color: #2db9bf;
+    background-image: linear-gradient(120deg, #3d4c5a, #af82bd);
+}
+/*行内命令或者代码,主要用于显示命令*/
+.icmd
+{
+    display:inline-block;
+    font-family:Courier New,sans-serif;
+    background-color:#2c3838;
+    color:#7ff;
+    border:2px;
+    padding:0px 10px 0px 10px;
+}
+/*缩进段落*/
+/*<div class="minipara"></div>*/
+.minipara
+{
+    margin-left:3%;
+    padding-left:5px;
+    border-left:8px solid green;
+}
+/*显示一些术语或者词汇*/
+/*<b class="term">stdout</b>*/
+.term
+{
+    display:inline-block;
+    font-family:Courier New,sans-serif;
+    color:#800000;
+    margin-left:5px;
+    margin-right:5px;
+}
+/*树形目录*/
+/*修改自:https://github.com/traceybaird/CSS-Tree*/
+/*示例:
+<div class="treebox">
+    <ul class="tree">
+        <!-- =================================================== -->
+        <li><a>进程与线程</a>
+            <ul>
+                <li><a>进程同步的基本概念</a>
+                    <ul>
+                        <li><a>临界资源</a></li>
+                        <li><a>同步</a></li>
+                        <li><a>互斥</a></li>
+                    </ul>
+                </li>
+                <li><a>实现临界区互斥的基本方法</a></li>
+            </ul>
+       </li>
+    </ul>
+</div>
+*/
+.treebox
+{
+    border:1px solid;
+    padding:5px;
+    margin:5px;
+}
+.tree ul 
+{
+    margin-left: 20px;
+}
+.tree li 
+{
+    list-style-type: none;
+    margin:10px;
+    position: relative;
+}
+
+.tree li::before 
+{
+    content: "";
+    position: absolute;
+    top:-7px;
+    left:-20px;
+    border-left: 1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    border-radius:0 0 0 0px;
+    width:20px;
+    height:15px;
+}
+
+.tree li::after 
+{
+    position:absolute;
+    content:"";
+    top:8px;
+    left:-20px;
+    border-left: 1px solid #ccc;
+    border-top:1px solid #ccc;
+    border-radius:0px 0 0 0;
+    width:20px;
+    height:100%;
+}
+
+.tree li:last-child::after  
+{
+    display:none;
+}
+
+.tree li:last-child:before
+{
+    border-radius: 0 0 0 5px;
+}
+
+ul.tree>li:first-child::before 
+{
+    display:none;
+}
+
+ul.tree>li:first-child::after 
+{
+    border-radius:5px 0 0 0;
+}
+
+.tree li a 
+{
+    border: 1px #ccc solid;
+    border-radius: 5px;
+    padding:2px 5px;
+}
+
+.tree li a:hover, .tree li a:hover+ul li a,
+.tree li a:focus, .tree li a:focus+ul li a 
+{
+    background: #ccc; color: #000; border: 1px solid #000;
+}
+
+.tree li a:hover+ul li::after, .tree li a:focus+ul li::after,
+.tree li a:hover+ul li::before, .tree li a:focus+ul li::before 
+.tree li a:hover+ul::before, .tree li a:focus+ul::before 
+.tree li a:hover+ul ul::before, .tree li a:focus+ul ul::before
+{
+    border-color:  #000; /*connector color on hover*/
+}

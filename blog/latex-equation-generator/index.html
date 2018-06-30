@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>LaTex公式图片生成</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="../../home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="../../home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../blog-assets/blog-style.css" type="text/css">
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>LaTex公式图片生成|bugnofree|2015-12-02 三 11:13 下午|</p>
+		</ul>
+		</div>
+	</center>
+    <br/><br/><br/><br/>
+
+
+
+    实际上就是借助Python3调用了几个TeX命令.平台为Linux,要求安装TeX.使用命令如下:<br/><br/><br/>
+    <pre>
+    tex2png.py fname late_math_equation_without_$
+
+    第一个参数为图像文件名,第二个为LaTex数学公式,没有$符号,且需要以双引号括起.
+    </pre>
+    示例用法如下:<br/> <br/>
+    python3 tex2png.py sqrt "\sqrt{x^{2}+\sqrt{y}}\frac{x^{2}}{k+1}+ a_0 + \ <br/>
+    \frac{1}{a_1+\frac{1}{a_2+\frac{1}{a_3+a_4}}} \begin{bmatrix} a&b \\\\ c&d \end{bmatrix}"<br/><br/><br/>
+    将生成如下图片:<br/><br/><br/>
+    <img src="0x001.png" width=90%></img>
+    <br/>
+    代码如下:
+    <hr/>
+    <pre class="cornor">
+    #!  /usr/bin/python3
+    # -*- coding:utf-8 -*-
+
+    #ex:
+    #python3 tex2png.py sqrt "\sqrt{x^{2}+\sqrt{y}}\frac{x^{2}}{k+1}+ a_0 + \frac{1}{a_1+\frac{1}{a_2+\frac{1}{a_3+a_4}}} \begin{bmatrix} a&b \\\\ c&d \end{bmatrix}"
+    import os
+    import sys
+
+    pkg=r"\documentclass{article} \usepackage{amsmath} \usepackage{fullpage} \usepackage{amssymb} \usepackage{latexsym} \pagestyle{empty} "
+    beg=r"\begin{document}"
+    end=r"\end{document}"
+
+    if(len(sys.argv)<=1):
+        print("Please input name and the LaTex Equation!")
+    elif(len(sys.argv)==3):
+        fname,equation=sys.argv[1],sys.argv[2] #文件名和LaTex数学公式
+        texfile=pkg+beg+"$"+equation+"$"+end
+        with open(fname+".tex","w+",encoding="utf-8") as f:
+            f.write(texfile)
+
+        os.system("latex "+fname+".tex")
+        os.system("dvipng "+fname+".dvi -T tight -x 5000  -o "+fname+".png")
+        #下面的是透明背景色
+        #os.system("dvipng "+fname+".dvi -T tight -x 5000 -bg transparent -o "+fname+".png")
+        os.system("rm "+fname+".tex "+fname+".aux "+fname+".dvi "+fname+".log")
+    else:
+        print("Usage:tex2png.py fname late_math_equation_without_$")
+    </pre>
+
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/u/5293648175/home" target="_blank">bugnofree</a>联系我.
+</body>
+</html>

@@ -1,0 +1,112 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>Funny Unicode Characters</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/blog/blog-assets/blog-style.css" type="text/css">
+<!-- 代码高亮 -->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">-->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">-->
+<!--<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>-->
+<!--<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>-->
+<!--<script type="text/javascript">-->
+  <!--hljs.initHighlightingOnLoad();-->
+<!--</script>-->
+</head>
+
+<body >
+    <!-- 菜单条 -->
+	<center>
+		<!-- 保证菜单条完整填充:上右下左 -->
+		<div style="margin: 0px 0% 12px 0%;">
+		<ul id="white-menu">
+		<li ><a href="http://www.ahageek.com/" title="Home">Home</a></li>
+		<li ><a href="http://www.ahageek.com/blog/blog-index.html">Blog</a></li>
+		<li ><a href="http://www.ahageek.com/shotimes/showtimes-index.html">Show Times</a></li>
+		<li><a href="http://www.ahageek.com/readings/readings-index.html">Readings</a></li>
+        <li ><a href="http://www.ahageek.com/about/about-index.html">About</a></li>
+		<!-- 菜单与文章分割线:黑色,宽度为2px -->
+		<li style="background:#000;width:2px;height:52px;"></li>
+		<!-- 文章标题 -->
+		<p>好玩的Unicode字符|bugnofree|2016-06-16 Thu 01:45 PM|</p>
+		</ul>
+		</div>
+	</center>
+<!-- ===========================================下面开始写文章============================================ -->
+<br/> <br/> <br/> <br/>
+<br/><b>本文所涉及的文件(如果有的话)大部分可以通过文章末尾的链接下载.</b> <br/>
+<hr/>
+Unicode字符集除了含有常见的字符之外,还有一些不常用的字符,这些字符或可见,或不可见.
+不可见的字符比如说零长度空格以及反序列字符.
+<h3 class="subtitle">计算机上手动输入Unicode</h3>
+<b>linux:</b><br/>
+
+<p> 方式一:按住Ctrl+Shift不松开,然后依次按下键u以及Unicode字符的十六进制编码值,最后松开Ctrl+Shifit.<br/>
+方式二:同时按下Ctrl+Shift+u再松开,然后输入Unicode字符的十六进制编码值,最后按一下空格或者回车键.<br/> </p>
+
+<b>Windows:</b><br/>
+<p> 打开WordPad或者Microsoft Word,输入Unicode字符的十六进制编码值,然后迅速的按下Alt+x.  </p>
+
+<b>软件:</b><br/>
+<p> VIM:按下Ctrl+v,然后按下u,输入Unicode字符的十六进制编码值.  </p>
+
+<b>HTML:</b><br/>
+<p>比如要在HTML中输入&#x03a9;,则只需输入&amp;#x03a9;即可,其中的'x'表示是十六进制值.</p>
+
+<h3 class="subtitle">一些有趣的Unicode字符</h3>
+<p><b>1.零长度空格字符:</b>该空格的unicode码为0x200B,长度为0但是却真实存在,其编码值为0x200B.
+比如&gt;&#x200b;&lt;,尖括号之间有一个零长度的空格字符,但是看上去就像不存在一样.
+</p>
+这个有什么用处呢?比如你的毕业论文查重....为了减少重复率,你可以在里面加入这样的字符啊..哈哈哈哈..
+
+<p><b>2.字符串序列翻转字符:</b>在正常序列前加上该字符,将会使正常字符翻转顺序.编码值为0x202e.
+比如原来的字符串为12345678,在5前面加上该字符,字符串将会变为:1234‮5678</p>
+有什么用处呢?可以是恶意的,也可以是恶作剧的.下载我们来做一个恶作剧吧!让我们制作一个看起来就像是
+文本文档的程序吧,首先编写如下代码:
+<pre>
+<b>makefile</b>
+all:
+	 i586-mingw32msvc-windres hack.rc -O coff -o hack.res
+	 i586-mingw32msvc-g++ hack.cpp -o hack.exe hack.res
+<b>C++源码</b>
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+
+int main()
+{
+    printf("Xiang kan Pian er? hahahahaha ....\n") ;
+    printf("Hacked By XXXX!\n") ;
+    system("pause");
+    return 0;
+}
+<b>资源文件</b>
+id ICON "./win-text.ico"
+<b>windows全系列图标资源文件</b>
+下载地址见文末
+</pre>
+编译后我们得到这样的一个程序.<br/>
+<br/><img src="0x01.png"></img><br/>
+那么怎么混淆呢?我们上面用的图片资源已经很大程度上迷惑对方了,
+然后我们改后缀为txt,怎么弄呢,首先标记1中的图中,修改名称为"福利你懂的Stxt.exe",
+txt将会作为迷惑性的后缀,字符S呢是为了配合exe,形成Sex这样的效果,最重要的一步是在S和txt之前加上
+那个翻转字符,然后就变成了标记2处的样子.
+
+<hr/>
+相关下载:链接: http://pan.baidu.com/s/1slxhnJn 密码: 39bm
+</body>
+
+
+<!-- ===========================================联系方式============================================ -->
+<br/><br/><br/>
+<hr/>
+本博客不设置评论功能.如有问题可以通过我的邮箱<a href="mailto:dXAyZ2Vla0AxNjMuY29tCg==">dXAyZ2Vla0AxNjMuY29tCg==</a>或者新浪微博:<a href="http://weibo.com/bugnofree" target="_blank">bugnofree</a>联系我.<br/><br/><br/>
+</html>
