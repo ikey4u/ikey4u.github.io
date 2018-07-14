@@ -1,0 +1,25 @@
+@title Ubuntu Server Datetime Sync
+@date 2018-07-14
+
+服务器时间如果不同步, 可能会导致很多时间敏感的服务产生证书错误.
+
+下面是 Ubuntu Server 时间同步的步骤:
+
+> 查看当前服务器时间日期
+date
+
+> 切换到当前时区
+
+timedatectl list-timezones
+
+> 我们设置为香港时区
+sudo timedatectl set-timezone Asia/Hong_Kong
+
+> 切换为 ntpd
+关闭 NTP
+sudo timedatectl set-ntp no
+安装 NTP
+sudo apt-get install ntp
+检测状态
+sudo ntpq -p
+timedatectl
