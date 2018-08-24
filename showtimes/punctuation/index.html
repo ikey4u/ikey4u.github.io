@@ -7,15 +7,18 @@
 <script type="text/javascript">
 $(function(){
     $(".phonetic").each(function(i, v) {
+        $(this).css({"text-align":"center"});
         var music;
         $(this).on('mouseenter', function() {
             mp3_name = $(this).attr("mp3");
             mp3_file = 'http://ahageek.com/showtimes/punctuation/mp3/' + mp3_name;
             music = new Audio(mp3_file);
+            $(this).css({"background-color":"green"});
             music.play().catch(function(){
                 console.log("I just stop playing the pronunciation ...");
             });
         }).on('mouseleave', function(){
+            $(this).css({"background-color":""});
             if(music){
                 music.pause();
             }
@@ -28,6 +31,7 @@ $(function(){
 <div>
     <dl>
         <dt class="dt"><div style="text-align:center"><h3>48个国际音标发音表</h3></div></dt>
+        <hr/>
         <dd>
             <div class="padbd">
                 <div class="b_ybtable">
@@ -160,7 +164,32 @@ $(function(){
                 </div>
             </div>
         </dd>
+    <hr/>
     </dl>
 </div>
+<p>
+录入音标的时候, 只有一些不常见的字符难以录入, 为了方便录入,
+使用下面的映射规则:
+</p>
+
+<pre>
+i: → /iː/
+E  → /æ/
+3: → 3:
+@  → /ə/
+^  → /ʌ/
+U  → /ʊ/
+): → /ɔː/
+D  → /ɒ/
+A  → /ɑː/
+S  → /ʃ/
+0  → /θ/
+R  → /ʒ/
+Z  → /ð/
+</pre>
+
+<hr/>
+<p style="text-align:center"> by bugnofree 2018-08-24 </p>
+<hr/>
 </body>
 </html>
