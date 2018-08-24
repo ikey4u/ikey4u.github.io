@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>音标发音</title>
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script type="text/javascript">
+$(function(){
+    $(".phonetic").each(function(i, v) {
+        var music;
+        $(this).on('mouseenter', function() {
+            mp3_name = $(this).attr("mp3");
+            mp3_file = 'http://ahageek.com/showtimes/punctuation/mp3/' + mp3_name;
+            music = new Audio(mp3_file);
+            music.play().catch(function(){
+                console.log("I just stop playing the pronunciation ...");
+            });
+        }).on('mouseleave', function(){
+            if(music){
+                music.pause();
+            }
+        });
+    });
+});
+</script>
+</head>
+<body>
+<div>
+    <dl>
+        <dt class="dt"><div style="text-align:center"><h3>48个国际音标发音表</h3></div></dt>
+        <dd>
+            <div class="padbd">
+                <div class="b_ybtable">
+                    <table width="100%" border="0" cellpadding="4" cellspacing="1" class="mainybtable ybtable">
+                        <tbody>
+                            <tr>
+                                <th width="50" rowspan="5">元音</th>
+                                <th width="80" rowspan="3">单元音</th>
+                                <th width="100">前元音</th>
+                                <td mp3="i-sound2.mp3" mapid="1" class="phonetic" title=""><span>/iː/</span></td>
+                                <td mp3="i-sound.mp3" mapid="2" class="phonetic" title=""><span>/ɪ/</span></td>
+                                <td mp3="e-sound.mp3" mapid="4" class="phonetic" title=""><span>/e/</span></td>
+                                <td mp3="an-sound.mp3" mapid="5" class="phonetic" title=""><span>/æ/</span></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>中元音</th>
+                                <td>&nbsp;</td>
+                                <td mp3="er-sound.mp3" mapid="8" class="phonetic" title=""><span>/ɜː/</span></td>
+                                <td mp3="e^-sound.mp3" mapid="9" class="phonetic" title=""><span>/ə/</span></td>
+                                <td mp3="^-sound.mp3" mapid="18" class="phonetic" title=""><span>/ʌ/</span></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>后元音</th>
+                                <td mp3="u-sound2.mp3" mapid="10" class="phonetic" title=""><span>/uː/</span></td>
+                                <td mp3="u-sound.mp3" mapid="11" class="phonetic" title=""><span>/ʊ/</span></td>
+                                <td mp3="o-sound2.mp3" mapid="13" class="phonetic" title=""><span>/ɔː/</span></td>
+                                <td mp3="o-sound.mp3" mapid="14" class="phonetic" title=""><span>/ɒ/</span></td>
+                                <td mp3="a-sound2.mp3" mapid="17" class="phonetic" title=""><span>/ɑː/</span></td>
+                            </tr>
+                            <tr>
+                                <th rowspan="2">双元音</th>
+                                <th>开合双元音</th>
+                                <td mp3="ei.mp3" mapid="22" class="phonetic" title=""><span>/eɪ/</span></td>
+                                <td mp3="ai.mp3" mapid="25" class="phonetic" title=""><span>/aɪ/</span></td>
+                                <td mp3="oi.mp3" mapid="28" class="phonetic" title=""><span>/ɔɪ/</span></td>
+                                <td mp3="ao.mp3" mapid="31" class="phonetic" title=""><span>/aʊ/</span></td>
+                                <td mp3="eu.mp3" mapid="35" class="phonetic" title=""><span>/əʊ/</span></td>
+                            </tr>
+                            <tr>
+                                <th>集中双元音</th>
+                                <td mp3="ir.mp3" mapid="37" class="phonetic" title=""><span>/ɪə/</span></td>
+                                <td mp3="er.mp3" mapid="38" class="phonetic" title=""><span>/eə/</span></td>
+                                <td mp3="uer.mp3" mapid="40" class="phonetic" title=""><span>/ʊə/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th rowspan="9">辅音</th>
+                                <th rowspan="2">爆破音</th>
+                                <th>清辅音</th>
+                                <td mp3="p.mp3" mapid="41" class="phonetic" title=""><span>/p/</span></td>
+                                <td mp3="t.mp3" mapid="44" class="phonetic" title=""><span>/t/</span></td>
+                                <td mp3="k.mp3" mapid="47" class="phonetic" title=""><span>/k/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>浊辅音</th>
+                                <td mp3="b.mp3" mapid="42" class="phonetic" title=""><span>/b/</span></td>
+                                <td mp3="d.mp3" mapid="45" class="phonetic" title=""><span>/d/</span></td>
+                                <td mp3="g.mp3" mapid="48" class="phonetic" title=""><span>/ɡ/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th rowspan="2">摩擦音</th>
+                                <th>清辅音</th>
+                                <td mp3="f.mp3" mapid="56" class="phonetic" title=""><span>/f/</span></td>
+                                <td mp3="s.mp3" mapid="50" class="phonetic" title=""><span>/s/</span></td>
+                                <td mp3="ss.mp3" mapid="53" class="phonetic" title=""><span>/ʃ/</span></td>
+                                <td mp3="si.mp3" mapid="59" class="phonetic" title=""><span>/θ/</span></td>
+                                <td mp3="h.mp3" mapid="63" class="phonetic" title=""><span>/h/</span></td>
+                            </tr>
+                            <tr>
+                                <th>浊辅音</th>
+                                <td mp3="v.mp3" mapid="57" class="phonetic" title=""><span>/v/</span></td>
+                                <td mp3="z.mp3" mapid="51" class="phonetic" title=""><span>/z/</span></td>
+                                <td mp3="n3.mp3" mapid="55" class="phonetic" title=""><span>/ʒ/</span></td>
+                                <td mp3="qq.mp3" mapid="61" class="phonetic" title=""><span>/ð/</span></td>
+                                <td mp3="r.mp3" mapid="64" class="phonetic" title=""><span>/r/</span></td>
+                            </tr>
+                            <tr>
+                                <th rowspan="2">破擦音</th>
+                                <th>清辅音</th>
+                                <td mp3="tss.mp3" mapid="65" class="phonetic" title=""><span>/tʃ/</span></td>
+                                <td mp3="tr.mp3" mapid="69" class="phonetic" title=""><span>/tr/</span></td>
+                                <td mp3="ts.mp3" mapid="72" class="phonetic" title=""><span>/ts/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>浊辅音</th>
+                                <td mp3="d3.mp3" mapid="67" class="phonetic" title=""><span>/dʒ/</span></td>
+                                <td mp3="dr.mp3" mapid="71" class="phonetic" title=""><span>/dr/</span></td>
+                                <td mp3="dz.mp3" mapid="73" class="phonetic" title=""><span>/dz/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>鼻音</th>
+                                <th>(浊辅音)</th>
+                                <td mp3="m.mp3" mapid="74" class="phonetic" title=""><span>/m/</span></td>
+                                <td mp3="n.mp3" mapid="75" class="phonetic" title=""><span>/n/</span></td>
+                                <td mp3="ng.mp3" mapid="77" class="phonetic" title=""><span>/ŋ/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>舌则音</th>
+                                <th>(浊辅音)</th>
+                                <td mp3="l.mp3" mapid="80" class="phonetic" title=""><span>/l/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <th>半元音</th>
+                                <th>(浊辅音)</th>
+                                <td mp3="j.mp3" mapid="86" class="phonetic" title=""><span>/j/</span></td>
+                                <td mp3="w.mp3" mapid="83" class="phonetic" title=""><span>/w/</span></td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </dd>
+    </dl>
+</div>
+</body>
+</html>
