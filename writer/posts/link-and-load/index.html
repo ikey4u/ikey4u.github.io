@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>Explore GOT and PLT using radare2</title>
+  <link href="../pigger/css/prism.css" rel="stylesheet" />
+  <link href="../pigger/css/normalize.css" rel="stylesheet" />
+  <link href="../pigger/css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <h1 style="font-size: 2.25rem;"> Explore GOT and PLT using radare2 </h1>
+      <h3 style="font-weight: normal; opacity: 0.7; font-size: 1.15rem;"> 2018-11-02 by bugnofree </h3>
+    </section>
+    
+<h2>基本介绍</h2>
+<p>ELF 将 GOT 拆分为两个表:</p>
+<ul><li>.got 该数组依次存放全局变量的引用地址<li>.got.plt 该数组依次存放函数的引用地址, 该数组的前三个元素如下<ul><li>.got.plt[0]: 保存 .dynamic 地址<li>.got.plt[1]: 保存 link_map 指针<li>.got.plt[2]: 保存 _dl_runtime_resolve 函数地址</li></li></li></ul></li></li></ul>
+<p>其余的每一项均保存外部函数的引用.</p>
+<p>注意引用地址相当于一个指针, 需要解引用才能得到真实的的地址.</p>
+<p>linux 中, 函数符号的动态解析借助于 PLT 实现, PLT 表为 .plt,每一个元素的大小都是 16 字节(32bits 和 64bits 机器上都是如此).</p>
+<p>目标文件(.o)中的重定位表有</p>
+<ul><li>.rel.text<br/>    对代码的重定位, 修正的位置位于 .text<li>.rel.data<br/>    对数据的重定位, 修正的位置位于 .data</li></li></ul>
+<p>动态链接文件(共享库, ELF可执行文件)中的重定位表有</p>
+<ul><li>.rel.dyn: 对数据引用的重定位, 修正位置位于 .got 以及 .data<li>.rel.plt: 对函数引用的重定位, 修正位置位于 .got.plt</li></li></ul>
+<p>注意, 在 x64 下, 重定位表的前缀是 .rela, 比如 .rela.dyn, .rela.text 等.</p>
+<ul><li>.symtab 或者 .dynsym 可以看做是元素为 Elf64_Sym 的数组.<li>.rela.dyn 或者 .rela.plt 可以看做元素为 Elf64_Rela 的数组.</li></li></ul>
+<h2>样例代码</h2>
+<p>测试使用的 C 代码如下, 编译使用 gcc main.c -o main, gcc 版本是 5.4.0:</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(int argc, char **argv)
+{
+    char str[1024];
+
+    strcpy(str, argv[1]);
+    printf(&#34;%s\n&#34;, str);
+    return 0;
+}
+</code></pre>
+<h2>分析 GOT 和 PLT</h2>
+<p>现在我们来看一下 GOT 和 PLT 是如何合作完成符号解析的.在分析之前需要导入 elf.h 头文件, 导入方式如下:</p>
+<pre><code class="language-clike">to /usr/include/linux/elf.h
+</code></pre>
+<p>可以通过 ts 查看导入的结构体.</p>
+<p>看一下 PLT 表:</p>
+<pre><code class="language-clike">[0x00400615]&gt; iS~.plt$
+10 0x00000400    96 0x00400400    96 -r-- .rela.plt
+12 0x00000480    80 0x00400480    80 -r-x .plt
+24 0x00001000    56 0x00601000    56 -rw- .got.plt
+</code></pre>
+<p>这里 .plt 表示的是用于修正函数地址的代码表, 每一个元素都为一段很简短的代码,代码长度为 16 字节; 而 .got.plt 表示的是除去函数之外的其他对象表, 如全局变量;.rela.plt 表示的是函数重定位信息表. 我们先来看一下 .plt 表, 该表大小为 80 字节,每个元素大小为 16 字节, 所以一共有 5 个元素, 每个元素的指令数为 3,我们反编译 15 条指令如下:</p>
+<pre><code class="language-clike">[0x00400480]&gt; pdi 15 @ section..plt
+0x00400480    section..plt:
+0x00400480         ff35820b2000  push qword [rip + 0x200b82]
+0x00400486         ff25840b2000  jmp qword [rip + 0x200b84]
+0x0040048c             0f1f4000  nop dword [rax]
+0x00400490    sym.imp.strcpy:
+0x00400490         ff25820b2000  jmp qword [rip + 0x200b82]
+0x00400496           6800000000  push 0
+0x0040049b           e9e0ffffff  jmp 0x400480
+0x004004a0    sym.imp.puts:
+0x004004a0         ff257a0b2000  jmp qword [rip + 0x200b7a]
+0x004004a6           6801000000  push 1
+0x004004ab           e9d0ffffff  jmp 0x400480
+0x004004b0    sym.imp.__stack_chk_fail:
+0x004004b0         ff25720b2000  jmp qword [rip + 0x200b72]
+0x004004b6           6802000000  push 2
+0x004004bb           e9c0ffffff  jmp 0x400480
+0x004004c0    sym.imp.__libc_start_main:
+0x004004c0         ff256a0b2000  jmp qword [rip + 0x200b6a]
+0x004004c6           6803000000  push 3
+0x004004cb           e9b0ffffff  jmp 0x400480
+</code></pre>
+<p>plt 表的第一个元素是 plt 的桩(stub)代码, 现在先跳过, 其余的每一个元素对应一个函数,先看第一个元素 sym.imp.strcpy, 很显然这对应于 libc 中的 strcpy 函数,该元素的第一条指令是 jmp qword [rip + 0x200b82], 当指令运行到这里是 rip 指向下一条指令,因此 rip = 0x400496, 因此跳转地址 addr =  *(0x400496 + 0x200b82), 那么 addr 的值是什么呢?如下所示</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf q @ 0x400496 + 0x200b82
+0x00601018 = (qword)0x0000000000400496
+</code></pre>
+<p>所以 addr 的值为 0x400496, 也就是说跳转到下一条指令, 看起来这个中间层很多余,但其实十分巧妙, 这个跳转只有在第一次解析时才会跳转到紧挨着的下一条指令处,其他情况下均是直接跳转到函数开始处. 这里的中间层是 0x601018, 这个是什么呢?这个值实际上就是 .got.plt 表某个元素的开始地址. 我们看一下 .got.plt 表,</p>
+<pre><code class="language-clike">[0x00400480]&gt; iS~.got.plt
+24 0x00001000    56 0x00601000    56 -rw- .got.plt
+</code></pre>
+<p>这个表的大小为 56 字节, 每一个元素存放的是一个地址, 因此在 64bits 机器上一个元素的大小是 8 字节,所以一共是 7 个元素, 我们打印一下该表</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf 7q @ section..got.plt
+0x00601000 [0] {
+  0x00601000 = (qword)0x0000000000600e28
+}
+0x00601008 [1] {
+  0x00601008 = (qword)0x00007f1fb0123168
+}
+0x00601010 [2] {
+  0x00601010 = (qword)0x00007f1faff13870
+}
+0x00601018 [3] {
+  0x00601018 = (qword)0x0000000000400496
+}
+0x00601020 [4] {
+  0x00601020 = (qword)0x00000000004004a6
+}
+0x00601028 [5] {
+  0x00601028 = (qword)0x00000000004004b6
+}
+0x00601030 [6] {
+  0x00601030 = (qword)0x00007f1fafb52740
+}
+</code></pre>
+<p>我们前面说过, .got.plt 的前三个元素分别存放的是 .dynamic, link_map 和_dl_runtime_resolve 的地址, 所以从索引 3 处开始看, 可以看到这个元素的的地址正好为 0x601018, 在函数第一次解析之前, 该元素的值是 0x400496,也就是 .plt 表中 jmp 紧挨着的下一跳指令地址.</p>
+<p>接着看 .plt 表中对应于 strcpy 的下一条指令: push 0,这个 0 表示 strcpy 的重定位信息元素在重定位信息表 .rela.plt 中的索引值,在 .rela.plt 中, 每一个元素都是 Elf64_Rela 类型的, 我们先看一下这个表的基本信息:</p>
+<pre><code class="language-clike">[0x00400480]&gt; iS~.rela.plt
+10 0x00000400    96 0x00400400    96 -r-- .rela.plt
+[0x00400480]&gt; t elf64_rela
+pf qqq r_offset r_info r_addend
+[0x00400480]&gt; pfs qqq
+24
+</code></pre>
+<p>表的大小为 96 字节, 元素的大小为 24 字节, 所以一共 4 个元素, 现在我们打印这个表:</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf 4qqq r_offset r_info r_addend @ section..rela.plt
+0x00400400 [0] {
+   r_offset : 0x00400400 = (qword)0x0000000000601018
+     r_info : 0x00400408 = (qword)0x0000000100000007
+   r_addend : 0x00400410 = (qword)0x0000000000000000
+}
+0x00400418 [1] {
+   r_offset : 0x00400418 = (qword)0x0000000000601020
+     r_info : 0x00400420 = (qword)0x0000000200000007
+   r_addend : 0x00400428 = (qword)0x0000000000000000
+}
+0x00400430 [2] {
+   r_offset : 0x00400430 = (qword)0x0000000000601028
+     r_info : 0x00400438 = (qword)0x0000000300000007
+   r_addend : 0x00400440 = (qword)0x0000000000000000
+}
+0x00400448 [3] {
+   r_offset : 0x00400448 = (qword)0x0000000000601030
+     r_info : 0x00400450 = (qword)0x0000000400000007
+   r_addend : 0x00400458 = (qword)0x0000000000000000
+}
+</code></pre>
+<p>Elf64_Rela 结构如下</p>
+<pre><code class="language-clike">typedef struct {
+    Elf32_Addr r_offset;
+    Elf32_Word r_info;
+    Elf32_Sword r_addend;
+} Elf32_Rela;
+</code></pre>
+<p>对于二进制文件或者共享库而言, r_offset 表示存放对应的 .got.plt 元素的地址,r_info 处于 MSB 的 32bits 表示符号表 .dynsym 的索引, LSB 的 32bits 表示重定位类型,</p>
+<p>以上面输出的第一个元素(地址为 0x400400)为例, 则该函数的地址在动态解析后,得到的真实地址应该放到 0x601018, 而这个地址就是 .got.plt 索引为 3 的元素的开始地址,假如我们把 .got.plt 看成一个指针数组 void *GOT = (void *).got.plt,那么函数地址解析后, 存放的单元就是 GOT[(r_offset - .got.plt)/8].使用 radare2 查看如下</p>
+<pre><code class="language-clike">[0x00400480]&gt; ?v section..got.plt
+0x601000
+[0x00400480]&gt; ?vi (0x0000000000601018 - section..got.plt)/8
+3
+</code></pre>
+<p>继续看 r_info, 可知, .dynsym 符号表索引为 0x0000000100000007 &gt;&gt; 32 即0x1, 重定位类型为 0x0000000100000007 &amp; 0xFFFFFFFF = 0x7, 表示 R_AMD64_JUMP_SLOT.</p>
+<p>我们可以嵌入的让 r2 给我们打印 r_info 相关信息, 用到的 pf 语法格式为 N4, N 表示无符号,后面跟上一个数值 1, 2, 4 或者 8 表示大小, 由于是小端序, 所以第一个遇到的32bits 表示类型,后一个 32bits 表示 .dynsym 符号表索引.</p>
+<p>这里我将符号表索引和类型分别命名为 r_sym 和 r_type, 于是便有了如下输出</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf 4qN4N4q r_offset r_type r_sym r_info r_addend  @ section..rela.plt
+0x00400400 [0] {
+   r_offset : 0x00400400 = (qword)0x0000000000601018
+     r_type : 0x00400408 = 7
+      r_sym : 0x0040040c = 1
+     r_info : 0x00400410 = (qword)0x0000000000000000
+}
+0x00400418 [1] {
+   r_offset : 0x00400418 = (qword)0x0000000000601020
+     r_type : 0x00400420 = 7
+      r_sym : 0x00400424 = 2
+     r_info : 0x00400428 = (qword)0x0000000000000000
+}
+0x00400430 [2] {
+   r_offset : 0x00400430 = (qword)0x0000000000601028
+     r_type : 0x00400438 = 7
+      r_sym : 0x0040043c = 3
+     r_info : 0x00400440 = (qword)0x0000000000000000
+}
+0x00400448 [3] {
+   r_offset : 0x00400448 = (qword)0x0000000000601030
+     r_type : 0x00400450 = 7
+      r_sym : 0x00400454 = 4
+     r_info : 0x00400458 = (qword)0x0000000000000000
+}
+</code></pre>
+<p>因此我们需要看一下 .dynsym 表, 该表的每一项均为一个 Elf64_Sym 结构体,在 radare2 中我们使用如下方法打印该表:</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf 6dbbwqq st_name st_info st_other st_shndx st_value st_size  @ section..dynsym
+0x004002b8 [0] {
+    st_name : 0x004002b8 = 0
+    st_info : 0x004002bc = 0x00
+   st_other : 0x004002bd = 0x00
+   st_shndx : 0x004002be = 0x0000
+   st_value : 0x004002c0 = (qword)0x0000000000000000
+    st_size : 0x004002c8 = (qword)0x0000000000000000
+}
+0x004002d0 [1] {
+    st_name : 0x004002d0 = 11
+    st_info : 0x004002d4 = 0x12
+   st_other : 0x004002d5 = 0x00
+   st_shndx : 0x004002d6 = 0x0000
+   st_value : 0x004002d8 = (qword)0x0000000000000000
+    st_size : 0x004002e0 = (qword)0x0000000000000000
+}
+0x004002e8 [2] {
+    st_name : 0x004002e8 = 18
+    st_info : 0x004002ec = 0x12
+   st_other : 0x004002ed = 0x00
+   st_shndx : 0x004002ee = 0x0000
+   st_value : 0x004002f0 = (qword)0x0000000000000000
+    st_size : 0x004002f8 = (qword)0x0000000000000000
+}
+0x00400300 [3] {
+    st_name : 0x00400300 = 23
+    st_info : 0x00400304 = 0x12
+   st_other : 0x00400305 = 0x00
+   st_shndx : 0x00400306 = 0x0000
+   st_value : 0x00400308 = (qword)0x0000000000000000
+    st_size : 0x00400310 = (qword)0x0000000000000000
+}
+0x00400318 [4] {
+    st_name : 0x00400318 = 40
+    st_info : 0x0040031c = 0x12
+   st_other : 0x0040031d = 0x00
+   st_shndx : 0x0040031e = 0x0000
+   st_value : 0x00400320 = (qword)0x0000000000000000
+    st_size : 0x00400328 = (qword)0x0000000000000000
+}
+0x00400330 [5] {
+    st_name : 0x00400330 = 58
+    st_info : 0x00400334 = 0x20
+   st_other : 0x00400335 = 0x00
+   st_shndx : 0x00400336 = 0x0000
+   st_value : 0x00400338 = (qword)0x0000000000000000
+    st_size : 0x00400340 = (qword)0x0000000000000000
+}
+</code></pre>
+<p>命令很长? 我们可以定义一个宏来执行打印, 如下</p>
+<pre><code class="language-clike">(dynsym len, pf $0dbbwqq st_name st_info st_other st_shndx st_value st_size)
+</code></pre>
+<p>宏使用一对括号包起来, 第一个逗号之前的为宏的定义, 包括宏的名称, 参数,之后就是要执行的各个命令, 以逗号分隔. 执行宏的方法如下</p>
+<pre><code class="language-clike">[0x00400480]&gt; .(dynsym 2)
+0x00400480 [0] {
+    st_name : 0x00400480 = 193082879
+    st_info : 0x00400484 = 0x20
+   st_other : 0x00400485 = 0x00
+   st_shndx : 0x00400486 = 0x25ff
+   st_value : 0x00400488 = (qword)0x00401f0f00200b84
+    st_size : 0x00400490 = (qword)0x006800200b8225ff
+}
+0x00400498 [1] {
+    st_name : 0x00400498 = 3909091328
+    st_info : 0x0040049c = 0xe0
+   st_other : 0x0040049d = 0xff
+   st_shndx : 0x0040049e = 0xffff
+   st_value : 0x004004a0 = (qword)0x016800200b7a25ff
+    st_size : 0x004004a8 = (qword)0xffffffd0e9000000
+}
+</code></pre>
+<p>查看定义的所有宏:</p>
+<pre><code class="language-clike">[0x00400480]&gt; (*
+(dynsym len,  pf $0dbbwqq st_name st_info st_other st_shndx st_value st_size)
+</code></pre>
+<p>删除宏: (-dynsym)</p>
+<p>但是宏有一个地方不好就是其输出无法捕获供后续使用. 这里我们打印过滤所有的 st_name:</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf 6dbbwqq st_name st_info st_other st_shndx st_value st_size @ section..dynsym  ~ st_name
+    st_name : 0x004002b8 = 0
+    st_name : 0x004002d0 = 11
+    st_name : 0x004002e8 = 18
+    st_name : 0x00400300 = 23
+    st_name : 0x00400318 = 40
+    st_name : 0x00400330 = 58
+</code></pre>
+<p>然后查看 .dynstr 节区对应的符号, 如下</p>
+<pre><code class="language-clike">[0x00400480]&gt; ps @ section..dynstr + 11
+strcpy
+[0x00400480]&gt; ps @ section..dynstr + 18
+puts
+[0x00400480]&gt; ps @ section..dynstr + 23
+__stack_chk_fail
+[0x00400480]&gt; ps @ section..dynstr + 40
+__libc_start_main
+[0x00400480]&gt; ps @ section..dynstr + 58
+__gmon_start__
+</code></pre>
+<p>到这里基本上把该说的表和结构都说了. 回到 .plt 表的 push 0 指令, 为了方便, 我再写一下对应的 PLT 表元素.</p>
+<pre><code class="language-clike">[0x00400480]&gt; pdi 15 @ section..plt
+0x00400480    section..plt:
+0x00400480         ff35820b2000  push qword [rip + 0x200b82]
+0x00400486         ff25840b2000  jmp qword [rip + 0x200b84]
+0x0040048c             0f1f4000  nop dword [rax]
+0x00400490    sym.imp.strcpy:
+0x00400490         ff25820b2000  jmp qword [rip + 0x200b82]
+0x00400496           6800000000  push 0
+0x0040049b           e9e0ffffff  jmp 0x400480
+</code></pre>
+<p>在第一次解析符号时, jmp 调到紧挨着的下一条指令, 该指令放入 .rela.plt 的元素索引,通过该元素可以得到 strcpy 符号的地址, 进而设置元素值. 在执行 push 之后,一个 jmp 指令跳到了 .plt 表的第一个元素, 可以看到又 push 了一个元素,这是 link_map 指针, 定义在 /usr/include/link.h 中:</p>
+<pre><code class="language-clike">struct link_map
+  {
+    /* These first few members are part of the protocol with the debugger.
+       This is the same format used in SVR4.  */
+
+    ElfW(Addr) l_addr;          /* Difference between the address in the ELF
+                                   file and the addresses in memory.  */
+    char *l_name;               /* Absolute file name object was found in.  */
+    ElfW(Dyn) *l_ld;            /* Dynamic section of the shared object.  */
+    struct link_map *l_next, *l_prev; /* Chain of loaded objects.  */
+  };
+</code></pre>
+<p>这里面的 ElfW 是一个宏, 在 /usr/include/link.h 中可以看到,</p>
+<pre><code class="language-clike">#define ElfW(type)      _ElfW (Elf, __ELF_NATIVE_CLASS, type)
+#define _ElfW(e,w,t)    _ElfW_1 (e, w, _##t)
+#define _ElfW_1(e,w,t)  e##w##t
+</code></pre>
+<p>__ELF_NATIVE_CLASS 是 __WORDSIZE 的别名, 而 __WORDSIZE 在 x86 下是 32, 在 x64下是 64.所以比如 ElfW(Addr) 就是 Elf64_Addr, ElfW(Dyn) 就是 Elf64_Dyn,这些都可以在 /usr/include/linux/elf.h 中查看.</p>
+<p>查看一下 link_map 指针的值:</p>
+<pre><code class="language-clike">[0x00400480]&gt;  pf q @ 0x00400486 + 0x200b82
+0x00601008 = (qword)0x00007f1fb0123168
+</code></pre>
+<p>查看 Elf64_Addr 在 radare2 中的内置类型:</p>
+<pre><code class="language-clike">[0x00400480]&gt; tt Elf64_Addr
+uint64_t
+</code></pre>
+<p>结合 link_map 的指针值 0x00007f1fb0123168, 我们可以定义 link_map 结构体如下</p>
+<pre><code class="language-clike">&#34;td struct link_map {uint64_t l_addr; char *l_name; void *l_ld; struct link_map *l_next, *l_prev;};&#34;
+</code></pre>
+<p>打印该结构体</p>
+<pre><code class="language-clike">[0x00400480]&gt; t link_map
+pf qzppp l_addr l_name l_ld l_next l_prev
+[0x00400480]&gt; pf qzppp l_addr l_name l_ld l_next l_prev @ 0x00007f1fb0123168
+ l_addr : 0x7f1fb0123168 = (qword)0x0000000000000000
+ l_name : 0x7f1fb0123170 = .6....
+   l_ld : 0x7f1fb0123177 = (qword)0x00000000600e2800
+ l_next : 0x7f1fb012317f = (qword)0x007f1fb012370000
+ l_prev : 0x7f1fb0123187 = (qword)0x0000000000000000
+[0x00400480]&gt; pf 4q @ section..got.plt
+0x00601000 [0] {
+  0x00601000 = (qword)0x0000000000600e28
+}
+0x00601008 [1] {
+  0x00601008 = (qword)0x00007f1fb0123168
+}
+0x00601010 [2] {
+  0x00601010 = (qword)0x00007f1faff13870
+}
+0x00601018 [3] {
+  0x00601018 = (qword)0x0000000000400496
+}
+</code></pre>
+<p>为了清晰起见, 我又打印了一下 .got.plt 表的前 4 项, 可以看到 l_ld 中存放的就是GOT[0], 而 GOT[1] 则是 link_map 指针, 因此通过 link_map 可以获取 .dynamic 表的地址.而 .dynamic 表就很厉害了, 这个表的每个元素都是 Elf64_Dyn 类型, 其定义如下</p>
+<pre><code class="language-clike">typedef struct {
+        Elf64_Xword d_tag;
+        union {
+                Elf64_Xword     d_val;
+                Elf64_Addr      d_ptr;
+        } d_un;
+} Elf64_Dyn;
+</code></pre>
+<p>看一下内置类型大小:</p>
+<pre><code class="language-clike">[0x00400480]&gt; tt Elf64_Addr
+uint64_t
+[0x00400480]&gt; tt Elf64_Sxword
+int64_t
+[0x00400480]&gt; tt Elf64_Xword
+uint64_t
+[0x00400480]&gt; tt Elf64_Addr
+uint64_t
+</code></pre>
+<p>都是无符号 64bits 整数. 因此一个元素的大小为 16 字节,可以计算元素数目如下</p>
+<pre><code class="language-clike">[0x00400480]&gt; iS~.dynamic
+22 0x00000e28   464 0x00600e28   464 -rw- .dynamic
+[0x00400480]&gt; ?vi 464 / 16
+29
+</code></pre>
+<p>使用 radare2 打印该表的各个元素</p>
+<pre><code class="language-clike">[0x00400480]&gt; pf 29qq  d_tag d_un @ section..dynamic
+0x00600e28 [0] {
+   d_tag : 0x00600e28 = (qword)0x0000000000000001
+    d_un : 0x00600e30 = (qword)0x0000000000000001
+}
+0x00600e38 [1] {
+   d_tag : 0x00600e38 = (qword)0x000000000000000c
+    d_un : 0x00600e40 = (qword)0x0000000000400460
+}
+0x00600e48 [2] {
+   d_tag : 0x00600e48 = (qword)0x000000000000000d
+    d_un : 0x00600e50 = (qword)0x00000000004006c4
+}
+0x00600e58 [3] {
+   d_tag : 0x00600e58 = (qword)0x0000000000000019
+    d_un : 0x00600e60 = (qword)0x0000000000600e10
+}
+0x00600e68 [4] {
+   d_tag : 0x00600e68 = (qword)0x000000000000001b
+    d_un : 0x00600e70 = (qword)0x0000000000000008
+}
+0x00600e78 [5] {
+   d_tag : 0x00600e78 = (qword)0x000000000000001a
+    d_un : 0x00600e80 = (qword)0x0000000000600e18
+}
+0x00600e88 [6] {
+   d_tag : 0x00600e88 = (qword)0x000000000000001c
+    d_un : 0x00600e90 = (qword)0x0000000000000008
+}
+0x00600e98 [7] {
+   d_tag : 0x00600e98 = (qword)0x000000006ffffef5
+    d_un : 0x00600ea0 = (qword)0x0000000000400298
+}
+0x00600ea8 [8] {
+   d_tag : 0x00600ea8 = (qword)0x0000000000000005
+    d_un : 0x00600eb0 = (qword)0x0000000000400348
+}
+0x00600eb8 [9] {
+   d_tag : 0x00600eb8 = (qword)0x0000000000000006
+    d_un : 0x00600ec0 = (qword)0x00000000004002b8
+}
+0x00600ec8 [10] {
+   d_tag : 0x00600ec8 = (qword)0x000000000000000a
+    d_un : 0x00600ed0 = (qword)0x000000000000005f
+}
+0x00600ed8 [11] {
+   d_tag : 0x00600ed8 = (qword)0x000000000000000b
+    d_un : 0x00600ee0 = (qword)0x0000000000000018
+}
+0x00600ee8 [12] {
+   d_tag : 0x00600ee8 = (qword)0x0000000000000015
+    d_un : 0x00600ef0 = (qword)0x00007f1fb0123140
+}
+0x00600ef8 [13] {
+   d_tag : 0x00600ef8 = (qword)0x0000000000000003
+    d_un : 0x00600f00 = (qword)0x0000000000601000
+}
+0x00600f08 [14] {
+   d_tag : 0x00600f08 = (qword)0x0000000000000002
+    d_un : 0x00600f10 = (qword)0x0000000000000060
+}
+0x00600f18 [15] {
+   d_tag : 0x00600f18 = (qword)0x0000000000000014
+    d_un : 0x00600f20 = (qword)0x0000000000000007
+}
+0x00600f28 [16] {
+}
+0x00600f28 [17] {
+}
+</code></pre>
+<p>很不幸, 遇到了 radare2 的一个 bug, 打印到索引为 16 的元素时, 出现了问题.借助 reaelf 来看一下:</p>
+<pre><code class="language-clike">➜  ~ readelf -d main
+
+Dynamic section at offset 0xe28 contains 24 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000c (INIT)               0x400460
+ 0x000000000000000d (FINI)               0x4006c4
+ 0x0000000000000019 (INIT_ARRAY)         0x600e10
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x600e18
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x400298
+ 0x0000000000000005 (STRTAB)             0x400348
+ 0x0000000000000006 (SYMTAB)             0x4002b8
+ 0x000000000000000a (STRSZ)              95 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000015 (DEBUG)              0x0
+ 0x0000000000000003 (PLTGOT)             0x601000
+ 0x0000000000000002 (PLTRELSZ)           96 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x400400
+ 0x0000000000000007 (RELA)               0x4003e8
+ 0x0000000000000008 (RELASZ)             24 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffe (VERNEED)            0x4003b8
+ 0x000000006fffffff (VERNEEDNUM)         1
+ 0x000000006ffffff0 (VERSYM)             0x4003a8
+ 0x0000000000000000 (NULL)               0x0
+</code></pre>
+<p>通过 .dynamic 表可以得到很多其他重要的表, 如 .dynstr, .dynsym, .rel.plt.</p>
+<p>继续回到 PLT[0] 元素, 在 push 完元素后, 一个 jump 跳转到 _dl_runtime_resolve(在  glibc/sysdeps/x86_64/dl-trampoline.h 中) 函数,而 _dl_runtime_resolve 再调用 _df_fixup 对符号进行解析,_df_fixup 位于glibc/elf/dl-runtime.c 中.  _df_fixup 将会覆盖 GOT 元素, 写入真实的 strcpy 地址.</p>
+<p>动态链接的实现过程在源码级别可以大致描述如下</p>
+<pre><code class="language-clike">RTLD_START()					(sysdeps/i386/dl-machine.h)
+  _dl_start()					(elf/rtld.c)
+    elf_machine_load_addr()
+    elf_get_dynamic_info()
+    ELF_DYNAMIC_RELOCATE()			(elf/dynamic-link.h)
+      elf_machine_runtime_setup()		(sysdeps/i386/dl-machine.h)
+        _ELF_DYNAMIC_DO_RELOC() 		(sysdeps/i386/dl-machine.h)
+        elf_dynamic_do_rel()		(elf/do-rel.h)
+                elf_machine{,_lazy_}rel() 	(sysdeps/i386/dl-machine.h)
+  _dl_start_final()				(elf/rtld.c)
+    _dl_sysdep_start()			(sysdeps/generic/dl-sysdeps.h)
+      _dl_main()				(elf/rtld.c)
+         process_envvars()			(elf/rtld.c)
+         elf_get_dynamic_info()
+         _dl_setup_hash()			(elf.dl-lookup.c)
+         _dl_new_object()			(elf/dl-object.c)
+         _dl_map_object()			(elf/dl-load.c)
+         _dl_map_object_from_fd()		(elf/dl-load.c)
+            add_name_to_object()		(elf/dl-load.c)
+            _dl_new_object()		(elf/dl-object.c)
+            map_segment()
+            ELF_{PREFERED,FIXED}_ADDRESS()
+            mprotect()
+            munmap()
+           _dl_setup_hash()			(elf/dl-lookup.c)
+         _dl_map_object_deps()		(elf/dl-deps.c)
+        preload()
+           _dl_lookup_symbol()		(elf/dl-lookup.c)
+              do_lookup()
+        _dl_relocate_object()		(loop in elf/dl-reloc.c)
+  _start()					(main binary)
+</code></pre>
+<h2>参考</h2>
+<ul><li>Understanding Linux ELF RTLD internals    <a href="http://s.eresi-project.org/inc/articles/elf-rtld.txt">http://s.eresi-project.org/inc/a...</a><li>Linux Internals - The Art Of Symbol Resolution    <a href="https://0x00sec.org/t/linux-internals-the-art-of-symbol-resolution/1488">https://0x00sec.org/t/linux-inte...</a><li>COMPILER, ASSEMBLER, LINKER AND LOADER: A BRIEF STORY    <a href="https://www.tenouk.com/ModuleW.html">https://www.tenouk.com/ModuleW.h...</a><li>Modern Day ELF Runtime infection via GOT poisoning    <a href="http://web.archive.org/web/20111222005751/http://vxheavens.com/lib/vrn00.html">http://web.archive.org/web/20111...</a><li>Why are GOT and PLT still present in Linux static stripped binaries?    <a href="https://reverseengineering.stackexchange.com/questions/2172/why-are-got-and-plt-still-present-in-linux-static-stripped-binaries">https://reverseengineering.stack...</a></li></li></li></li></li></ul>
+
+    <script src="../pigger/js/prism.js"></script>
+  </div>
+  </body>
+</html>
+
