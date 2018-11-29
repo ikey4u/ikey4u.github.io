@@ -1,0 +1,244 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>1.Two Sum</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 菜单样式 -->
+<link rel="stylesheet" href="http://www.ahageek.com/home-assets/white-menu.css" type="text/css">
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../../blog-assets/blog-style.css" type="text/css">
+
+<!--数学公式-->
+    <!--MathJax路径:-->
+    <script type="text/javascript" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_CHTML">
+    </script>
+</head>
+
+<body >
+<!--文章正文-->
+<h3 class="titlebar">Two Sum </h3>
+开始刷Leetcode算法题了,昨天(2017.01.05)看了题,今天把这道题AC了.
+题目如下:
+<img src="problem.png"></img>
+题目含义:<br/>
+给一个整数数组nums以及一个数字target,要你在nums中找出两个数的索引i,j使得
+nums[i]+nums[j]==target.返回i,j即可.假设nums中满足条件的有且仅有一个解.
+<h3 class="titlebar">Solution</h3>
+<pre id='vimCodeElement'>
+<span class="PreProc">#include </span><span class="String">&lt;cstdio&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;iostream&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;unordered_map&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;vector&gt;</span>
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+<span class="Type">class</span> Solution
+{
+<span class="Statement">public</span>:
+    vector&lt;<span class="Type">int</span>&gt; twoSum(vector&lt;<span class="Type">int</span>&gt;&amp; nums, <span class="Type">int</span> target)
+    {
+        <span class="Comment">//Hash表</span>
+        unordered_map&lt;<span class="Type">int</span>,vector&lt;<span class="Type">int</span>&gt; &gt; ht;
+        <span class="Comment">//存放返回结果的向量</span>
+        vector&lt;<span class="Type">int</span>&gt; result;
+        <span class="Comment">//遍历元素</span>
+        <span class="Statement">for</span>(<span class="Type">int</span> i=<span class="Constant">0</span>;i&lt;nums.size();++i)
+        {
+            <span class="Type">int</span> key=nums[i];
+            unordered_map&lt;<span class="Type">int</span>,vector&lt;<span class="Type">int</span>&gt; &gt;::iterator pos = ht.find(target - key);
+            <span class="Comment">//如果target-key在表里面</span>
+            <span class="Statement">if</span>( pos != ht.end())
+            {
+                result.push_back(i);
+                result.push_back(pos-&gt;second[<span class="Constant">0</span>]);
+            }
+            <span class="Statement">else</span>
+            {
+                <span class="Comment">//target-key不在表里面时,先看看表中是否已经有key,如果有key则</span>
+                <span class="Comment">//存入索引即可,注意这里的用的是类似数组的访问方式ht[key]</span>
+                <span class="Statement">if</span>(ht.count(key)) ht[key].push_back(i);
+                <span class="Statement">else</span>
+                {
+                    <span class="Comment">//如果没有key,凑成一对儿加入Hash表</span>
+                    vector&lt;<span class="Type">int</span>&gt; tmp ;
+                    tmp.push_back(i);
+                    ht.insert(make_pair(key,tmp));
+                }
+            }
+        }
+        <span class="Statement">return</span> result;
+    }
+};
+<span class="Comment">//----------------Driver-------------------------</span>
+<span class="Type">int</span> main()
+{
+    vector&lt;<span class="Type">int</span>&gt; nums={<span class="Constant">1</span>,<span class="Constant">7</span>,<span class="Constant">5</span>,<span class="Constant">3</span>,<span class="Constant">3</span>,<span class="Constant">2</span>,<span class="Constant">1</span>,<span class="Constant">1</span>,<span class="Constant">1</span>,<span class="Constant">1</span>};
+    Solution sol;
+    vector&lt;<span class="Type">int</span>&gt; v =  sol.twoSum(nums,<span class="Constant">9</span>);
+    cout&lt;&lt;v[<span class="Constant">0</span>]&lt;&lt;<span class="String">&quot;</span><span class="Special">\t</span><span class="String">&quot;</span>&lt;&lt;v[<span class="Constant">1</span>]&lt;&lt;endl;
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+<span class="Comment">/*</span>
+<span class="Comment">//-----makefile</span>
+<span class="Comment">all:</span>
+<span class="Comment">    @g++ -std=c++11 solve.cpp -o   solve</span>
+<span class="Comment">    @./solve</span>
+<span class="Comment">clean:</span>
+<span class="Comment">    rm -f solve</span>
+<span class="Comment">    reset</span>
+<span class="Comment">//----leetcode accepted</span>
+<span class="Comment">16 / 16 test cases passed.</span>
+<span class="Comment">Status: Accepted</span>
+<span class="Comment">Runtime: 43 ms</span>
+<span class="Comment">Submitted: 0 minutes ago</span>
+<span class="Comment">2017-01-06 Fri 02:15 PM</span>
+<span class="Comment">*/</span>
+</pre>
+<h3 class="titlebar">Analysis</h3>
+<p>自C++ 11标准出来,STL中Hash表用的是unordered_map这个容器,以前用的是hash_map.我用的g++编译器,
+使用这个新的容器需要开启-std=c++11这个选项,具体的makefilek,Solution一节里面有.<p/>
+<p>先来简单回顾一下Hash表,Hash表的原理是<b>addr=Hash(key)</b>,可以看到有三部分组成:addr,Hash(),key.
+也就是给一个键值key,通过一个哈希函数Hash,计算出存储地址addr.根据存储空间的动静,
+Hash算法分为两种:一种是开放地址法(静态),另一种是拉链法(动态).</p>
+<ul>
+    <li>开放地址法:随之而来的问题就是元素碰撞, 解决冲突的主要方法有:线性探测,平方探测,再散列,它们都是给出下一个位置偏移.</li>
+    <li>拉链法:很少考虑碰撞问题,因为散列地址的元素会把放到一条链表上,通常称为桶(bucket),来一个相同散列地址的元素,就new一个空间,然后放到桶里.</li>
+</ul>
+我们以数据{11,13,5,3,9,2,7,5}为例,取表长为10,Hash函数选择除留余数法,那么有Hash(key)=key%7,除数选择小于等于表长的最大质数,这里取7,开放定址冲突用线性探测解决,
+那么则有:
+<pre>
+Hash(11)=4  Hash(13)=6  Hash(5)=5   Hash(3)=3   Hash(9)=2   Hash(2)=2   Hash(7)=0
+</pre>
+于是可以很快的给出两种情况下的Hash表,如下:
+<img src="hash-table.png"></img>
+<p>对应于STL中,unordered_map就是使用开放链表构建的Hash表,基本结构是<b>(key,maped_values)</b>.因此我们就用它来解决问题.</p>
+<p>由于涉及都是基本的内置数据类型,
+因此我们不需要另外实现Hash函数和比较函数,那么接下来就是决定谁做key,我们一思考,采用索引做key是不合理的,因为索引本来就是[0,n)这样一组连续增长的序列,
+这样用Hash没什么意义.于是我们可以以向量nums中的元素作为key</p>
+<p>保存的值为该key对应的索引,由于可能相同的元素,那么我们第二个元素maped_values应该是一个向量(这里使用vector),来存重复元素的不同索引,
+比如key=2有两个,那么key的value1,value2就分别是2的两个索引,这就解释了上图大括号处的含义.</p>
+<p> 说了这么多,接下来才是该算法的核心思路.</p>
+<b>
+    <p>首先依次遍历向量nums中的元素,遇到元素nums[i],记做key,检测target-key是否在Hash表中,如果在说明我们已经找到了,算法结束.</p>
+    <p>如果target-key没有在Hash表里面,当key已经存在于表中时,存入新的索引,如果不在表中,那么将该元素key弄成"一对儿"加到Hash表里面.</p>
+</b>
+<p>另外要注意的是,STL中的元素访问可以使用类似数组的方式访问(称为Associative Arrays:关联数组),比如代码中ht[key].</p>
+<p>如果熟悉unordered_map的操作,写出上面的代码并不是很难.</p>
+<h3 class="titlebar">Supplement</h3>
+<p>刚开始我对这个unordered_map容器不是很了解,参考The C++  standard Library A Tutorial and reference 2th总结了一下.</p>
+<h4 class="subtitle">无序容器基本概念</h4>
+unordered_map属于无序容器,无序容器包(unordered container)含四类:
+<b>无序不重复集合(unordered_set),无序可重复集合(unordered_multiset),无序不重复映射(unordered_map),无序可重复映射(unordered_multimap)</b>
+<p>对于集合set,不重复就是说集合里的不能有重复元素,而可重复就是说集合里面可以有重复的元素.对于映射,重复与否则是针对键而言的.</p>
+这里主要介绍unordered_map.它声明与std命名空间中,其类模板定义如下:
+<pre id='vimCodeElement'>
+template <span class="Function">&lt;</span>typename<span class="Function"> Key, typename T,</span>
+<span class="Function">typename Hash =</span><span class="String"> hash&lt;T</span><span class="Function">&gt;</span>,
+typename EqPred = equal_to<span class="Function">&lt;</span>T<span class="Function">&gt;</span>,
+typename Allocator = allocator<span class="Function">&lt;</span>pair<span class="Function">&lt;</span>const<span class="Function"> Key, T&gt;</span> <span class="Error">&gt;</span> <span class="Error">&gt;</span>
+class unordered_map;
+</pre>
+可以看到一共有五个参数,其中前两个是必须提供的,后两个是可选的.五个参数含义如下:
+<ul>
+    <li><b>Key</b>:代表元素的键</li>
+    <li><b>T</b>:与元素关联的值的类型</li>
+    <li><b>Hash</b>:Hash函数,显然这里传入的也是一个模板类.如果T是内置数据类型,则自动使用默认的Hash函数,定义在functional头文件中</li>
+    <li><b>EqPred</b>:判等函数,也是一个模板类.自己提供或者系统默认.</li>
+    <li><b>Allocator</b>:较为底层的内存分配器,可以是自己提供,也可是使用STL中默认的allocator,它比new更底层,new分配的内存已经构造了分配对象的结构,而allocator分配的内存则是一款"单纯"的空白内存块.</li>
+</ul>
+上述五个参数中,Key和T必须是<b>可比较的</b>且是<b>可复制的</b>.
+<h4 class="subtitle">无序容器的创建</h4>
+常用的三种创建方式如下:
+<pre id='vimCodeElement'>
+unordered_map<span class="Function">&lt;</span>Key<span class="Function">,T&gt;</span>
+unordered_map<span class="Function">&lt;</span>Key<span class="Function">,T,Hash&gt;</span>
+unordered_map<span class="Function">&lt;</span>Key<span class="Function">,T,Hash,Cmp&gt;</span>
+</pre>
+你可以用一个初始化列表来初始化容器:
+<pre>
+std::unordered_map&lt;std::string,std::string&gt; mymap;
+mymap = {{"Australia","Canberra"},{"U.S.","Washington"},{"France","Paris"}};
+//或者等价的如下:
+std::unordered_map&lt;std::string,std::string&gt; mymap({{"Australia","Canberra"},{"U.S.","Washington"},{"France","Paris"}});
+</pre>
+但是要注意,上述两者的构造结果并不同(但是这是为什么呢?)如下:
+<pre id='vimCodeElement'>
+<span class="PreProc">#include </span><span class="String">&lt;cstdio&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;iostream&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;unordered_map&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;vector&gt;</span>
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+<span class="Type">void</span> PrintBucket(unordered_map&lt;string,string&gt; mymap)
+{
+  <span class="Statement">for</span> ( <span class="Type">auto</span> it = mymap.begin(); it != mymap.end(); ++it ) std::cout &lt;&lt; <span class="String">&quot; &quot;</span> &lt;&lt; it-&gt;first &lt;&lt; <span class="String">&quot;:&quot;</span> &lt;&lt; it-&gt;second;
+  std::cout &lt;&lt; std::endl;
+  std::cout &lt;&lt; <span class="String">&quot;buckets contain:</span><span class="Special">\n</span><span class="String">&quot;</span>;
+  <span class="Statement">for</span> ( <span class="Type">unsigned</span> i = <span class="Constant">0</span>; i &lt; mymap.bucket_count(); ++i)
+  {
+      std::cout &lt;&lt; <span class="String">&quot;bucket #&quot;</span> &lt;&lt; i &lt;&lt; <span class="String">&quot; contains:&quot;</span>;
+      <span class="Statement">for</span> ( <span class="Type">auto</span> local_it = mymap.begin(i); local_it!= mymap.end(i); ++local_it )
+          std::cout &lt;&lt; <span class="String">&quot; &quot;</span> &lt;&lt; local_it-&gt;first &lt;&lt; <span class="String">&quot;:&quot;</span> &lt;&lt; local_it-&gt;second;
+      std::cout &lt;&lt; std::endl;
+  }
+}
+<span class="Type">int</span> main()
+{
+    std::unordered_map&lt;std::string,std::string&gt; imap;
+    imap = {{<span class="String">&quot;Australia&quot;</span>,<span class="String">&quot;Canberra&quot;</span>},{<span class="String">&quot;U.S.&quot;</span>,<span class="String">&quot;Washington&quot;</span>},{<span class="String">&quot;France&quot;</span>,<span class="String">&quot;Paris&quot;</span>}};
+    std::unordered_map&lt;std::string,std::string&gt; iimap({{<span class="String">&quot;Australia&quot;</span>,<span class="String">&quot;Canberra&quot;</span>},{<span class="String">&quot;U.S.&quot;</span>,<span class="String">&quot;Washington&quot;</span>},{<span class="String">&quot;France&quot;</span>,<span class="String">&quot;Paris&quot;</span>}});
+    cout&lt;&lt;endl;
+    PrintBucket(imap);cout&lt;&lt;endl;
+    PrintBucket(iimap);
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+</pre>
+输出结构如下:
+<pre>
+U.S.:Washington France:Paris Australia:Canberra
+buckets contain:
+bucket #0 contains:
+bucket #1 contains:
+bucket #2 contains: U.S.:Washington
+bucket #3 contains: France:Paris Australia:Canberra
+bucket #4 contains:
+bucket #5 contains:
+bucket #6 contains:
+bucket #7 contains:
+bucket #8 contains:
+bucket #9 contains:
+bucket #10 contains:
+
+France:Paris Australia:Canberra U.S.:Washington
+buckets contain:
+bucket #0 contains:
+bucket #1 contains: France:Paris
+bucket #2 contains:
+bucket #3 contains: U.S.:Washington
+bucket #4 contains:
+bucket #5 contains:
+bucket #6 contains: Australia:Canberra
+</pre>
+另外两种方法是:用复制构造方法来初始化,也就是unordered_map iimap(imap)以及用另一个map的子范围,比如unordered_map iimap(imap.begin(),imap.end()),
+注意初始化后的范围是[begin,end).
+<h4 class="subtitle">常用操作</h4>
+我们记c为一个无序容器对象.
+<ul>
+    <li>c.count(key):返回键key的个数</li>
+    <li>c.find(key);返回key第一次出现的位置(为一个迭代器)</li>
+    <li>c.begin(),c.end(),c.rbegin(),c.rend():见名思义,不解释</li>
+    <li>c.insert(elem):插入元素elem,也就是一个键值对:可以使用{key,value}或者make_pair(key,value)</li>
+    <li>c.insert(pos,elem):从pos开始(包括pos)寻找插入位置,返回新插入元素的位置</li>
+    <li>c.erase(key)或c.erase(pos):删除所有键为key的元素或删除pos处的元素</li>
+    <li>c.bucket_count():桶的数目</li>
+    <li>c[key]:如果不存在键为key的元素,则插入键为key的元素,否则返回键为key的元素值的引用</li>
+</ul>
+更多请参考 The C++ standard Library A Tutorial and reference 2th 一书.
+
+</body>
+</html>

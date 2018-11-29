@@ -1,0 +1,125 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>palindrome-number</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../blog-assets/blog-style.css" type="text/css">
+
+<!--MathJax数学公式-->
+<!-- 参考:https://mathjax-chinese-doc.readthedocs.io/en/latest/start.html#id5-->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!--数学公式示例:-->
+<!--When $a \ne 0$, there are two solutions to \(ax^2 + bx + c = 0\) and they are-->
+<!--$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$-->
+</head>
+
+<body >
+<!--文章正文-->
+<h3 class="titlebar">Palindrome Number</h3>
+<img src="1.png" alt="">
+<center>图1:题目</center>
+<p>题目大意:不使用任何附加空间的情况下判定一个整数是否是回文.</p>
+<p>你需要考虑负数是否是回文.</p>
+<h3 class="titlebar">Solution</h3>
+<pre id='vimCodeElement'>
+<span class="PreProc">#include </span><span class="String">&lt;iostream&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;cstring&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;algorithm&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;cmath&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;climits&gt;</span>
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+<span class="Type">class</span> Solution
+{
+<span class="Statement">public</span>:
+  <span class="Type">bool</span> isPalindrome(<span class="Type">int</span> x)
+  {
+      <span class="Comment">//负数不是回文</span>
+      <span class="Statement">if</span>(x &lt; <span class="Constant">0</span>) <span class="Statement">return</span> <span class="Constant">false</span>;
+      <span class="Comment">//最左边,最右边的数位编号</span>
+      <span class="Type">int</span> left = <span class="Constant">1</span>,right = floor(log10(x * <span class="Constant">1.0</span>)) + <span class="Constant">1</span>;
+      <span class="Comment">//取最左边的数位因子:</span>
+      <span class="Comment">//1==&gt;10^0 2==&gt;10^1 3==&gt;10^2 len==&gt;10^(len-1)</span>
+      <span class="Comment">//int head = pow(10,right - 1);</span>
+      <span class="Type">int</span> head = <span class="Constant">1</span>;
+      <span class="Statement">for</span>(<span class="Type">int</span> i = <span class="Constant">1</span>; i &lt; right; ++i) head *= <span class="Constant">10</span>;
+      <span class="Comment">//回文检测</span>
+      <span class="Statement">while</span>(left &lt;= right)
+      {
+          <span class="Type">int</span> l = x / head;
+          <span class="Type">int</span> r = x % <span class="Constant">10</span>;
+          <span class="Statement">if</span>(l != r) <span class="Statement">return</span> <span class="Constant">false</span>;
+          ++left;
+          --right;
+          x = x - l * head;
+          x = (x - r) / <span class="Constant">10</span>;
+          head /= <span class="Constant">100</span>;
+      }
+      <span class="Statement">return</span> <span class="Constant">true</span>;
+  }
+};
+
+<span class="Comment">//=======================Driver===========================</span>
+<span class="Type">int</span> main()
+{
+    Solution sol;
+    cout&lt;&lt;sol.isPalindrome(-<span class="Constant">1</span>)&lt;&lt;endl;
+    cout&lt;&lt;sol.isPalindrome(<span class="Constant">1</span>)&lt;&lt;endl;
+    cout&lt;&lt;sol.isPalindrome(<span class="Constant">10</span>)&lt;&lt;endl;
+    cout&lt;&lt;sol.isPalindrome(<span class="Constant">121</span>)&lt;&lt;endl;
+    cout&lt;&lt;sol.isPalindrome(<span class="Constant">INT_MAX</span>)&lt;&lt;endl;
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+
+<span class="Comment">/*</span>
+<span class="Comment">===========makefile=================</span>
+<span class="Comment">all:</span>
+<span class="Comment">    @g++  solve.cpp -o   solve</span>
+<span class="Comment">    @./solve</span>
+<span class="Comment">clean:</span>
+<span class="Comment">    rm -f solve</span>
+<span class="Comment">    reset</span>
+<span class="Comment">===========leetcode accepted========</span>
+<span class="Comment">11507 / 11507 test cases passed.</span>
+<span class="Comment">Status: Accepted</span>
+<span class="Comment">Runtime: 185 ms</span>
+<span class="Comment">Submitted: 0 minutes ago</span>
+<span class="Comment">===========submission date=========</span>
+<span class="Comment">2017-02-03 Fri 10:51 AM</span>
+<span class="Comment">*/</span>
+</pre>
+<h3 class="titlebar">Analysis</h3>
+<p>这道题Leetcode上给定的等级为Easy级别,判断一个字符串是否是回文是很容易的,
+就是拿一个头指针,拿一个尾指针,然后相向而行,逐一判断.同样的道理,也可以应用到本题目.</p>
+<p>首先是确定整数的长度,用$\log_pN+1$即为p进制数N的长度.这个我在前面的算法有提到过.
+接下来就是取最左边的数字以及最右边的数字,取最右边的数字很简单了,直接对10求余即可.</p>
+<p>怎么取最左边的数位呢?也不难.比如12,取1的话只需12/10,再如123,取1的话只需123/100.
+类似地,我们可以知道长度为L的整数N,取最左边的数值方法为N/(10^(L-1)).这里记head为N/(10^(L-1)).</p>
+<p>分析完了就上代码啦.需要注意的地方就是更新head,由于N每次减少首位两位数字,所以head=head/100,
+对于数值N,更新时掐去首位即可.</p>
+<h3 class="titlebar">Supplement</h3>
+<pre id='vimCodeElement'>
+int kth(int x,int k)
+{
+    int len = floor(log10(x * 1.0)) + 1;
+    int m = floor(x / pow(10,len - k));
+    int n = 10 * floor(x / pow(10,len - k + 1));
+    return  m - n;
+}
+</pre>
+<p>上面这个函数是使用纯粹数学的方法来求得整数x的第k位数值.整数是从左到右从1开始编号.比如kth(1234,3)返回3.
+其中的数学原理,手动模拟一下应该不难理解,在博客上写数学符号确实很麻烦(其实是懒啦~~),此处就从略了.</p>
+</body>
+</html>

@@ -1,0 +1,106 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>华为悦盒破解</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../blog-assets/blog-style.css" type="text/css">
+ 
+<!-- 代码高亮:不再使用 2016-06-16 Thu 02:27 PM -->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs.css">-->
+<!--<link rel="stylesheet" href="http://www.ahageek.com/home-assets/highlight-codes/hljs-sublime.css">-->
+<!--<script src="http://www.ahageek.com/home-assets/highlight-codes/hljs.js"></script>-->
+<!--<script src="http://www.ahageek.com/home-assets/jquery/2.1.4/jquery-2.2.0.min.js"></script>-->
+<!--<script type="text/javascript">-->
+  <!--hljs.initHighlightingOnLoad();-->
+<!--</script>-->
+
+
+<!--数学公式-->
+    <!--MathJax路径:-->
+    <script type="text/javascript" async 
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=AM_CHTML">
+    </script>
+</head>
+
+<body >
+<!--文章正文-->
+<i>若干个月前,办了一个宽带,然后送了一个华为悦盒,我家电视是十多年前买的那种老电视,俗称彩电.办宽带的时候说时送1年IPTV.
+我也不懂是啥,据说可以看电视,但是当时我家有大锅,我就没去鼓捣,然而一次大锅不小心被风吹废了.于是就想起了送的1年免费IPTV.
+然而,一番折腾,怎么也连不上,IPTV总是提示账号连接不成功.于是我就给联通打电话,反应相当迅速,上午打,下午技术人员就来了.
+技术人员弄了一下午,告诉我,你去买个天猫魔盒吧,你的IPTV可能是被人给注销了,我心里一万个"纳尼????",一下午就给我个这??
+默默送走了技术人员,我父母说,这咋整,看不成电视了.我说那就让我have a try...于是有了此文...</i><br/><br/>
+我从http://www.znds.com/和bbs.shafa.com得到了许多帮助,特此感谢,我主要是按照前辈们的指导步骤去做并实践成功,底层的原理还不是很清楚,but hacking is always on the way.
+<br/> <br/><br/>
+先说一下悦盒相关信息:
+<pre>
+<b>系统版本</b>:Android4.4.4 <b>软件版本</b>:B012 <b>硬件版本</b>:EC6108V9A  <b>RAM(运行内存)</b>:1GB  <b>ROM(内置Flash闪存)</b>:4GB
+</pre> 配置还不错吧,我感觉确实挺好的,比路由器的可玩性多了去了.
+<h3 class="titlebar">连接方式</h3>
+华为悦盒的连接方式如下:<img src="connection.png"></img><br/>
+<h4 class="subtitle">USB连接</h4>
+上图少画了一个Micro SD接口,不同机子可能位置,提供的接口不同.在刷机的时候,USB孔随便选择一个插入U盘,U盘不能超过4GB,
+机子的配置ROM为4GB,32位的Linux内核,可寻址就这么大.刚开始没有4GB的U盘,我拿了个32GB的U盘,试了试果然不行,找来找去,
+找到了一个Micro SD卡,正好还有个Micro SD接口,插上就好了.文末你可以下载对应的固件,解压后含有如下内容:
+<img src="firmware.png"></img>
+你要把这些文件放在U盘根目录下面,然后再插入到盒子上面.
+<h4 class="subtitle">网线连接</h4>
+一根网线,一头连接到盒子上,一头连接到电脑上.
+<h4 class="subtitle">其他</h4>
+其他按图连接即可.
+<h3 class="titlebar">刷机</h3>
+我的盒子是不带装备测试选项,如果你的盒子有,依次[设置/更多/高级设置(密码8288)],
+在高级设置的最下面会找到一个<b>装备测试</b>选项,没有也没关系,按下面的来就行.我的就没有.
+这一步网上好多说的不清楚,都是狂按遥控上的开机键,哪里有开机键,我试了好大一会儿,是这样的:<br/>
+关闭盒子上的开关,然后重新打开,打开的时候,不停的按下<b>待机</b>键,不是按着不松,而是快速的按下松开这样子.然后就进入刷机界面了.
+刷机界面有如下内容:
+<pre>
+Android system recovery 
+-----------------------------------------
+Android system recovery utility
+1.Apply update from external storage
+2.Apply update from backup
+3.Wipe dalvik-cache partition
+4.Wipe date/factory reset
+5.Wipe userdata partition
+6.Reboot
+</pre>
+我们就是选择第一个了,从外部存储也就是我们的U盘刷入固件.刷入成功后,会自动重启,
+等待重启完毕,这样更新固件就搞好了,然后,依次[更多/高级设置(密码:10010)/装备测试(密码:131022)],
+选择<b>装备测试</b>选项,进入即可.
+
+<h3 class="titlebar">获取root</h3>
+现在回到你的电脑(我用的是Ubuntu 14.04 x64),设置有线网络连接如下:
+<img src="01.png"></img>
+IP地址选择手动,然后按照图上配置.完事儿后,打开命令行,输入命令 telnet 172.16.20.14:
+<img src="02.png"></img>
+接下来我们要把U盘mount到系统下面,先按照下图确定要mount的U盘文件格式以及分区等:
+<img src="03.png"></img>
+确定信息后,就很简单啦:
+<pre>
+mkdir -p /tmp/udisk
+mount -t vfat /dev/block/mmcblk1p1 /tmp/udisk
+/tmp/udisk/rootv9a.sh
+</pre>
+特别是中间那行,你自己要按照你自己的实际情况来.执行情况输出如下所示就表示成功了:
+<img src="04.png"></img>
+等待盒子重启后,把盒子的网线插到路由器上,Everthing is Done!But One more thing:
+你可能发现WIFI连接不上,没事儿,能插上网线就行,测测网速吧,能测动就说明能联网了,
+另外,这个固件里面的沙发应用有点旧,里面的一个电视直播总是"停止运行",升级一下就可以了!
+
+
+
+
+
+</body>
+
+<br/>
+<hr/>
+固件下载:链接: https://pan.baidu.com/s/1qXYX1ak 密码: jz2s<br/>
+</html>

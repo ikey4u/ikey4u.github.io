@@ -1,0 +1,135 @@
+﻿<!doctype html>
+<html>
+<head>
+<!-- 网页头部信息 -->
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta charset="UTF-8">
+<!-- 网页标题 -->
+<title>ZigZag Conversion</title>
+<!-- 网页图标 -->
+<link rel="shortcut icon" href="http://www.ahageek.com/home-assets/favicon.ico" type="image/x-icon" />
+<!-- 文章样式 -->
+<link rel="stylesheet" href="../blog-assets/blog-style.css" type="text/css">
+
+
+<!--MathJax数学公式-->
+<!-- 参考:https://mathjax-chinese-doc.readthedocs.io/en/latest/start.html#id5-->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!--数学公式示例:-->
+<!--When $a \ne 0$, there are two solutions to \(ax^2 + bx + c = 0\) and they are-->
+<!--$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$-->
+</head>
+
+<body >
+<!--文章正文-->
+<h3 class="titlebar">ZigZag Conversion</h3>
+<img src="problem.png"></img>
+题目大意:将以zigzag模式(也就是"之"字形)写出来的字符串按行读取得到一个新的字符串,返回这个新的字符串.
+比如说字符串"PAYPALISHIRING"是以"之"字形模式写出来的,直观来看如下所示:
+<pre>
+P   A   H   N
+A P L S I I G
+Y   I   R
+</pre>
+那么按行读取,就得到"PAHNAPLSIIGYIR",那么返回"PAHNAPLSIIGYIR"即可.
+<h3 class="titlebar">Solution</h3>
+<pre id='vimCodeElement'>
+<span class="PreProc">#include </span><span class="String">&lt;iostream&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;string&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;algorithm&gt;</span>
+<span class="PreProc">#include </span><span class="String">&lt;cmath&gt;</span>
+<span class="Statement">using</span> <span class="Type">namespace</span> std;
+<span class="Type">class</span> Solution
+{
+<span class="Statement">public</span>:
+    string convert(string s, <span class="Type">int</span> numRows)
+    {
+        <span class="Comment">//如果行为1,则不需要转换</span>
+        <span class="Statement">if</span>(numRows == <span class="Constant">1</span>) <span class="Statement">return</span> s;
+        <span class="Comment">//返回字符串初始为空</span>
+        string ss(<span class="String">&quot;&quot;</span>);
+        <span class="Comment">//行数,字符串长度</span>
+        <span class="Type">int</span> rows = numRows,len = s.length();
+        <span class="Comment">//zz的长度 zz的数目</span>
+        <span class="Type">int</span> ziglen = rows + (rows - <span class="Constant">2</span>);
+        <span class="Type">int</span> zigcnt = ceil(len * <span class="Constant">1.0</span> / ziglen);
+        <span class="Statement">for</span>(<span class="Type">int</span> i = <span class="Constant">0</span>;i &lt; rows;++i)
+        {
+            <span class="Type">int</span> p = i;
+            <span class="Comment">//第一行和最后一行,只需缀一次</span>
+            <span class="Statement">if</span>(i == <span class="Constant">0</span> || i == rows - <span class="Constant">1</span>)
+                <span class="Statement">for</span>(<span class="Type">int</span> j = <span class="Constant">0</span>;j &lt; zigcnt &amp;&amp; p &lt; len; ++j)
+                {
+                    ss += s[p];
+                    p += ziglen;
+                }
+            <span class="Comment">//其他行则需缀两次</span>
+            <span class="Statement">else</span>
+                <span class="Statement">for</span>(<span class="Type">int</span> j = <span class="Constant">0</span>;j &lt; zigcnt;++j)
+                {
+                    <span class="Statement">if</span>(p &lt; len) ss += s[p];
+                    <span class="Comment">//边界索引和ziglen * (2 * j + 1)</span>
+                    <span class="Statement">if</span>(ziglen * (<span class="Constant">2</span> * j + <span class="Constant">1</span>) - p &lt; len) ss += s[ziglen * (<span class="Constant">2</span> * j + <span class="Constant">1</span>) - p];
+                    p += ziglen;
+                }
+        }
+        <span class="Statement">return</span> ss;
+    }
+};
+<span class="Comment">//=======================Driver===========================</span>
+<span class="Type">int</span> main()
+{
+    Solution sol;
+    <span class="Comment">//cout&lt;&lt;sol.convert(&quot;PAYPALISHIRING&quot;, 3)&lt;&lt;endl;</span>
+    <span class="Comment">//cout&lt;&lt;sol.convert(&quot;&quot;, 1)&lt;&lt;endl;</span>
+    cout&lt;&lt;sol.convert(<span class="String">&quot;A&quot;</span>, <span class="Constant">2</span>)&lt;&lt;endl;
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+
+<span class="Comment">/*</span>
+<span class="Comment">===========complexity==============</span>
+<span class="Comment">Time Complexity:O(n))</span>
+<span class="Comment">Space Complexity:O(1)</span>
+<span class="Comment">===========makefile=================</span>
+<span class="Comment">all:</span>
+<span class="Comment">    @g++  solve.cpp -o   solve</span>
+<span class="Comment">    @./solve</span>
+<span class="Comment">clean:</span>
+<span class="Comment">    rm -f solve</span>
+<span class="Comment">    reset</span>
+<span class="Comment">===========leetcode accepted========</span>
+<span class="Comment">1158 / 1158 test cases passed.</span>
+<span class="Comment">Status: Accepted</span>
+<span class="Comment">Runtime: 16 ms</span>
+<span class="Comment">Submitted: 0 minutes ago</span>
+<span class="Comment">===========submission date=========</span>
+<span class="Comment">2017-01-14 Sat 08:08 PM</span>
+<span class="Comment">*/</span>
+</pre>
+<h3 class="titlebar">Analysis</h3>
+<p>leetcode对这道题的评级是Easy,当然就是很Easy啦,确实很Easy啦.</p>
+<p>这道题一个比较大的坎是意识到zigzag到底是什么形状,给出的样例case是三行,那么四行应该长什么样呢?
+我想了一会儿,觉得zigzag应该是"正方形"这样的,这样画"之"字中间的斜线时,才有可能穿过元素点,还是看图:</p>
+<img src="drawing.png"></img>
+<p>然后就开始写代码了,代码AC了,验证了我的想法是正确的.</p>
+<p>Easy到底Easy在哪里,我认为主要是Easy在它不那么难以理解,这题感觉就跟初三那些几何题目似的,有趣味,但是不难.</p>
+<p>来说说代码实现,首先你先要计算出zig的长度,这里主要是为了找到一个循环部件,我就取上图绿色框里面的作为zigzag的zig长度:ziglen.
+这个长度由给出的行数可以很容易计算出来有:ziglen=rows+(rows-2).然后是zigzag的数目,其数值等于字符串长度除以ziglen,结果向上取整.</p>
+<p>一共rows行,那么需要循环rows次,依次提取出第一行,第二行,...,第rows行的元素.其中,第一行和第rows行,每个zig只需提取一个元素,
+而第二行到第rows-1行,则每行需要提取两个元素.</p>
+<p>在提取元素的过程中,需要知道要提取元素的索引,第一行和第rows行好处理,第二行到第rows-1行需要看出一个简单规律,
+如上图所示的数字标号,代表对应元素点的索引值,可以发现1+5=2+4=6*1;7+11=8+10=6*3.很快的我们就可以得到索引为j处的zig块中,
+索引为i的行,如果靠左侧的元素索引为p(这个是容易计算的),那么另一个元素的索引则为ziglen * (2 * j + 1) - p.</p>
+<p>有两个地方容易出错,一个是计算zig的块数时,记得化为浮点型(具体地,可以乘以1.0)再计算.另一个是,注意边界检测.</p>
+<p>至此,这个有趣的问题就完美的得到了解决.如果字符串长度为n,那么算法的时间复杂度为O(n),空间复杂度为O(1).</p>
+<!--<h3 class="titlebar">Supplement</h3>-->
+</body>
+
+</html>
