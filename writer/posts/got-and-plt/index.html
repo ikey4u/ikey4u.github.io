@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 }
 </code></pre>
 <h2>分析 GOT 和 PLT</h2>
-<p>现在我们来看一下 GOT 和 PLT 是如何合作完成符号解析的.在分析之前需要导入 elf.h 头文件, 导入方式如下:</p>
+<p>现在我们来看一下 GOT 和 PLT 是如何合作完成符号解析的.在分析之前需要导入 elf.h 头文件, 导入方式如下(假设 glibc 的源码目录为 glibc,那么也可以使用 glibc/elf/elf.h):</p>
 <pre><code class="language-clike">to /usr/include/linux/elf.h
 </code></pre>
 <p>可以通过 ts 查看导入的结构体.</p>
@@ -292,7 +292,7 @@ __gmon_start__
 0x00400496           6800000000  push 0
 0x0040049b           e9e0ffffff  jmp 0x400480
 </code></pre>
-<p>在第一次解析符号时, jmp 调到紧挨着的下一条指令, 该指令放入 .rela.plt 的元素索引,通过该元素可以得到 strcpy 符号的地址, 进而设置元素值. 在执行 push 之后,一个 jmp 指令跳到了 .plt 表的第一个元素, 可以看到又 push 了一个元素,这是 link_map 指针, 定义在 /usr/include/link.h 中:</p>
+<p>在第一次解析符号时, jmp 调到紧挨着的下一条指令, 该指令放入 .rela.plt 的元素索引,通过该元素可以得到 strcpy 符号的地址, 进而设置元素值. 在执行 push 之后,一个 jmp 指令跳到了 .plt 表的第一个元素, 可以看到又 push 了一个元素,这是 link_map 指针, 定义在 /usr/include/link.h (glibc/elf/link.h) 中:</p>
 <pre><code class="language-clike">struct link_map
   {
     /* These first few members are part of the protocol with the debugger.
@@ -305,12 +305,13 @@ __gmon_start__
     struct link_map *l_next, *l_prev; /* Chain of loaded objects.  */
   };
 </code></pre>
-<p>这里面的 ElfW 是一个宏, 在 /usr/include/link.h 中可以看到,</p>
+<p>这里的 link_map 数据结构实际上不是完整的, 我再看 glibc/elf/dl-runtime.c 时,其中有一个 &nbsp;<code class="language-clike">l_info</code>&nbsp; 的结构, 在 glibc 源码里面找了半天才找到,位于 &nbsp;<code class="language-clike">glibc/include/link.h</code>&nbsp;, 而 &nbsp;<code class="language-clike">glibc/elf/link.h</code>&nbsp; 中的 link_map 只是一小部分,粗略估计, 暴露出的 link_map 结构体只占完整 link_map 结构体的 5% 属性吧.</p>
+<p>这里面的 ElfW 是一个宏, 在 /usr/include/link.h (glibc/elf/link.h) 中可以看到,</p>
 <pre><code class="language-clike">#define ElfW(type)      _ElfW (Elf, __ELF_NATIVE_CLASS, type)
 #define _ElfW(e,w,t)    _ElfW_1 (e, w, _##t)
 #define _ElfW_1(e,w,t)  e##w##t
 </code></pre>
-<p>__ELF_NATIVE_CLASS 是 __WORDSIZE 的别名, 而 __WORDSIZE 在 x86 下是 32, 在 x64下是 64.所以比如 ElfW(Addr) 就是 Elf64_Addr, ElfW(Dyn) 就是 Elf64_Dyn,这些都可以在 /usr/include/linux/elf.h 中查看.</p>
+<p>__ELF_NATIVE_CLASS 是 __WORDSIZE 的别名, 而 __WORDSIZE 在 x86 下是 32, 在 x64下是 64.所以比如 ElfW(Addr) 就是 Elf64_Addr, ElfW(Dyn) 就是 Elf64_Dyn,这些都可以在 /usr/include/linux/elf.h (glibc/elf/elf.h) 中查看.</p>
 <p>查看一下 link_map 指针的值:</p>
 <pre><code class="language-clike">[0x00400480]&gt;  pf q @ 0x00400486 + 0x200b82
 0x00601008 = (qword)0x00007f1fb0123168
@@ -471,7 +472,7 @@ Dynamic section at offset 0xe28 contains 24 entries:
  0x000000006ffffff0 (VERSYM)             0x4003a8
  0x0000000000000000 (NULL)               0x0
 </code></pre>
-<p>通过 .dynamic 表可以得到很多其他重要的表, 如 .dynstr, .dynsym, .rel.plt.</p>
+<p>通过 .dynamic 表可以得到很多其他重要的表, 如 .dynstr, .dynsym, .rel.plt.上述 bug 目前可以通过手动设置块大小来避免, 我也不知道怎么设置,r2 作者随便给了一个 32k, 即执行 &nbsp;<code class="language-clike">b 32k</code>&nbsp;, 然后再打印就没事了,讨论见这里 <a href="https://github.com/radare/radare2/issues/12041">https://github.com/radare/radare...</a>.</p>
 <p>继续回到 PLT[0] 元素, 在 push 完元素后, 一个 jump 跳转到 _dl_runtime_resolve(在  glibc/sysdeps/x86_64/dl-trampoline.h 中) 函数,而 _dl_runtime_resolve 再调用 _df_fixup 对符号进行解析,_df_fixup 位于glibc/elf/dl-runtime.c 中.  _df_fixup 将会覆盖 GOT 元素, 写入真实的 strcpy 地址.</p>
 <p>动态链接的实现过程在源码级别可以大致描述如下</p>
 <pre><code class="language-clike">RTLD_START()					(sysdeps/i386/dl-machine.h)
@@ -506,6 +507,114 @@ Dynamic section at offset 0xe28 contains 24 entries:
         _dl_relocate_object()		(loop in elf/dl-reloc.c)
   _start()					(main binary)
 </code></pre>
+<h2>附录</h2>
+<p>glibc 的启动代码位于 &nbsp;<code class="language-clike">/sysdeps</code>&nbsp; 目录, <a href="https://sourceware.org/git/?p=glibc.git;a=tree;f=sysdeps;h=7f6d0bfb0fc738358363b639d74bbc39f6c9fa43;hb=HEAD">https://sourceware.org/git/?p=gl...</a>有许多不同架构的启动代码, 比如 x86, x86_64, i386(intel x86), ia64(intel x86_64), arm, aarch64 等,我们这里关注 i386 和 x86_64.</p>
+<h3>i386</h3>
+<p>位于 &nbsp;<code class="language-clike">i386/dl-trampoline.S</code>&nbsp; 文件, 定位到这里</p>
+<pre><code class="language-clike">33 _dl_runtime_resolve:
+34         cfi_adjust_cfa_offset (8)
+35         _CET_ENDBR
+36         pushl %eax              # Preserve registers otherwise clobbered.
+37         cfi_adjust_cfa_offset (4)
+38         pushl %ecx
+39         cfi_adjust_cfa_offset (4)
+40         pushl %edx
+41         cfi_adjust_cfa_offset (4)
+42         movl 16(%esp), %edx     # Copy args pushed by PLT in register.  Note
+43         movl 12(%esp), %eax     # that `fixup&#39; takes its parameters in regs.
+44         call _dl_fixup          # Call resolver.
+45         popl %edx               # Get register content back.
+46         cfi_adjust_cfa_offset (-4)
+47         movl (%esp), %ecx
+48         movl %eax, (%esp)       # Store the function address.
+49         movl 4(%esp), %eax
+50         ret $12                 # Jump to function address.
+51         cfi_endproc
+52         .size _dl_runtime_resolve, .-_dl_runtime_resolve
+</code></pre>
+<p>这里调用了 &nbsp;<code class="language-clike">_dl_fixup</code>&nbsp; 来动态修复符号地址, 注释中提到, _dl_fixup 的两个参数通过寄存器传递,稍后会说 _dl_fixup 函数. 这里的汇编语法是 AT&amp;T, 它和 Intel 汇编语法的区别主要是方向不同,比如这里 &nbsp;<code class="language-clike">movl (%esp), %ecx</code>&nbsp; 等价于 &nbsp;<code class="language-clike">mov ecx, esp</code>&nbsp;, 也就是说 AT&amp;T 的方向是 `→&nbsp;<code class="language-clike">, 而 Intel 的则是赋值 </code>&nbsp;=`.</p>
+<p>为什么有偏移 12 呢, 因为前面保存了三个寄存器 eax, ecx, edx, 这些寄存器的宽度都是 4 字节.</p>
+<p>另外注意到里面也有一个 &nbsp;<code class="language-clike">_dl_runtime_resolve_shstk</code>&nbsp;, 其中 &nbsp;<code class="language-clike">shstk</code>&nbsp; 表示的是 shadow stack,一种安全措施.</p>
+<h2>x86_64</h2>
+<p>位于 &nbsp;<code class="language-clike">x86_64/dl-trampoline.h</code>&nbsp;, 定位到这里</p>
+<pre><code class="language-clike">122         # Copy args pushed by PLT in register.
+123         # %rdi: link_map, %rsi: reloc_index
+124         mov (LOCAL_STORAGE_AREA + 8)(%BASE), %RSI_LP
+125         mov LOCAL_STORAGE_AREA(%BASE), %RDI_LP
+126         call _dl_fixup          # Call resolver.
+127         mov %RAX_LP, %R11_LP    # Save return value
+</code></pre>
+<p>这里的 BASE 是 rsp 或者 rbx, LOCAL_STORAGE_AREA 为一个数值, 表示局部栈空间大小, 对于我们而言不重要. 不管如何, 它成功的传入了两个参数,第一个是 link_map, 第二是 reloc_index, 分别通过 rdi, rsi 传递,注意高地址的是 reloc_index, 所以这个要先入栈.</p>
+<p>运行时的实现位于 &nbsp;<code class="language-clike">sysdeps/x86_64/dl-runtime.c</code>&nbsp;, 这个文件的内容如下:</p>
+<pre><code class="language-clike">1 /* The ABI calls for the PLT stubs to pass the index of the relocation
+2    and not its offset.  In _dl_profile_fixup and _dl_call_pltexit we
+3    also use the index.  Therefore it is wasteful to compute the offset
+4    in the trampoline just to reverse the operation immediately
+5    afterwards.  */
+6 #define reloc_offset reloc_arg * sizeof (PLTREL)
+7 #define reloc_index  reloc_arg
+8
+9 #include &lt;elf/dl-runtime.c&gt;
+</code></pre>
+<p>这里面定义了 reloc_offset 和 reloc_index.</p>
+<h2>粗说 _dl_fixup</h2>
+<p>无论哪个架构, 最终解析时都调用了 _dl_fixup 函数,这个函数的实现位于 &nbsp;<code class="language-clike">glibc/elf/dl-runtime.c</code>&nbsp; 中, 其声明如下(简化了一下):</p>
+<pre><code class="language-clike">_dl_fixup (struct link_map *l, ElfW(Word) reloc_arg)
+</code></pre>
+<p>reloc_arg 实际上在整个 _dl_fixup 中都没有被直接使用.在 dl-runtime.c 中开始部分定义了如下宏:</p>
+<pre><code class="language-clike">45 #ifndef reloc_offset
+46 # define reloc_offset reloc_arg
+47 # define reloc_index  reloc_arg / sizeof (PLTREL)
+48 #endif
+</code></pre>
+<p>为什么没用直接用呢? 因为 glibc 对 reloc_arg 的用法有变动.</p>
+<p>在 i386 里面没有定义 reloc_offset, 因此使用的 reloc_offset 就是 reloc_arg,也就是说 i386 的 .plt 函数桩代码里面, push 的是相对于 .got.plt 表头的偏移值,而 x86_64 中, 定义了 reloc_offset, 其值为 reloc_arg * sizeof (PLTREL),因此该 .plt 函数桩代码 push 的是 .got.plt 表元素的索引值,这一点务必要注意.</p>
+<p>在 _dl_fixup 中通过下面的代码调要执行的函数:</p>
+<pre><code class="language-clike">140   if (sym != NULL
+141       &amp;&amp; __builtin_expect (ELFW(ST_TYPE) (sym-&gt;st_info) == STT_GNU_IFUNC, 0))
+142     value = elf_ifunc_invoke (DL_FIXUP_VALUE_ADDR (value));
+</code></pre>
+<p>elf_ifunc_invoke 是一个 inline 函数, 定义在 &nbsp;<code class="language-clike">dl-irel.h</code>&nbsp; 中,这个文件位于 &nbsp;<code class="language-clike">sysdeps/&lt;arch&gt;/dl-irel.h</code>&nbsp; 处.</p>
+<p>最后, _dl_fixup 调用 elf_machine_fixup_plt 修正 .got.plt 中的地址项:</p>
+<pre><code class="language-clike">148   return elf_machine_fixup_plt (l, result, refsym, sym, reloc, rel_addr, value);
+</code></pre>
+<p>这个函数定义在 &nbsp;<code class="language-clike">glibc/sysdeps/generic/dl-machine.h</code>&nbsp; 中, 做的所有工作如下:</p>
+<pre><code class="language-clike">  *rel_addr = value
+</code></pre>
+<h2>细说 _dl_fixup</h2>
+<p>刚开始 _dl_fixup 查了三个表, 如下所示:</p>
+<pre><code class="language-clike">const ElfW(Sym) *const symtab = (const void *) D_PTR (l, l_info[DT_SYMTAB]);
+const char *strtab = (const void *) D_PTR (l, l_info[DT_STRTAB]);
+const PLTREL *const reloc = (const void *) (D_PTR (l, l_info[DT_JMPREL]) + reloc_offset);
+</code></pre>
+<p>分别是符号表, 字符串表和重定位表,  这里面有个 D_PTR 宏, 这是个声明鬼东西?它定义在 &nbsp;<code class="language-clike">glibc/sysdeps/generic/ldsodefs.h</code>&nbsp; 中, 如下:</p>
+<pre><code class="language-clike">/* All references to the value of l_info[DT_PLTGOT],
+  l_info[DT_STRTAB], l_info[DT_SYMTAB], l_info[DT_RELA],
+  l_info[DT_REL], l_info[DT_JMPREL], and l_info[VERSYMIDX (DT_VERSYM)]
+  have to be accessed via the D_PTR macro.  The macro is needed since for
+  most architectures the entry is already relocated - but for some not
+  and we need to relocate at access time.  */
+#ifdef DL_RO_DYN_SECTION
+# define D_PTR(map, i) ((map)-&gt;i-&gt;d_un.d_ptr + (map)-&gt;l_addr)
+#else
+# define D_PTR(map, i) (map)-&gt;i-&gt;d_un.d_ptr
+#endif
+</code></pre>
+<p>l_info 中的元素个个都是指针, 指向 .dynamic 节区中特定元素,在 64 位程序中, .dynamic 节区本质上就是一个元素类型为 Elf64_Dyn 的数组,Elf64_Dyn 的结构体中用 d_tag 指明该元素的元素的类型, 比如是 DT_NEEDED,还是 DT_PLTGOT, 还是 DT_RELA 等等, 这里就用元素类型的值来作为 l_info 数组的索引,比如说这里的 l_info[DT_PLTGOT] 就是一个指针指向了 .dynamic 数组中元素类型为 DT_PLTGOT 的元素.当然还有一个 &nbsp;<code class="language-clike">PLTREL</code>&nbsp; 宏, 这个宏在就在 glibc/elf/dl-runtime.c 中定义, 根据不同宏条件,其值可以为 &nbsp;<code class="language-clike">ElfW(Rela)</code>&nbsp; 或者 &nbsp;<code class="language-clike">ElfW(Rel)</code>&nbsp;.</p>
+<p>只要这些神秘的宏定义搞清楚了, 这代码很容易理解了.</p>
+<p>另外我们要理解在 .plt 中, 函数桩代码 push 的到底是什么? push 的是 reloc_arg.但是从 dl-runtime.c 中可以看出, _dl_fixup 没有直接用到这个参数.但是间接用到了, 因为 reloc_offset, reloc_index 都是通过 reloc_arg 得到的.</p>
+<p>但它到底是个什么东西?</p>
+<ul><li>对于 i386 来说, 它是 reloc_offset, 也就是距离 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 偏移位置,    由该偏移位置可以得到 reloc_index.<li>对于 x86_64 来说, 它是 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 数组的索引, 由该索引可以得到  relco_offset.</li></li></ul>
+<p>不管如何最终都能得到正确的 reloc_offset 和 reloc_index.</p>
+<p>得到了 reloc_offset 我们便可以从 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 获得要重定位函数的重定位信息.所以 _dl_fixup 做了如下事情:</p>
+<pre><code class="language-clike">const ElfW(Sym) *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];
+const ElfW(Sym) *refsym = sym;
+void *const rel_addr = (void *)(l-&gt;l_addr + reloc-&gt;r_offset);
+</code></pre>
+<p>&nbsp;<code class="language-clike">.rel.plt</code>&nbsp; 表本质上是一个 Elf64_Rel 数组, Elf64_Rel 结构体包含两个元素:r_offset 和 r_info.</p>
+<p>r-&gt;info 包含了符号表索引和重定位信息类型,l-&gt;laddr + r_offset 就是要修正的内存绝对地址(l-&gt;laddr 和 r_offset 暂时没搞明白).</p>
+<p>所以到现在为止找到了要修改单元的绝对地址, 然后就开始寻找函数符号的实际地址,(目前还没打算继续看下去, 暂时略去), 找到后存放在 value 里面.</p>
+<p>然后调用 elf_ifunc_invoke 调用该函数,调用完毕后再调用 elf_machine_fixup_plt 将 value 写如 rel_addr 处即可.</p>
 <h2>参考</h2>
 <ul><li>Understanding Linux ELF RTLD internals    <a href="http://s.eresi-project.org/inc/articles/elf-rtld.txt">http://s.eresi-project.org/inc/a...</a><li>Linux Internals - The Art Of Symbol Resolution    <a href="https://0x00sec.org/t/linux-internals-the-art-of-symbol-resolution/1488">https://0x00sec.org/t/linux-inte...</a><li>COMPILER, ASSEMBLER, LINKER AND LOADER: A BRIEF STORY    <a href="https://www.tenouk.com/ModuleW.html">https://www.tenouk.com/ModuleW.h...</a><li>Modern Day ELF Runtime infection via GOT poisoning    <a href="http://web.archive.org/web/20111222005751/http://vxheavens.com/lib/vrn00.html">http://web.archive.org/web/20111...</a><li>Why are GOT and PLT still present in Linux static stripped binaries?    <a href="https://reverseengineering.stackexchange.com/questions/2172/why-are-got-and-plt-still-present-in-linux-static-stripped-binaries">https://reverseengineering.stack...</a></li></li></li></li></li></ul>
 
