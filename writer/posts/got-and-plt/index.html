@@ -585,6 +585,11 @@ void *const rel_addr = (void *)(l-&gt;l_addr + reloc-&gt;r_offset);
 <p>r-&gt;info 包含了符号表索引和重定位信息类型,l-&gt;laddr + r_offset 就是要修正的内存绝对地址(l-&gt;laddr 和 r_offset 暂时没搞明白).</p>
 <p>所以到现在为止找到了要修改单元的绝对地址, 然后就开始寻找函数符号的实际地址(目前还没打算继续看下去, 暂时略去), 找到后存放在 value 里面.</p>
 <p>然后调用 elf_ifunc_invoke 调用该函数,调用完毕后再调用 elf_machine_fixup_plt 将 value 写入 rel_addr 处即可.</p>
+<h2>整体流程图</h2>
+<p>这是我在梳理完整个 got 和 plt 调用过程后画的一张图</p>
+<p><img src="images/got-and-plt.svg"/></p>
+<p>第一次调用 &nbsp;<code class="language-clike">foo</code>&nbsp; 函数时, 依次执行的是 0 -&gt; 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6 -&gt;7.</p>
+<p>第二次调用 &nbsp;<code class="language-clike">foo</code>&nbsp; 函数时, 依次执行的是 0 -&gt; 1 -&gt; 8.</p>
 <h2>参考</h2>
 <ul><li>Understanding Linux ELF RTLD internals    <a href="http://s.eresi-project.org/inc/articles/elf-rtld.txt">http://s.eresi-project.org/inc/a...</a><li>Linux Internals - The Art Of Symbol Resolution    <a href="https://0x00sec.org/t/linux-internals-the-art-of-symbol-resolution/1488">https://0x00sec.org/t/linux-inte...</a><li>COMPILER, ASSEMBLER, LINKER AND LOADER: A BRIEF STORY    <a href="https://www.tenouk.com/ModuleW.html">https://www.tenouk.com/ModuleW.h...</a><li>Modern Day ELF Runtime infection via GOT poisoning    <a href="http://web.archive.org/web/20111222005751/http://vxheavens.com/lib/vrn00.html">http://web.archive.org/web/20111...</a><li>Why are GOT and PLT still present in Linux static stripped binaries?    <a href="https://reverseengineering.stackexchange.com/questions/2172/why-are-got-and-plt-still-present-in-linux-static-stripped-binaries">https://reverseengineering.stack...</a></li></li></li></li></li></ul>
 
