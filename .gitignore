@@ -10,3 +10,4 @@
 *.ipynb_checkpoints
 *.pyc
 build
+./writer/draft
