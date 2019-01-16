@@ -739,7 +739,7 @@ Elf64_Dyn 的结构体中用 d_tag 指明该元素的元素的类型, 比如是 
 - 对于 i386 来说, 它是 reloc_offset, 也就元素在 `.rel*.plt` 表中的偏移位置,
     由该偏移位置可以得到 reloc_index.
 - 对于 x86_64 来说, 它是元素在 `.rel*.plt` 数组中的索引, 由该索引可以得到
-  relco_offset.
+    relco_offset.
 
 不管如何最终都能得到正确的 reloc_offset 和 reloc_index.
 

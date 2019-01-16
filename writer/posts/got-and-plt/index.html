@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -13,7 +12,7 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> Explore GOT and PLT using radare2 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2018-11-02 Update → 2019-01-05</div>
+      <div id = "lastupdate"> Publish → 2018-11-02 Update → 2019-01-16</div>
     </section>
     
 <h1> 基本介绍</h1>
@@ -23,7 +22,7 @@
 <p>注意引用地址相当于一个指针, 需要解引用才能得到真实的的地址.</p>
 <p>linux 中, 函数符号的动态解析借助于 PLT 实现, PLT 表为 .plt,每一个元素的大小都是 16 字节(32bits 和 64bits 机器上都是如此).</p>
 <p>目标文件(.o)中的重定位表有</p>
-<ul><li>.rel.text<br/>    对代码的重定位, 修正的位置位于 .text</li><li>.rel.data<br/>    对数据的重定位, 修正的位置位于 .data</li></ul>
+<ul><li>.rel.text:    对代码的重定位, 修正的位置位于 .text</li><li>.rel.data:    对数据的重定位, 修正的位置位于 .data</li></ul>
 <p>动态链接文件(共享库, ELF可执行文件)中的重定位表有</p>
 <ul><li>.rel.dyn: 对数据引用的重定位, 修正位置位于 .got 以及 .data</li><li>.rel.plt: 对函数引用的重定位, 修正位置位于 .got.plt</li></ul>
 <p>注意, 在 x64 下, 重定位表的前缀是 .rela, 比如 .rela.dyn, .rela.text 等.</p>
@@ -575,7 +574,7 @@ const PLTREL *const reloc = (const void *) (D_PTR (l, l_info[DT_JMPREL]) + reloc
 <p>只要这些神秘的宏定义搞清楚了, 这代码很容易理解了.</p>
 <p>另外我们要理解在 .plt 中, 函数桩代码 push 的到底是什么? push 的是 reloc_arg.但是从 dl-runtime.c 中可以看出, _dl_fixup 没有直接用到这个参数.但是间接用到了, 因为 reloc_offset, reloc_index 都是通过 reloc_arg 得到的.</p>
 <p>但它到底是个什么东西?</p>
-<ul><li>对于 i386 来说, 它是 reloc_offset, 也就元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 表中的偏移位置,    由该偏移位置可以得到 reloc_index.</li><li>对于 x86_64 来说, 它是元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 数组中的索引, 由该索引可以得到  relco_offset.</li></ul>
+<ul><li>对于 i386 来说, 它是 reloc_offset, 也就元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 表中的偏移位置,    由该偏移位置可以得到 reloc_index.</li><li>对于 x86_64 来说, 它是元素在 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 数组中的索引, 由该索引可以得到    relco_offset.</li></ul>
 <p>不管如何最终都能得到正确的 reloc_offset 和 reloc_index.</p>
 <p>得到了 reloc_offset 我们便可以从 &nbsp;<code class="language-clike">.rel*.plt</code>&nbsp; 获得要重定位函数的重定位信息.所以 _dl_fixup 做了如下事情:</p>
 <pre><code class="language-clike">const ElfW(Sym) *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];
