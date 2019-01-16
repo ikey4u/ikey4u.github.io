@@ -16,8 +16,7 @@
     </section>
     
 <h1> 安装</h1>
-<pre><code class="language-clike">参见 ./install-overview.txt
-</code></pre>
+<p>参见 ./install-overview.txt 或者 <a href="http://ahageek.com/writer/special/vim/install-overview/">http://ahageek.com/writer/specia...</a></p>
 <h1> 功能快速预览</h1>
 <ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;man</code>&nbsp; 快速打开 &nbsp;<code class="language-clike">$HOME/.vim/manual.txt</code>&nbsp;, 即本手册</li><li>&nbsp;<code class="language-clike">&lt;leader&gt;&#39;</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;&#39;&#39;</code>&nbsp; 分别给当前单词加上单双引号</li><li>&nbsp;<code class="language-clike">&lt;leader&gt;ev</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;sv</code>&nbsp; 分别用于打开配置文件和重载配置文件</li><li>自动监视 vimrc 以及 settings 目录下配置文件的更改, 并自动更新 vimrc</li><li>大文件优化打开, 超过 10 M 的文件自动启用大文件打开功能.    对于 json 类文件, 格式化后打开更快捷,    如果未格式化, 则所有内容都在一行显示,    则打开十分hhh缓慢缓慢,因为 vim 要分析其结构</li><li>&nbsp;<code class="language-clike">:Tabmsg &lt;cmd&gt;</code>&nbsp; 在新的 tab 中捕获命令 &nbsp;<code class="language-clike">cmd</code>&nbsp; 的输出</li><li>&nbsp;<code class="language-clike">:Recent</code>&nbsp; 在新的 tab 中打开最近文件列表,    可以到该文件列表定位到所需文件后,按下 gf 即可打开文件.</li><li>&nbsp;<code class="language-clike">:Fmt</code>&nbsp; 一键将文件格式置为 unix, 编码方式为 utf-8</li></ul>
 <ul><li>pdf 转换插件<p>    提供一个将 vim 里面的内容高亮转换为 pdf 的插件,    位于 plugin 目录需要安装 wkhtmltopdf,    下载地址 https://wkhtmltopdf.org/downloads.html.</p><p>    如果安装到系统目录,则不需要任何设置,安装到其他地方,    则需要设置变量 &nbsp;<code class="language-clike">g:html2pdf_exepath</code>&nbsp; 的值, 指定路径,    需要时绝对路径.</p><p>    转换命令 &nbsp;<code class="language-clike">:TOpdf</code>&nbsp;, 生成的文件名为 &nbsp;<code class="language-clike">PDF@xxx.pdf</code>&nbsp;,    xxx 为你当前转换的文件名称, 保存路径为当前路径.</p></li></ul>
