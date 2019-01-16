@@ -52,10 +52,27 @@ fc-cache -f -v ~/.fonts/adobe-fonts/source-code-pro
 </code></pre></li><li>ycm 补全依赖<pre><code class="language-clike">cd $HOME/.vim/plugged/YouCompleteMe/
 python3 install.py --clang-completer --java-completer --go-completer --rust-completer
 </code></pre><p>            注意, 这里的 completer 仅当你安装了对应的编译器, 比如 go, 那么go-completer 才会正确安装.            如果没有这样的编译器, 去掉对应的选项即可.</p></li></ul></li></ul></li></ul>
-<h1> 检测 ycm 是否正常工作</h1>
+<h1> 代码补全的依赖(ycm)</h1>
 <p>重新打开 vim, 输入 &nbsp;<code class="language-clike">:YcmDebugInfo</code>&nbsp; 如果没有错, 则恭喜你成功安装.</p>
 <p>ycm 自动补全可以使用 c-z 强制触发.</p>
 <p>如果报错了, 没关系, 参见 <a href="./install-ycm.txt">./install-ycm.txt</a></p>
+<h1> 阅读源码需要配置的依赖</h1>
+<ul><li>ctags<p>    安装 cmake 之后, 执行如下命令编译 ctags, 程序前缀设置为 ex</p><pre><code class="language-clike">git clone https://github.com/universal-ctags/ctags.git
+cd ctags/
+./autogen.sh
+./configure --prefix=/usr/local/ --program-prefix=ex
+make &amp;&amp; sudo make install
+</code></pre><ul><li>生成 tags<pre><code class="language-clike">exctags -R *
+</code></pre></li><li>使用方法<ul><li>&nbsp;<code class="language-clike">ctrl+]</code>&nbsp; 到定义处</li><li>&nbsp;<code class="language-clike">ctrl+t</code>&nbsp; 返回原位置</li><li>&nbsp;<code class="language-clike">ctrl+w+]</code>&nbsp; 在新窗口打开定义</li></ul></li><li>其他<p>        ctags 并不会自动更新,如何自动更新呢?</p><p>        安装 autotags.vim 插件, 然后在 .vimrc 中加入如下选项</p><pre><code class="language-clike">let g:autotagCtagsCmd=&#34;exctags&#34;
+let g:autotagTagsFile=&#34;tags&#34;
+</code></pre></li></ul></li></ul>
+<ul><li>GNU Global<pre><code class="language-clike">wget http://tamacom.com/global/global-6.6.2.tar.gz
+tar zxvf global-6.6.2.tar.gz
+cd global-6.6.2
+./configure --with-universal-ctags=/usr/local/bin/exctags
+make &amp;&amp; sudo make install
+</code></pre><ul><li>生成 tag &nbsp;<code class="language-clike">gtags --gtagslabel ctags</code>&nbsp;</li><li>用法<p>        将光标移动到某个定义出,执行 :Gtags 即可查看定义, 执行 :Gtags -r 即可查看引用.</p></li></ul><p>    若要自动更新 gtags, 可以在 ~/.vimrc 中设置如下选项:</p><pre><code class="language-clike">let Gtags_Auto_Update = 1
+</code></pre></li></ul>
 
     <script src="./js/prism.js"></script>
   </div>
