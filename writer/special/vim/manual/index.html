@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>vim 配置手册 by bugnofree</title>
+  <link href="./css/prism.css" rel="stylesheet" />
+  <link href="./css/normalize.css" rel="stylesheet" />
+  <link href="./css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> vim 配置手册 by bugnofree </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-16</div>
+    </section>
+    
+<h1> 安装</h1>
+<pre><code class="language-clike">参见 ./install-overview.txt
+</code></pre>
+<h1> 功能快速预览</h1>
+<ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;man</code>&nbsp; 快速打开 &nbsp;<code class="language-clike">$HOME/.vim/manual.txt</code>&nbsp;, 即本手册</li><li>&nbsp;<code class="language-clike">&lt;leader&gt;&#39;</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;&#39;&#39;</code>&nbsp; 分别给当前单词加上单双引号</li><li>&nbsp;<code class="language-clike">&lt;leader&gt;ev</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;sv</code>&nbsp; 分别用于打开配置文件和重载配置文件</li><li>自动监视 vimrc 以及 settings 目录下配置文件的更改, 并自动更新 vimrc</li><li>大文件优化打开, 超过 10 M 的文件自动启用大文件打开功能.    对于 json 类文件, 格式化后打开更快捷,    如果未格式化, 则所有内容都在一行显示,    则打开十分hhh缓慢缓慢,因为 vim 要分析其结构</li><li>&nbsp;<code class="language-clike">:Tabmsg &lt;cmd&gt;</code>&nbsp; 在新的 tab 中捕获命令 &nbsp;<code class="language-clike">cmd</code>&nbsp; 的输出</li><li>&nbsp;<code class="language-clike">:Recent</code>&nbsp; 在新的 tab 中打开最近文件列表,    可以到该文件列表定位到所需文件后,按下 gf 即可打开文件.</li><li>&nbsp;<code class="language-clike">:Fmt</code>&nbsp; 一键将文件格式置为 unix, 编码方式为 utf-8</li></ul>
+<h1> 依赖安装</h1>
+<ul><li>ctags<p>    安装 cmake 之后, 执行如下命令编译 ctags, 程序前缀设置为 ex</p><pre><code class="language-clike">git clone https://github.com/universal-ctags/ctags.git
+cd ctags/
+./autogen.sh
+./configure --prefix=/usr/local/ --program-prefix=ex
+make &amp;&amp; sudo make install
+</code></pre><ul><li>生成 tags<pre><code class="language-clike">exctags -R *
+</code></pre></li><li>使用方法<ul><li>&nbsp;<code class="language-clike">ctrl+]</code>&nbsp; 到定义处</li><li>&nbsp;<code class="language-clike">ctrl+t</code>&nbsp; 返回原位置</li><li>&nbsp;<code class="language-clike">ctrl+w+]</code>&nbsp; 在新窗口打开定义</li></ul></li><li>其他<p>        ctags 并不会自动更新,如何自动更新呢?</p><p>        安装 autotags.vim 插件, 然后在 .vimrc 中加入如下选项</p><pre><code class="language-clike">let g:autotagCtagsCmd=&#34;exctags&#34;
+let g:autotagTagsFile=&#34;tags&#34;
+</code></pre></li></ul></li></ul>
+<ul><li>GNU Global<pre><code class="language-clike">wget http://tamacom.com/global/global-6.6.2.tar.gz
+tar zxvf global-6.6.2.tar.gz
+cd global-6.6.2
+./configure --with-universal-ctags=/usr/local/bin/exctags
+make &amp;&amp; sudo make install
+</code></pre><ul><li>生成 tag &nbsp;<code class="language-clike">gtags --gtagslabel ctags</code>&nbsp;</li><li>用法<p>        将光标移动到某个定义出,执行 :Gtags 即可查看定义, 执行 :Gtags -r 即可查看引用.</p></li></ul><p>    若要自动更新 gtags, 可以在 ~/.vimrc 中设置如下选项:</p><pre><code class="language-clike">let Gtags_Auto_Update = 1
+</code></pre></li></ul>
+<ul><li>pdf 转换插件<p>    提供一个将 vim 里面的内容高亮转换为 pdf 的插件,    位于 plugin 目录需要安装 wkhtmltopdf,    下载地址 https://wkhtmltopdf.org/downloads.html.</p><p>    如果安装到系统目录,则不需要任何设置,安装到其他地方,    则需要设置变量 &nbsp;<code class="language-clike">g:html2pdf_exepath</code>&nbsp; 的值, 指定路径,    需要时绝对路径.</p><p>    转换命令 &nbsp;<code class="language-clike">:TOpdf</code>&nbsp;, 生成的文件名为 &nbsp;<code class="language-clike">PDF@xxx.pdf</code>&nbsp;,    xxx 为你当前转换的文件名称, 保存路径为当前路径.</p></li></ul>
+<ul><li>实时预览 html<p>    安装 browser-sync 来同步预览 html</p><pre><code class="language-clike">brew install npm
+npm install -g browser-sync
+</code></pre><p>    下载地址 <a href="https://github.com/BrowserSync/browser-sync">https://github.com/BrowserSync/b...</a>,    编写一个脚本 livehtml 存放到系统路径中, 脚本内容如下:</p><pre><code class="language-clike">browser-sync start --server --files &#34;css/*.css, *.html
+</code></pre><p>    调用方法:</p><pre><code class="language-clike">:call Pre()
+</code></pre><p>    杀死进程:</p><pre><code class="language-clike">:call KillPre()
+</code></pre></li></ul>
+<ul><li>代码高亮到网页<p>    vim 自带了一个 TOhtml 命令,但是它生成的是一个完整的网页,所以在此命令基础上,    我编写了一个插件,让其生成一个单独的 div并将其内容放置到 0 号寄存器中,    插件位于 &nbsp;<code class="language-clike">~/.vim/plugin/code.vim</code>&nbsp;, 依赖 bs4 python 包,    使用 &nbsp;<code class="language-clike">pip3 install bs4</code>&nbsp; 即可对于指定文件, 执行 &nbsp;<code class="language-clike">:TOCode</code>&nbsp; 即可.    然后使用 &nbsp;<code class="language-clike">&#34;0p</code>&nbsp; 粘贴.</p><p>    代码边框样式我修改为了圆角边框,感觉好看点,    也可以使用可是模式选择指定行转换为高亮删除单词</p></li></ul>
+
+    <script src="./js/prism.js"></script>
+  </div>
+  </body>
+</html>
+

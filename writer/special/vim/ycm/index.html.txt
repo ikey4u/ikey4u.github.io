@@ -1,0 +1,115 @@
+---
+Title: YCM 配置
+Date: 2019-01-15
+Author: bugnofree
+---
+
+# 错误调试
+
+## YCM 有调试信息
+
+YCM 不工作的时候极其蛋疼, 往往不知道从哪里调试错误, 十分之难受,
+下面说一下解决问题的姿势.
+
+使用 :YcmDebugInfo 可以看到有如下输出:
+
+    Printing YouCompleteMe debug information...
+    -- Client logfile: /var/folders/45/_9t3pg9513z2r9703wgnj_t40000gn/T/ycm_btf29seo.log
+    -- Server errored, no debug info from server
+    -- Server running at: http://127.0.0.1:60666
+    -- Server process ID: 9944
+    -- Server logfiles:
+    --   /var/folders/45/_9t3pg9513z2r9703wgnj_t40000gn/T/ycmd_60666_stdout_k3sm61r2.log
+    --   /var/folders/45/_9t3pg9513z2r9703wgnj_t40000gn/T/ycmd_60666_stderr_82_gfx4_.log
+
+然后使用 :YcmToggleLogs 选择日志, 其输出如下
+
+    Which logfile do you wish to open (or close if already open)?
+    1: ycm_btf29seo.log
+    2: ycmd_60666_stderr_82_gfx4_.log
+    3: ycmd_60666_stdout_k3sm61r2.log
+    Type number and <Enter> or click with mouse (empty cancels):
+
+第一个日志是 ycm 客户端的调试日志, 后两个以 ycmd 开头的都是 ycm 服务器端的日志.
+
+选择客户端日志, 看前面几行有如下输出:
+
+    2019-01-15 14:02:45,200 - ERROR - The ycmd server SHUT DOWN (restart with ':YcmRestartServer').
+    Unexpected exit code 0. Type ':YcmToggleLogs ycmd_60666_stderr_82_gfx4_.log' to check the logs.
+
+所以我们使用 :YcmToggleLogs 选择上述日志, 然后打开看一下
+
+    2019-01-15 14:02:45,136 - ERROR - Error occurred while loading global extra conf /Users/bugnofree/.vim/.ycm_extra_conf.py
+    Traceback (most recent call last):
+      File "/Users/bugnofree/.vim/plugged/YouCompleteMe/third_party/ycmd/ycmd/extra_conf_store.py", line 104, in _CallGlobalExtraConfMethod
+        module = Load( global_ycm_extra_conf, force = True )
+      File "/Users/bugnofree/.vim/plugged/YouCompleteMe/third_party/ycmd/ycmd/extra_conf_store.py", line 183, in Load
+        module = LoadPythonSource( _RandomName(), module_file )
+      File "/Users/bugnofree/.vim/plugged/YouCompleteMe/third_party/ycmd/ycmd/utils.py", line 462, in LoadPythonSource
+        return importlib.machinery.SourceFileLoader( name, pathname ).load_module()
+      File "<frozen importlib._bootstrap_external>", line 399, in _check_name_wrapper
+      File "<frozen importlib._bootstrap_external>", line 823, in load_module
+      File "<frozen importlib._bootstrap_external>", line 682, in load_module
+      File "<frozen importlib._bootstrap>", line 251, in _load_module_shim
+      File "<frozen importlib._bootstrap>", line 675, in _load
+      File "<frozen importlib._bootstrap>", line 655, in _load_unlocked
+      File "<frozen importlib._bootstrap_external>", line 678, in exec_module
+      File "<frozen importlib._bootstrap>", line 205, in _call_with_frames_removed
+      File "/Users/bugnofree/.vim/.ycm_extra_conf.py", line 34, in <module>
+        import ycm_core
+    ModuleNotFoundError: No module named 'ycm_core'
+    2019-01-15 14:02:45,137 - ERROR - ycm_core library not detected; you need to compile it by running the build.py script. See the documentation for more details.
+    Traceback (most recent call last):
+      File "/Users/bugnofree/.vim/plugged/YouCompleteMe/third_party/ycmd/ycmd/server_utils.py", line 97, in CompatibleWithCurrentCore
+        ycm_core = ImportCore()
+      File "/Users/bugnofree/.vim/plugged/YouCompleteMe/third_party/ycmd/ycmd/server_utils.py", line 89, in ImportCore
+        import ycm_core as ycm_core
+    ModuleNotFoundError: No module named 'ycm_core'
+
+这里我们看到了具体的错误是:
+
+    File "/Users/bugnofree/.vim/.ycm_extra_conf.py", line 34, in <module>
+        import ycm_core
+    ModuleNotFoundError: No module named 'ycm_core'
+    2019-01-15 14:02:45,137 - ERROR - ycm_core library not detected; you need to compile it by running the build.py script. See the documentation for more details.
+
+也就是 ycm_core 这个库找不到了, 所以我们需要编译这个库.
+
+    python3 install.py --clang-completer --java-completer --go-completer --rust-completer
+
+编译的时候注意看输出, 注意 python3 的库是否正确.
+
+    -- Found PythonLibs: /Users/bugnofree/.pyenv/versions/3.6.0/lib/libpython3.6m.dylib (found version "3.6.0")
+
+一般编译完成后问题就可以解决了, 编译完成后, 生成的 ycm_core 位置为
+
+    $HOME/.vim/plugged/YouCompleteMe/third_party/ycmd/ycm_core.so
+
+注意 plugged 为我使用的插件管理工具.
+
+## 无调试信息
+
+有时候我们的 ycm_core 已经编译成功了, 而当我们使用 :YcmToggleLogs 切换日志,
+得到的日志是空的. 此时几乎已经是走投无路了,
+在 vim 里面输入 `:echo has('py3')` 返回结果为 0.
+
+偶然的, 我跑到 $HOME/.vim/plugged/YouCompleteMe/third_party/ycmd/ 目录下执行了如下命令
+
+    ➜  ycmd (0e999dbe) ✔ python3 -c "import ycm_core"
+    Fatal Python error: PyThreadState_Get: no current thread
+
+拿报错搜索, 知道是 vim 链接的 python3 库版本和我用的 python3 版本不一致.
+
+这就好解决了, 使用 vim --version 查看 vim 链接的 python3 库对应的 python3,
+然后需要做两件事情:
+
+- 使用 vim 链接版本的 python3 编译 ycm_core, 以下命令仅供参考
+
+        py3=/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7/bin/python3
+        cd $HOME/.vim/plugged/YouCompleteMe
+        $py3 install.py --clang-completer --java-completer --go-completer --rust-completer
+
+- 修改 vimrc 中 ycm 的 python3 路径
+- 安装其他的 python3 第三方库依赖
+        py3=/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7/bin/python3
+        $py3 -m pip install neovim

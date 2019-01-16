@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>vim 命令</title>
+  <link href="./css/prism.css" rel="stylesheet" />
+  <link href="./css/normalize.css" rel="stylesheet" />
+  <link href="./css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> vim 命令 </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-16</div>
+    </section>
+    
+<ul><li>exec vs call<p>    exec 将一个字符串当做命令执行, 而 call 则是调用一个函数.</p></li></ul>
+<ul><li>替换语法<pre><code class="language-clike">:[range]s/from/to/[flags]
+</code></pre><p>    注意需要转义的字符</p><pre><code class="language-clike">*./\[]&amp;
+</code></pre></li></ul>
+<ul><li>窗口大小调整    以下 res 代表 resize<ul><li>:res +10 水平方向增加10行</li><li>:vertical res +10 垂直方向增加10行</li></ul></li></ul>
+<ul><li>强制以root权限保存<pre><code class="language-clike">:w !sudo tee %
+</code></pre></li></ul>
+<ul><li>vim命令行无法显示输入中文<p>    打开 ~/.bashrc 或者 ~/.zshrc,在最后加入以下配置:</p><pre><code class="language-clike">export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+</code></pre><p>    更新一下系统对中文的语言支持, 在 Ubuntu 中可以通过 Dash 输入 Language 来打开语言支持界面</p></li></ul>
+<ul><li>vim 粘贴不全<p>    在控制台打开后用鼠标右键选择粘贴时开头的几个字符会缺失    需要首先进入插入模式,然后鼠标右键粘贴即可解决这个问题</p></li></ul>
+<ul><li>一些容易忘记的快捷键<ul><li>窗口间游走<pre><code class="language-clike">Ctrl + w + h: 向左移动窗口
+Ctrl + w + j: 向下移动窗口
+Ctrl + w + j: 向上移动窗口
+Ctrl + w + l: 向右移动窗口
+Ctrl + w + w: 这个命令会在所有窗口中循环移动
+Ctrl + w + t: 移动到最左上角的窗口
+Ctrl + w + b: 移动到最右下角的窗口
+Ctrl + w + p: 移动到前一个访问的窗口
+</code></pre></li><li>移动窗口        vim默认交换当前窗口的        与它下一个窗口的位置,如果下方没有窗口,则试着与上一个窗口交换位置.        亦可在此命令前加上数量,与制定的窗口交换位置.<ul><li>Ctrl + w + r: 向右或向下方交换窗口，而Ctrl + w + R则和它方向相反。</li><li>Ctrl + w + x: 交换同列或同行的窗口的位置.</li></ul></li></ul></li></ul>
+<ul><li>vim 内置的 ins-completion 相关补全快捷键<ul><li>整行 &lt;C-X&gt;&lt;C-L&gt;</li><li>文件名 &lt;C-X&gt;&lt;C-F&gt;</li><li>当前文件中的关键字 &lt;C-X&gt;&lt;C-P&gt;或&lt;C-X&gt;&lt;C-N&gt;</li><li>关键字 &lt;C-N&gt;或&lt;C-P&gt; &lt;C-N&gt;、&lt;C-P&gt;跟&lt;C-X&gt;&lt;C-N&gt;、&lt;C-X&gt;&lt;C-P&gt;类似,        但是查找范围更广，不局限于当前文件。</li></ul></li></ul>
+<ul><li>系统剪贴板粘贴到 vim 命令行上<p>     输入冒号(:),定位到命令行,然后 Ctrl + R 然后再按下 +</p></li></ul>
+<ul><li>插入行号<p>    将 src=...的形式替换为 srcXX=...</p><pre><code class="language-clike">src00=http\://mirrors.neusoft.edu.cn/android/repository/addon-6.xml
+src01=http\://mirrors.neusoft.edu.cn/android/repository/addon.xml
+src02=http\://mirrors.neusoft.edu.cn/android/repository/extras/intel/addon.xml
+src03=http\://mirrors.neusoft.edu.cn/android/repository/sys-img/android-tv/sys-img.xml
+src04=http\://mirrors.neusoft.edu.cn/android/repository/sys-img/android-wear/sys-img.xml
+src05=http\://mirrors.neusoft.edu.cn/android/repository/sys-img/android/sys-img.xml
+src06=http\://mirrors.neusoft.edu.cn/android/repository/sys-img/google_apis/sys-img.xml
+src07=http\://mirrors.neusoft.edu.cn/android/repository/sys-img/x86/addon-x86.xml
+src08=http\://mirrors.neusoft.edu.cn/android/repository/addons_list-2.xml
+src09=http\://mirrors.neusoft.edu.cn/android/repository/repository-10.xml
+</code></pre><p>    先 shift+v 行选择模式选中上述所有行,然后执行如下命令:</p><pre><code class="language-clike">&#39;&lt;,&#39;&gt;s/=/\=printf(&#39;%02d=&#39;,line(&#39;.&#39;)-line(&#34;&#39;&lt;&#34;))/
+</code></pre><p>    这个命令的主要限制是,得有一些特定的模式需要被替换.</p></li></ul>
+<ul><li>以root权限写入文件<pre><code class="language-clike">:w !sudo tee %
+</code></pre></li></ul>
+<ul><li>远程打开 vim<p>    有时候我们已经打开了 vim,然后希望从 shell 的命令行中新打开一个文件,    这个新打开的文件我们仍希望处于已有的 vim实例中.</p><p>    怎么做呢?有以下几种方法,添加到 ~/.bashrc 中即可:</p><pre><code class="language-clike">#&gt;&gt;&gt; commands for awesome vim
+#@1 remote new tab
+    alias gvimtab=&#34;gvim --remote-tab&#34;
+#@2 open file in sp mode overrding the current focused vim window
+    alias gvimcsp=&#34;gvim --remote +split&#34;
+#@3 open file in vsp mode overrding the current focused vim window
+    alias gvimcvsp=&#34;gvim --remote +vsplit&#34;
+#@4 open file in sp mode not overrding the current focused vim window
+    gvimsp()
+    {
+        if [[ $# == 1 ]]
+        then
+            fpath=$(realpath $1)
+            gvim --remote-send  &#34;:split ${fpath}&lt;CR&gt;&#34;
+        else
+            gvim --remote-send  &#34;:split&lt;CR&gt;&#34;
+        fi
+    }
+#@5 open file in vsp mode not overrding the current focused vim window
+    gvimvsp()
+    {
+        if [[ $# == 1 ]]
+        then
+            fpath=$(realpath $1)
+            gvim --remote-send  &#34;:vsplit ${fpath}&lt;CR&gt;&#34;
+        else
+            gvim --remote-send  &#34;:vsplit&lt;CR&gt;&#34;
+        fi
+    }
+</code></pre></li><li>xxd 编辑二进制文件应注意的问题<p>    通常地我会在 vim 中打开一个二进制文件,然后使用 &nbsp;<code class="language-clike">:%!xxd -g 1</code>&nbsp; 来将其转换为    十六进制模式. 但是 vim 会根据 .vimrc 中的 fileencoding 设置对文件内容进行解释,    当无法解释文件内容时就会显示成 0x3f 也就是问号(?).</p><p>    这样我们看的时候就会发现有许多地方不对. 怎么解决呢?方法有两个:</p><ul><li>注释掉set fileencodings设置</li><li>重新开一个 vim 指定 -b 选项(binary):gvim -b xxx</li></ul><p>    这样的话,再使用 %!xxd 来查看即可.    通常地我们使用 fileencodings 来让 vim 正确编码,    所以后一种是比较好的选择.</p></li></ul>
+<ul><li>vim 命令行执行结果重定向到 vim<pre><code class="language-clike">:r !ls -la
+</code></pre></li></ul>
+<ul><li>vim 中的特殊按键<pre><code class="language-clike">Shift: &lt;S-?&gt;,比如 Shift+s : &lt;S-s&gt;
+Ctrl:  &lt;C-?&gt;,比如 Ctrl+s  : &lt;C-s&gt;
+Alt :  &lt;A-?&gt;,比如 Alt+s  : &lt;A-s&gt;
+F1~F12 : &lt;F1&gt; 到 &lt;F12&gt;
+回车:    &lt;CR&gt; 或者 &lt;Enter&gt; 或者 &lt;Return&gt;
+空格:    &lt;Space&gt;
+Esc:     &lt;Esc&gt;
+</code></pre></li></ul>
+<ul><li>顺畅的跳转到文件的某处<p>    normal 模式下直接输入 {count}% 即可, 比如要跳转到 50%,直接输入 50% 即可.</p></li></ul>
+<ul><li>搜索<p>    我们使用 &#39;/&#39; 来进行搜索时默认是大小写不敏感的</p><p>    /pattern\C :大小写敏感</p><p>    /pattern\c :大小写不敏感</p></li></ul>
+<ul><li> 美化(格式化) json 文件<pre><code class="language-clike">:%!python -m json.tool
+</code></pre><p>    其中 % 表示应用到整个文件, -m 告诉 python 将某个库作为脚本运行    但是对于 unicode 字符则会显示 \uxxxx,解决方法为在 ~/.vimrc 中加入如下命令:</p><pre><code class="language-clike">command! JsonFormat :execute &#39;%!python -m json.tool&#39;
+\ | :execute &#39;%!python -c &#34;import re,sys;chr=__builtins__.__dict__.get(\&#34;unichr\&#34;, chr);sys.stdout.write(re.sub(r\&#34;\\\\u[0-9a-f]{4}\&#34;, lambda x: chr(int(\&#34;0x\&#34; + x.group(0)[2:], 16)).encode(\&#34;utf-8\&#34;), sys.stdin.read()))&#34;&#39;
+\ | :set ft=javascript
+\ | :1
+</code></pre><p>    然后执行 :JsonFormat 即可.</p><p>    参考 <a href="https://qiita.com/tomoemon/items/cc29b414a63e08cd4f89">https://qiita.com/tomoemon/items...</a></p></li></ul>
+<ul><li>mapleader<p>    缺省的 &lt;leader&gt; 是 &#39;\&#39;, 可以使用 &nbsp;<code class="language-clike">let mapleader = &#34;,&#34;</code>&nbsp; 来修改 \ 为 &nbsp;<code class="language-clike">,</code>&nbsp;,    不过我保持默认设置.</p></li></ul>
+<ul><li>关于 vim 中的快捷键自定义 map<p>    默认的 :map 操作是递归的, 而 :noremap 则是非递归的,什么意思呢?    比如</p><pre><code class="language-clike">:map j gg
+:map Q j
+:noremap W j
+</code></pre><p>    那么 Q 将会被映射为 gg,因为 j 被映射为 gg 了.而 W 只会被映射为 j.</p><p>    map 的语法格式如下:</p><pre><code class="language-clike">{cmd} {attr} {lhs} {rhs}
+</code></pre><p>    其中:{cmd} 属于下列命令之一</p><pre><code class="language-clike">&#39;:map&#39;, &#39;:map!&#39;, &#39;:nmap&#39;, &#39;:vmap&#39;, &#39;:imap&#39;, :cmap&#39;, &#39;:smap&#39;, &#39;:xmap&#39;, &#39;:omap&#39;, &#39;:lmap&#39;
+</code></pre><ul><li>{attr} 是可选的,属于下列之一或多个<pre><code class="language-clike">&lt;buffer&gt;, &lt;silent&gt;,&lt;expr&gt; &lt;script&gt;, &lt;unique&gt; 和 &lt;special&gt;.
+</code></pre><p>        &lt;silent&gt; 属性指明执行命令时不在命令行上进行回显</p></li><li>{lhs} 左侧序列值,是你要定义的快捷方式</li><li>{rhs} 右侧序列值,是具体执行快捷方式所对应的 vim 命令</li></ul></li></ul>
+<ul><li>字符选取<ul><li>选择一个单引号内的内容,vi&#39;,选择一个双引号内的内容,vi&#34;</li><li>选择一个圆括号中的内容,vib,选择一个花括号中的内容,viB</li><li>如果想包含单引号,双引号等可以将 i 替换为 a.</li></ul><p>    更多请参考 :h text-objects</p></li></ul>
+<ul><li>&lt;200b&gt; &lt;200e&gt; Unicode 字符<pre><code class="language-clike">:%s/&lt;c-v&gt;u200b//g
+</code></pre></li></ul>
+<ul><li>删除模式    d/while:模式删除,也就是说从当前位置删除到 while 单词处(不包括 while)</li></ul>
+<ul><li>evince 无法正确显示所有页面(pdf/evince):<pre><code class="language-clike">rm -rf $HOME/.local/share/gvfs-metadata/
+</code></pre></li></ul>
+<ul><li>文件格式和编码<pre><code class="language-clike">set ff=[unix|dos]
+ser fenc=&lt;encoding-names&gt;
+</code></pre><ul><li>文件格式 :h ff</li><li>文件编码 :h encoding-names</li></ul></li></ul>
+<ul><li>在 vim 中打开光标下的文件, 按下 gf 即可</li></ul>
+<ul><li>put 命令<p>    格式==&gt; :[line]pu[t] [x]</p><p>    在行 line 处放入寄存器 x 中的内容, 一个等号(=),在其后面跟着一个表达式.    其中字符竖线(|)和双引号(&#34;)需要转义.    使用 put 生成一个自增序列</p><pre><code class="language-clike">:put =range(11,15)
+:0put =range(11,15)
+:123put =range(11,15)
+&#34; 注意下面使用两个单引号来来表示双引号, v:val 用于获取 list 中的每一个
+&#34; 元素值, v:key 用于获取字典的键
+:put =map(range(1,150), &#39;printf(&#39;&#39;%04d&#39;&#39;, v:val)&#39;)
+:for i in range(1,10) | put =&#39;192.168.0.&#39;.i | endfor
+</code></pre><p>    在 vim8 以上版本:</p><pre><code class="language-clike">my_array[0] = 0;
+my_array[0] = 0;
+my_array[0] = 0;
+my_array[0] = 0;
+my_array[0] = 0;
+my_array[0] = 0;
+my_array[0] = 0;
+</code></pre><p>    使用块模式选中数组中的一列 0, 然后按下g &lt;C-a&gt; 即可自增所有数字,如下</p><pre><code class="language-clike">my_array[1] = 0;
+my_array[2] = 0;
+my_array[3] = 0;
+my_array[4] = 0;
+my_array[5] = 0;
+my_array[6] = 0;
+my_array[7] = 0;
+</code></pre></li></ul>
+<ul><li>quickfix<ul><li>关闭窗口  :ccl[ose]</li><li>打开窗口  :cope[n]</li><li>下一个    :cn[ext]</li><li>前一个    :cp[revious]</li><li>列出所有  :cl[ist]</li></ul></li></ul>
+<ul><li>显示单词个数<pre><code class="language-clike">%s/pattern//gn
+</code></pre><p>    关键为最末的n,只显示匹配数目,不真正的匹配替换.</p></li></ul>
+<ul><li>bro    :bro {command} 打开一个对话框, 选择文件, command 支持如下命令<pre><code class="language-clike">|:wall|, |:wq|, |:wqall|, |:x|, |:xall|, |:exit|,
+|:view|, |:sview|, |:r|, |:saveas|, |:sp|, |:mkexrc|,
+|:mkvimrc|, |:mksession|, |:mkview|, |:split|,
+|:vsplit|, |:tabe|, |:tabnew|, |:cfile|, |:cgetfile|,
+|:caddfile|, |:lfile|, |:lgetfile|, |:laddfile|,
+|:diffsplit|, |:diffpatch|, |:open|, |:pedit|,
+|:redir|, |:source|, |:update|, |:visual|, |:vsplit|,
+</code></pre></li></ul>
+<ul><li>&nbsp;<code class="language-clike">g;</code>&nbsp; 和 &nbsp;<code class="language-clike">g,</code>&nbsp; 可以在整个 changelist 里面来回跳转，敲 :help changelist 可以看说明。</li></ul>
+<ul><li>行排序 :sort r /regex/</li></ul>
+<ul><li>替换搜索<p>    只替换 visual 选中的部分, 使用 %V 原子指明, 如下替换 us 为 az.</p><pre><code class="language-clike">:s/\%Vus/az/g
+</code></pre></li></ul>
+<ul><li>替换空行<pre><code class="language-clike">:g/^\s*$/d
+</code></pre></li></ul>
+
+    <script src="./js/prism.js"></script>
+  </div>
+  </body>
+</html>
+

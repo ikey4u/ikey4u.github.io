@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>VIM 安装配置说明</title>
+  <link href="./css/prism.css" rel="stylesheet" />
+  <link href="./css/normalize.css" rel="stylesheet" />
+  <link href="./css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> VIM 安装配置说明 </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-16</div>
+    </section>
+    
+<h1> 编译环境配置</h1>
+<h2> python 配置</h2>
+<ul><li>检查 python3, pip3, python3-config, python3 主目录<p>    命令行运行下面的命令检测是否能执行</p><pre><code class="language-clike">pip3 --version
+python3 -c &#34;import sys; print(sys.executable)&#34;
+python3-config --prefix
+</code></pre><p>    上述命令应能正确执行, 且输出为同一个 python3 版本,    比如下面的就是一个正确的样例输出:</p><pre><code class="language-clike">➜   pip3 --version
+pip 9.0.1 from /Users/bugnofree/.pyenv/versions/3.6.0/lib/python3.6/site-packages (python 3.6)
+➜   python3 -c &#34;import sys; print(sys.executable)&#34;
+/Users/bugnofree/.pyenv/versions/3.6.0/bin/python3
+➜   python3-config --prefix
+/Users/bugnofree/.pyenv/versions/3.6.0
+</code></pre><p>    确定 python3 程序的路径后, 再确定 python3 的主目录,    由 &nbsp;<code class="language-clike">python3-config --prefix</code>&nbsp; 命令输出的即为主目录, 该目录结构如下</p><pre><code class="language-clike">├── bin/
+├── include/
+├── lib/
+└── share/
+</code></pre></li></ul>
+<ul><li>检查 python3 是否是动态链接编译生成的<p>    这个可以通过查看 python3 主目录下的 lib 中是否有 .dylib, .dll 或者 .so 文件,    如果有的话说明是动态链接编译的.</p></li></ul>
+<ul><li>检查 vim 链接的 python 3 库<ul><li>如果已经安装了 vim<p>        应该保证 vim 链接的 python3 动态库和上述 python3 动态库版本一致.</p><p>        通过 vim --version, 或者打开 vim 输入 &nbsp;<code class="language-clike">:version</code>&nbsp; 来查看链接信息,        比如如下样例输出:</p><pre><code class="language-clike">-L/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7/lib/python3.7/config-3.7m-darwin
+-lpython3.7m -framework CoreFoundation
+</code></pre><p>        这说明编译 vim 时使用的链接库是 python3.7.</p><p>        如果 vim 链接的 python3 库和命令行运行的 python3 版本不一致,        则会导致如下错误</p><pre><code class="language-clike">Fatal Python error: PyThreadState_Get: no current thread
+</code></pre><p>        如果没有经验, 此错误或许会带你走向穷途末路.</p></li><li>未安装 vim, 此时应保证前面的步骤已经正确完成,        即 python3 和 pip3 已经准备就绪, 然后就可以编译安装了.<ul><li>Ubuntu <a href="./install-linux.txt">./install-linux.txt</a></li><li>MacOS <a href="./install-mac.txt">./install-mac.txt</a></li></ul></li></ul></li></ul>
+<h1> 快速配置 vim</h1>
+<ul><li>配置字体<ul><li>macos        执行下面的命令安装字体<pre><code class="language-clike">brew tap caskroom/fonts &amp;&amp; brew cask install font-source-code-pro
+git clone https://github.com/powerline/fonts.git --depth=1
+cd fonts
+./install.sh
+cd ..
+rm -rf fonts
+</code></pre></li><li>ubuntu        执行下面的命令安装字体<pre><code class="language-clike">git clone --depth 1 --branch release https://github.com/adobe-fonts/source-code-pro.git ~/.fonts/adobe-fonts/source-code-pro
+fc-cache -f -v ~/.fonts/adobe-fonts/source-code-pro
+</code></pre></li></ul></li></ul>
+<ul><li>安装配置文件<ul><li>下载<pre><code class="language-clike">git clone https://github.com/ikey4u/vim.git ~/.vim
+</code></pre></li><li>编辑配置文件<p>        打开 &nbsp;<code class="language-clike">~/.vim/vimrc</code>&nbsp; 配置自定义变量.</p></li><li>打开 vim, 执行如下命令<pre><code class="language-clike">:PlugInstall
+</code></pre></li><li>依赖安装<ul><li>deoplete.vim 补全依赖<pre><code class="language-clike">python3 -m pip install neovim
+</code></pre></li><li>ycm 补全依赖<pre><code class="language-clike">cd $HOME/.vim/plugged/YouCompleteMe/
+python3 install.py --clang-completer --java-completer --go-completer --rust-completer
+</code></pre><p>            注意, 这里的 completer 仅当你安装了对应的编译器, 比如 go, 那么go-completer 才会正确安装.            如果没有这样的编译器, 去掉对应的选项即可.</p></li></ul></li></ul></li></ul>
+<h1> 检测 ycm 是否正常工作</h1>
+<p>重新打开 vim, 输入 &nbsp;<code class="language-clike">:YcmDebugInfo</code>&nbsp; 如果没有错, 则恭喜你成功安装.</p>
+<p>ycm 自动补全可以使用 c-z 强制触发.</p>
+<p>如果报错了, 没关系, 参见 <a href="./install-ycm.txt">./install-ycm.txt</a></p>
+
+    <script src="./js/prism.js"></script>
+  </div>
+  </body>
+</html>
+
