@@ -1,0 +1,107 @@
+---
+Title: Microsoft Visual C++ Build Tools
+Date: 2019-01-17
+Author: bugnofree
+---
+
+# 安装 Visual C++ Build Tools
+
+到 @[https://visualstudio.microsoft.com/downloads/] 下载两个东西
+
+- .NET Framework
+
+    下载 .Net Framework, 而不是 Runtime, 完成后安装.
+
+- Build Tools for Visual Studio 2017
+
+    下载后会得到一个 vs_buildtools.exe 程序.
+
+    值得一说的 build tools 有一个单独的介绍页面
+    @[https://visualstudio.microsoft.com/visual-cpp-build-tools/]
+
+    - 可以从 GUI 界面安装
+
+        运行 vs_buildtools, vs_buildtools 会先准备一下, 然后就出来, 甩给我们几个大的分类,
+        我们勾选从 Visual C++ build tools 即可.
+
+    - 离线安装
+
+        为了方便以后安装, 我们可以创建一个离线安装包.
+
+        - 安装编译器工具链
+
+            安装命令如下:
+
+                vs_BuildTools.exe --layout c:\vs2017buildtools ^
+                    --add Microsoft.VisualStudio.Component.Static.Analysis.Tools ^
+                    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
+                    --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest ^
+                    --add Microsoft.VisualStudio.Component.VC.CMake.Project ^
+                    --add Microsoft.VisualStudio.Component.TestTools.BuildTools^
+                    --add Microsoft.VisualStudio.Component.VC.CoreBuildTools ^
+                    --add Microsoft.VisualStudio.Component.Windows10SDK ^
+                    --add Microsoft.VisualStudio.Component.Windows10SDK.17763 ^
+                    --add Microsoft.Component.MSBuild ^
+                    --add Microsoft.VisualStudio.Component.CoreBuildTools ^
+                    --lang en-US
+
+            注意 visual c++ build tools 并不要求 MSBuild 和
+            Component.CoreBuildTools, 这里我也下载了.
+
+            当下载成功后, 就会提示
+
+                Setup completed successfully.
+                Press any key to continue...
+
+            这个是时候安装文件就被放置到了 `c:\vs2017buildtools` 中.
+
+            这里面的选项我花费了挺多时间筛选, 怎么得到这些参数呢?
+            如果好奇的话, 可以继续看下面这个段落, 否则可以跳过.
+
+            微软在 @[https://docs.microsoft.com/en-us/visualstudio/install/install-vs-inconsistent-quality-network]
+            提供了离线下载安装包的方式. 使用 `--add` 选项可以添加 workload 或者 component id 来进行组件的安装.
+
+            component id 值位于 @[https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids],
+            我们定位到 Visual Studio Build Tools 2017, 即来到这里
+            @[https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools]
+            对所需要的工具进行筛选即可, 那么需要筛选那些东西呢?
+
+            打开 vs_buildtools, 在 `workload` 栏里面勾选 visual c++ build tools, 然后
+            就可以在 `individual components` 栏里面找到勾选了的组件,
+            拿勾选的组件名到上述网址找组件 ID 名即可, 比如我筛选后得到了以下信息
+
+                - Microsoft.VisualStudio.Component.Static.Analysis.Tools	Static analysis tools
+                - Microsoft.VisualStudio.Component.VC.Tools.x86.x64	VC++ 2017 version 15.9 v14.16 latest v141 tools
+                - Microsoft.VisualStudio.Component.VC.Redist.14.Latest	Visual C++ 2017 Redistributable Update
+                - Microsoft.VisualStudio.Component.VC.CMake.Project	Visual C++ tools for CMake
+                - Microsoft.VisualStudio.Component.TestTools.BuildTools	Testing tools core features - Build Tools
+                - Microsoft.VisualStudio.Component.VC.CoreBuildTools	Visual C++ Build Tools core features
+                - Microsoft.VisualStudio.Component.Windows10SDK.17134	Windows 10 SDK (10.0.17134.0)
+                - Microsoft.VisualStudio.Component.Windows10SDK	Windows Universal C Runtime
+
+
+        - 安装
+
+            执行如下程序完成安装
+
+            - 以管理员权限安装 `C:\vs2017buildtools\certificates` 里面的证书
+            - 启动安装程序
+
+                    c:\vs2017buildtools\vs_setup.exe --noweb
+
+                这个程序会启动 Visual Studio Installer, 稍等片刻将会转到安装界面,
+                可以选择安装位置, 以及查看占用的空间大小, 这里大概为 5 GB.
+
+                另外不要被其下载过程迷惑, 如果不放心, 可以断网.
+
+        -  添加环境变量
+
+            为了方便使用, 把工具链初始化工具 vsdevcmd 加入到 path 中
+
+                wmic environment where "UserName='<system>' and name='Path'" set VariableValue="%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools"
+
+            然后刷新环境变量, 这个可以手动打开再关闭环境变量设置窗口,
+            或者下载 @[https://github.com/ikey4u/cheatsheet/raw/master/winenv/refreshwin.exe]
+            该程序是我写的一个小程序, 可以不重启刷新环境变量.
+
+            重新打开一个命令行,执行 vsdevcmd 即可进入编译环境.
