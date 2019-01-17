@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>vim 自定义选项</title>
+  <link href="./css/prism.css" rel="stylesheet" />
+  <link href="./css/normalize.css" rel="stylesheet" />
+  <link href="./css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> vim 自定义选项 </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2019-01-17 Update → 2019-01-17</div>
+    </section>
+    
+<p>在 vimrc 文件开始处有如下几个选项需要自己配置一下</p>
+<pre><code class="language-clike">let g:pyhome = &#34;/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7&#34;
+let g:idapro = &#34;/Applications/IDAPro7.0/ida.app/Contents/MacOS/python&#34;
+let g:idaprotag = &#34;/Applications/IDAPro7.0/ida.app/Contents/MacOS/python/tags&#34;
+let g:terminal = &#34;/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal&#34;
+let g:openex = &#34;open&#34;
+</code></pre>
+<ul><li>g:pyhome 是 python 的主目录, 可以通过如下命令获得<pre><code class="language-clike">python -c &#34;import sys; print(sys.executable)&#34;
+</code></pre><p>    比如它输出</p><pre><code class="language-clike">C:\Users\Administrator\AppData\Local\Programs\Python\Python37\python.exe
+</code></pre><p>    那么 python 主目录就是</p><pre><code class="language-clike">C:\Users\Administrator\AppData\Local\Programs\Python\Python37
+</code></pre><p>    然而在 windows 下你需要替换反斜线为斜线</p><pre><code class="language-clike">C:/Users/Administrator/AppData/Local/Programs/Python/Python37
+</code></pre></li></ul>
+<ul><li>&nbsp;<code class="language-clike">idapro</code>&nbsp;, &nbsp;<code class="language-clike">idaprotag</code>&nbsp; 如果你不知道是啥, 那么你不用管.</li><li>g:terminal<p>    终端命令路径</p><ul><li>windows &nbsp;<code class="language-clike">C:\Windows\system32\cmd.exe</code>&nbsp;</li><li>linux 自己找吧</li><li>mac 参考默认设置</li></ul></li><li>g:openex<p>    打开文件浏览器</p><ul><li>windows &nbsp;<code class="language-clike">start</code>&nbsp;</li><li>linux 自己找吧</li><li>mac &nbsp;<code class="language-clike">open</code>&nbsp;</li></ul></li></ul>
+
+    <script src="./js/prism.js"></script>
+  </div>
+  </body>
+</html>
+

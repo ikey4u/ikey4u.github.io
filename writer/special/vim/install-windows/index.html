@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>Windows 下 vim 的安装</title>
+  <link href="./css/prism.css" rel="stylesheet" />
+  <link href="./css/normalize.css" rel="stylesheet" />
+  <link href="./css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> Windows 下 vim 的安装 </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2019-01-17 Update → 2019-01-17</div>
+    </section>
+    
+<h1> 安装 vim</h1>
+<p>到这里 <a href="https://github.com/vim/vim-win32-installer/releases">https://github.com/vim/vim-win32...</a> 下载安装包,然后一步步安装. 如下所示</p>
+<ul><li>选择语言    <img src="images/winvim-01.png"/></li><li>next    <img src="images/winvim-02.png"/></li><li>next    <img src="images/winvim-03.png"/></li><li>组件选择完全安装    <img src="images/winvim-04.png"/></li><li>vimrc 默认配置<ul><li>启用完全优化配置(vim with all enhancements)</li><li>映射键, 不要映射</li><li>鼠标, 采用默认行为即可</li></ul><p>    <img src="images/winvim-05.png"/></p></li><li>安装位置, 保持默认即可    <img src="images/winvim-06.png"/></li><li>安装完成    <img src="images/winvim-07.png"/></li></ul>
+<h1> 安装恰当的 python3 版本</h1>
+<p>安装 vim 之后, 打开命令行, 输入 vim --version, 寻找类似下面的输出</p>
+<pre><code class="language-clike">-DDYNAMIC_PYTHON3_DLL=\&#34;python37.dll\&#34;
+</code></pre>
+<p>这里我的输出是 python37.dll, 所以你应该下载安装 python37 版本,到这里 <a href="https://www.python.org/downloads/">https://www.python.org/downloads...</a> 下载 python3.7.x,下载完成后安装即可, 注意在安装界面勾选将 Python 添加到 PATH 环境变量.</p>
+<p>安装完成后打开一个新的命令行, 输入 python 或者 python3 看是否能进入 python环境,我假定能成功的命令为 python3.</p>
+<h1> 安装字体 source code pro 字体</h1>
+<p>说实话这个字体下载地址可是真难找, 在这里 <a href="https://github.com/adobe-fonts/source-code-pro/downloads">https://github.com/adobe-fonts/s...</a>下载完成后解压, 其字体目录如下</p>
+<pre><code class="language-clike">➜  SourceCodePro_FontsOnly-1.013 tree
+.
+├── LICENSE.txt
+├── OTF
+│   ├── SourceCodePro-Black.otf
+│   ├── SourceCodePro-Bold.otf
+│   ├── SourceCodePro-ExtraLight.otf
+│   ├── SourceCodePro-Light.otf
+│   ├── SourceCodePro-Regular.otf
+│   └── SourceCodePro-Semibold.otf
+├── ReadMe.html
+├── SourceCodeProReadMe.html
+└── TTF
+    ├── SourceCodePro-Black.ttf
+    ├── SourceCodePro-Bold.ttf
+    ├── SourceCodePro-ExtraLight.ttf
+    ├── SourceCodePro-Light.ttf
+    ├── SourceCodePro-Regular.ttf
+    └── SourceCodePro-Semibold.ttf
+</code></pre>
+<p>拷贝 TTF 目录下的所有文件到 C:\Windows\Fonts 目录即可.</p>
+<h1> 安装 git</h1>
+<p>到这里 <a href="https://git-scm.com/download/win">https://git-scm.com/download/win</a> 下载 git 安装.</p>
+<p>注意如下几个步骤</p>
+<ul><li>调整环境变量(Adjusting your PATH environment)<p>    勾选 &nbsp;<code class="language-clike">Git from the command line and also from 3rd-party software</code>&nbsp;.</p></li></ul>
+<ul><li>选择 SSH 可执行程序(Choosing the SSH executable)<p>    勾选 &nbsp;<code class="language-clike">Use OpenSSH</code>&nbsp;</p></li></ul>
+<ul><li>选择 HHTPS 传输后端(Chossing HTTPS transport backend)<p>    勾选 &nbsp;<code class="language-clike">Use the OpenSSL library</code>&nbsp;</p></li></ul>
+<ul><li>配置换行符(Configuring the line ending conversions)<p>    勾选 &nbsp;<code class="language-clike">Checkout Windows-style, commit Unix-style line endings</code>&nbsp;</p></li></ul>
+<p>其他保持默认, 一路 next 狂奔下去即可.</p>
+<h1> 安装配置文件</h1>
+<p>重新打开一个命令行, 执行如下命令下载配置文件</p>
+<pre><code class="language-clike">rd /s /q %USERPROFILE%\vimfiles
+git clone https://github.com/ikey4u/vim.git %USERPROFILE%\vimfiles
+</code></pre>
+<p>现在就完成了基本的配置, 打开 gvim 看一下效果.</p>
+<p>接着我们来安装插件, 在 gvim 里面执行 &nbsp;<code class="language-clike">:PlugInstall</code>&nbsp;,该命令将会并行的为你安装所有的插件.</p>
+<p>这里面的插件需要额外的依赖, 所需要的简单的依赖可以通过如下命令完成安装</p>
+<pre><code class="language-clike">python3 -m pip install neovim
+</code></pre>
+<p>当安装完插件后我们需要配置 &nbsp;<code class="language-clike">%USERPROFILE%\vimfiles\vimrc</code>&nbsp; 中的几个选项,参考 <a href="./options.txt">./options.txt</a> 或者 <a href="http://ahageek.com/writer/special/vim/options">http://ahageek.com/writer/specia...</a></p>
+<p>复杂依赖比如 YCM, 参见下节.</p>
+<h1> 自动补全 YCM 的配置安装</h1>
+<ul><li>安装 cmake<p>    下载地址 <a href="https://cmake.org/download/">https://cmake.org/download/</a>,    安装时注意勾选将 cmake 添加到环境变量.</p></li></ul>
+<ul><li>安装编译器<p>    前方高能(又到了另一个十分痛苦的时刻了).</p><p>    编译工具链安装安装可参考 <a href="https://github.com/ikey4u/cheatsheet/blob/master/msvc.txt">https://github.com/ikey4u/cheats...</a>    或者 <a href="http://ahageek.com/writer/special/msvc/">http://ahageek.com/writer/specia...</a></p></li></ul>
+<ul><li>开始编译 YCM<p>    首先恭喜你走到了这里, 阁下太强了! 现在我们开始编译 YCM.</p><pre><code class="language-clike">cd %USERPROFILE%/vimfiles/plugged/YouCompleteMe
+python3 install.py --clang-completer
+</code></pre><p>    这个会自动下载 llvm-clang, 然而, 如果下载不了就只能你自己手动下载了,    下载的是 libclang-xxx.tar.bz2, 然后放到这个目录下, 然而我并没有试过这个方法,    因为我通过网络下载成功了.</p><pre><code class="language-clike">$HOME\vimfiles\plugged\YouCompleteMe\third_party\ycmd\clang_archives
+</code></pre><p>    顺利通过编译后, 写个 cpp 文件测试一下:</p><pre><code class="language-clike">#include &lt;iostream&gt;
+
+using namespace std;
+
+int main() {
+    string s;
+    s.
+    return 0;
+}
+</code></pre><p>    效果见图</p><p>    <img src="images/winvim-ycm.png"/></p></li></ul>
+
+    <script src="./js/prism.js"></script>
+  </div>
+  </body>
+</html>
+
