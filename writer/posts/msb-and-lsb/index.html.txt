@@ -5,7 +5,8 @@ Author: bugnofree
 ---
 
 MSB 和 LSB 其实是有歧义的, 可以代表 MSBit, MSByte 或者 LSBit, MSByte.
-这里分别介绍一下.
+
+本文将分别对其介绍.
 
 # MSByte 和 LSByte
 
