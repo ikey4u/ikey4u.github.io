@@ -44,14 +44,31 @@ Author: bugnofree
 
     常见的表达式有如下几种, 参考模仿即可
 
-        let var=expr let var+=expr let var-=expr let var.=expr
-        bool?expr-if-true:expr-if-false
-        bool||bool bool&&bool !bool
-        expr==expr expr!=expr expr>expr expr>=expr expr<expr expr<=expr
-        num+num num-num
-        str.str
-        num*num num/num num%num
-        +num -num
+    - let var=expr let var+=expr let var-=expr let var.=expr
+
+    - 三元操作符号
+
+            bool?expr-if-true:expr-if-false
+
+    - 逻辑运算
+
+            bool||bool bool&&bool !bool
+
+    - 算术运算
+
+            expr==expr expr!=expr expr>expr expr>=expr expr<expr expr<=expr
+            num+num num-num
+            num*num num/num num%num
+            +num -num
+
+    - 字符串拼接
+
+            "hello"."world" => "helloworld"
+            10 . "foo" => "10foo"
+
+            let s = "hello"
+            let s .= "world"
+            echom s => "helloworld"
 
 - 控制流
 
@@ -83,33 +100,55 @@ Author: bugnofree
 
 - 输入输出
 
+    在 vim 启动已经 `:messages` 中显示消息
+
         echom total
+
+    在脚本里面加入错误信息所在打文件和行号是一个不错的选择, 如下所示
+
+        let s:scriptpath = expand("<sfile>:p")
+        echomsg s:scriptpath . "." . expand("<slnum>") . " => No fcitx-remote is found!"
+
+    其中 `s:` 开头打变量是脚本(script)变量, expand 里面用 <sfile> 表示 source 打当前文件,
+    然后 `:p` 来展开完整路径, 这样打我们就得到了当前 source 打文件路径,
+    然后我们还需要获取当前行号, 可以使用 <slnum> 得到.
+
+    expand 功能很强大, 可以使用 `:h expand` 来查看.
 
 - 函数
     - 获取函数列表
             :help function-list
     - expand 函数
+
         假设当前文件为 ~/notes/python.txt
+
             :p		expand to full path
             :h		head (last path component removed)
             :t		tail (last path component only), 比如 expand("%:t") 得到 python.txt
             :r		root (one extension removed)
             :e		extension only
             let @a=expand("%:p") ==> 寄存器 a 的值为文件的完整路径
+
+        expand 也可以用于展开环境变量, 如 echo expand("$HOME") 将会输出 home 目录.
+
     - 定义函数,函数格式大致如下
+
             function! TheFunc()
                 function body ...
             endfunction
+
         函数名称以 `function!` 开始, 其后接着函数名称(函数名首字母必须为大写),
         最后以 `endfunction` 结束, 调用函数使用 `:call TheFunc()`.
 
         一个样例函数如下:
+
             nnoremap <F11> :call MaxWindows(1, 23, 71, 239)<CR>
             function! MaxWindows(x, y, l, c)
                 exec "winpos ".a:x." ".a:y
                 exec "set lines=".a:l
                 exec "set columns=".a:c
             endfunction
+
         需要用 a 前缀来表示在作用域里面寻找变量,
         set 命令在函数体内无法直接工作, 需要借助 exec 来执行.
 
@@ -120,6 +159,18 @@ Author: bugnofree
         catch [pattern]
             [command]
         endtry
+
+# 编程常用
+
+- source 命令
+
+    更新一个配置文件用, 如果更新打文件路径是变量和字符串混合, 则需要使用 exec
+
+        exec "source " . g:home . "/user.vim"
+
+    注意, 仅仅使用 source 命令, 比如下面这个是不行的
+
+        source g:home . "/user.vim"
 
 # 正则表达式
 
@@ -200,8 +251,60 @@ Author: bugnofree
 - @[http://vimregex.com/]
 - @[https://github.com/johngrib/vimscript-cheatsheet]
 
+# python 接口
 
+自带文档看一下即可, 查看命令 `:h python-vim`.
 
+一般的在 vim 里面用 python 写一个函数的方法如下
+
+    function! FuncName()
+    python >> EOF
+    import vim
+    // codes ...
+    EOF
+    endfunction
+
+里面的 vim 模块是 python 和 vim 之间进行交互的唯一模块.
+用法示例
+
+- 执行 vim 命令
+
+        vim.command(cmd)
+
+-  窗口与鼠标
+
+    索引为 n 的窗口
+        w = vim.windows[n]
+
+    当前窗口
+        cw = vim.current.window
+
+    其他
+        w.height = lines		# sets the window height
+        w.cursor = (row, col)	# sets the window cursor position
+        pos = w.cursor		# gets a tuple (row, col)
+
+- buffer
+
+    索引为 n 的 buffer
+        b = vim.buffers[n]
+
+    当前 buffer
+        cb = vim.current.buffer
+
+    buffer 的名称
+        name = b.name		# gets the buffer file name
+
+    获取第 n 行
+        line = b[n]			# gets a line from the buffer
+
+    其他常用操作
+        lines = b[n:m]		# gets a list of lines
+        num = len(b)		# gets the number of lines
+        b[n] = str			# sets a line in the buffer
+        b[n:m] = [str1, str2, str3]	# sets a number of lines at once
+        del b[n]			# deletes a line
+        del b[n:m]			# deletes a number of lines
 
 # 转 pdf 插件编写
 
@@ -236,4 +339,3 @@ Author: bugnofree
 
 使用命令 `:TOpdf` 即可将当前文件转换为 PDF, 输出的文件名称由前缀 `PDF@` 和当前文件名组成,
 PDF 的标题为当前文件名称(不带后缀).
-

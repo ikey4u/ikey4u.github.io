@@ -12,13 +12,13 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> VIM 安装配置说明 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-18</div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-03-25</div>
     </section>
     
 <p>Windows 用户出门右拐参见 <a href="./install-windows.txt">./install-windows.txt</a> 或 <a href="http://ahageek.com/writer/special/vim/install-windows">http://ahageek.com/writer/specia...</a></p>
 <p>Linux, Mac 用户请继续往下看, 下面是你们的时间.</p>
 <h1> 编译环境配置</h1>
-<h2> python 配置</h2>
+<p>## python 配置</p>
 <ul><li>检查 python3, pip3, python3-config, python3 主目录<p>    命令行运行下面的命令检测是否能执行</p><pre><code class="language-clike">pip3 --version
 python3 -c &#34;import sys; print(sys.executable)&#34;
 python3-config --prefix
@@ -37,7 +37,7 @@ pip 9.0.1 from /Users/bugnofree/.pyenv/versions/3.6.0/lib/python3.6/site-package
 <ul><li>检查 vim 链接的 python 3 库<ul><li>如果已经安装了 vim<p>        应该保证 vim 链接的 python3 动态库和上述 python3 动态库版本一致.</p><p>        通过 vim --version, 或者打开 vim 输入 &nbsp;<code class="language-clike">:version</code>&nbsp; 来查看链接信息,        比如如下样例输出:</p><pre><code class="language-clike">-L/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7/lib/python3.7/config-3.7m-darwin
 -lpython3.7m -framework CoreFoundation
 </code></pre><p>        这说明编译 vim 时使用的链接库是 python3.7.</p><p>        如果 vim 链接的 python3 库和命令行运行的 python3 版本不一致,        则会导致如下错误</p><pre><code class="language-clike">Fatal Python error: PyThreadState_Get: no current thread
-</code></pre><p>        如果没有经验, 此错误或许会带你走向穷途末路.</p></li><li>未安装 vim, 此时应保证前面的步骤已经正确完成,        即 python3 和 pip3 已经准备就绪, 然后就可以编译安装了.<ul><li>Ubuntu <a href="./install-linux.txt">./install-linux.txt</a> 或 <a href="http://ahageek.com/writer/special/vim/install-linux">http://ahageek.com/writer/specia...</a> </li><li>MacOS <a href="./install-mac.txt">./install-mac.txt</a> 或<a href="http://ahageek.com/writer/special/vim/install-mac">http://ahageek.com/writer/specia...</a> </li></ul></li></ul></li></ul>
+</code></pre><p>        如果没有经验, 此错误或许会带你走向穷途末路.</p></li><li>未安装 vim, 此时应保证前面的步骤已经正确完成,        即 python3 和 pip3 已经准备就绪, 然后就可以编译安装了.<ul><li>Ubuntu <a href="./install-linux.txt">./install-linux.txt</a> 或 <a href="http://ahageek.com/writer/special/vim/install-linux">http://ahageek.com/writer/specia...</a></li><li>MacOS <a href="./install-mac.txt">./install-mac.txt</a> 或<a href="http://ahageek.com/writer/special/vim/install-mac">http://ahageek.com/writer/specia...</a></li></ul></li></ul></li></ul>
 <h1> 配置 vim</h1>
 <ul><li>配置字体<ul><li>macos        执行下面的命令安装字体<pre><code class="language-clike">brew tap caskroom/fonts &amp;&amp; brew cask install font-source-code-pro
 git clone https://github.com/powerline/fonts.git --depth=1

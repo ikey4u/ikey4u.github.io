@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>vim 插件配置手册</title>
+  <link href="./css/prism.css" rel="stylesheet" />
+  <link href="./css/normalize.css" rel="stylesheet" />
+  <link href="./css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> vim 插件配置手册 </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2019-03-07 Update → 2019-03-25</div>
+    </section>
+    
+<p>标志有 ~ 的是插件是工作良好, 如丝般顺化.标志有 x 的是插件是已经不再使用的或者禁用了的.标志有 ? 的是插件是目前有点问题, 但凑合还能用.</p>
+<h1> fcitx-vim-osx (~)</h1>
+<p>场景是这样的, 当位于插入模式时, 你在输入中文, 如果你想移动一下光标,于是你按下 &lt;ESC&gt; 进入正常模式, 而输入法仍然保持这中文输入法,这个时候你按键移动时就不会生效, 而是启动了输入法, 这就很蛋疼.</p>
+<p>所以这个时候就要用这个工具了, 这个工具的地址为 <a href="https://github.com/dangxuandev/fcitx-remote-for-osx.git">https://github.com/dangxuandev/f...</a>.</p>
+<p>不过我已经将其放到 &nbsp;<code class="language-clike">$HOME/.vim/plugin/fcitx-remote/mac</code>&nbsp; 里面了. 所以以下操作在这个目录里面进行.</p>
+<p>这个目录下面只有一个 main.m 和 build.py, 我们告诉 build.py 要编译的拼音输入法名称即可编译所需的二进制文件.</p>
+<p>怎么知道是哪一个输入法打呢? 执行下面的命令</p>
+<pre><code class="language-clike">python2 build.py build -general
+./fcitx-remote-general -h
+    Usage: fcitx-remote [OPTION]
+        -c		deactivate input method
+        -o		activate input method
+        -t		switch Active/Inactive
+        -s &lt;imname&gt;	switch to the input method uniquely identified by &lt;imname&gt;
+        [no option]	display fcitx state, 1 for inactive, 2 for acitve
+        -h		display this help and exit
+        -n		display current imname
+</code></pre>
+<p>手动将输入法切换到要设置的输入法后, 执行下面打命令</p>
+<pre><code class="language-clike">./fcitx-remote-general -n
+</code></pre>
+<p>比如我的输出为 im.rime.inputmethod.Squirrel.Rime, 查看如下打对应表</p>
+<ul><li>baidu-pinyin: com.baidu.inputmethod.BaiduIM.pinyin,</li><li>baidu-wubi: com.baidu.inputmethod.BaiduIM.wubi,</li><li>sogou-pinyin: com.sogou.inputmethod.sogou.pinyin,</li><li>qq-wubi: com.tencent.inputmethod.QQInput.QQWubi,</li><li>squirrel-rime: com.googlecode.rimeime.inputmethod.Squirrel.Rime,</li><li>squirrel-rime-upstream: im.rime.inputmethod.Squirrel.Rime,</li><li>osx-pinyin: com.apple.inputmethod.SCIM.ITABC,</li><li>osx-wubi: com.apple.inputmethod.SCIM.WBX,</li><li>qingg: com.aodaren.inputmethod.Qingg,</li><li>loginput: com.logcg.inputmethod.LogInputMac.LogInputMacSP,</li><li>loginput2: com.logcg.inputmethod.LogInputMac2.LogInputMac2SP,</li><li>general: GENERAL</li></ul>
+<p>所以我可以得到名称是 squirrel-rime-upstream, 因此执行下面命令编译二进制</p>
+<pre><code class="language-clike">python2 build.py build squirrel-rime-upstream
+</code></pre>
+<p>此时会生成一个名称为 fcitx-remote-squirrel-rime-upstream 的二进制文件,将这个二进制文件重命名为 fcitx-remote 即可.</p>
+<p>对应的需要安装一个插件 <a href="https://github.com/dangxuandev/fcitx-vim-osx">https://github.com/dangxuandev/f...</a>,这个我已经将其放到 &nbsp;<code class="language-clike">$HOME/.vim/plugin/fcitx-remote</code>&nbsp; 中了, 你不需要任何操作.</p>
+<p>目前 RIME 还有一个问题是这样的, 比较难以描述:</p>
+<p>插入模式下, 你是输入法的中文状态, 然后你回到了正常模式, 于是输入法自动切换到英文模式.</p>
+<p>这个时候, 你把窗口打焦点聚焦到另外一个应用程序上, 然后再回到 vim,再进入插入模式, 也切换到了中文状态, 但是你发现你无法输入中文了,还是处于中文状态, 你不得不手动调用切换输入法的快捷键, 将其调整到中文模式.</p>
+<p>在这里 <a href="https://github.com/rime/squirrel/issues/292">https://github.com/rime/squirrel...</a> 有人也遇到了这个问题, 看来是 rime 输入法的问题.</p>
+<p>临时打解决方法是, 在 vim 里面, rime 虽然显示中文图标但是无法切换的时候,按两下 &lt;command-tab&gt; 快捷键, 就是说光标聚焦到其他程序, 再聚焦回来,可以临时解决.</p>
+<p>试用了几天后, 现在不打算使用 rime 了, 提了 issue 作者说是第三方软件的问题,但是明明我同样的配置, 搜狗输入法就没有问题.</p>
+<h1> deoplete (x)</h1>
+<p>deoplete 自动补全插件, 需要安装 pip3 install neovim, 参考配置如下</p>
+<pre><code class="language-clike">let g:python3_host_prog = g:pybin
+if has(&#39;nvim&#39;)
+    Plug &#39;Shougo/deoplete.nvim&#39;, { &#39;do&#39;: &#39;:UpdateRemotePlugins&#39; }
+else
+    Plug &#39;Shougo/deoplete.nvim&#39;
+    Plug &#39;roxma/nvim-yarp&#39;
+    Plug &#39;roxma/vim-hug-neovim-rpc&#39;
+endif
+let g:deoplete#enable_at_startup = 1
+</code></pre>
+<p>其难以忍受打问题为: 新开一个窗口, 分屏打开两个文件, 第一次按下 &lt;c-w&gt; 会导致 &lt;c-w&gt; 失效.</p>
+<h1> fzf (~)</h1>
+<p>在系统上安装 fzf</p>
+<pre><code class="language-clike">git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install
+</code></pre>
+<p>安装完成后在 Plug 里面配置如下即可</p>
+<pre><code class="language-clike">Plug &#39;~/.fzf&#39;
+</code></pre>
+<p>用法</p>
+<p>:FZF 在当前目录搜索</p>
+<p>:FZF ~ 在 ~ 目录搜索</p>
+<p>在搜索结果中, 可以使用 ctrl-j, ctrl-k 上下移动光标,使用 ctrl-t, ctrl-x, ctrl-v 分别在 tab, 水平, 垂直划分打开.</p>
+
+    <script src="./js/prism.js"></script>
+  </div>
+  </body>
+</html>
+

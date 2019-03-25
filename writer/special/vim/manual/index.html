@@ -12,13 +12,35 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 配置手册 by bugnofree </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-18</div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-03-25</div>
     </section>
     
+<h1> 手册说明</h1>
+<ul><li>manual.txt: 本手册, 对手册的说明.</li><li>安装手册<ul><li>install-overview.txt: 安装综述</li><li>install-linux.txt: linux 下的安装手册</li><li>install-mac.txt: mac 下的安装手册</li><li>install-windows.txt: windows 下的安装手册</li><li>options.txt: 安装后的配置选项</li></ul></li><li>about.txt: 关于 vim 自己的感受</li><li>cmd.txt: vim 常用命令的解释</li><li>script.txt: vim 脚本编程</li><li>symbols.txt: vim 常用符号</li><li>ycm.txt: 自动补全 ycm 的配置</li><li>plugin.txt: 插件配置手册</li></ul>
 <h1> 安装</h1>
 <p>参见 ./install-overview.txt 或者 <a href="http://ahageek.com/writer/special/vim/install-overview/">http://ahageek.com/writer/specia...</a></p>
-<h1> 功能快速预览</h1>
-<ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;man</code>&nbsp; 快速打开 &nbsp;<code class="language-clike">$HOME/.vim/manual.txt</code>&nbsp;, 即本手册</li><li>&nbsp;<code class="language-clike">&lt;leader&gt;&#39;</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;&#39;&#39;</code>&nbsp; 分别给当前单词加上单双引号</li><li>&nbsp;<code class="language-clike">&lt;leader&gt;ev</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;sv</code>&nbsp; 分别用于打开配置文件和重载配置文件</li><li>自动监视 vimrc 以及 settings 目录下配置文件的更改, 并自动更新 vimrc</li><li>大文件优化打开, 超过 10 M 的文件自动启用大文件打开功能.    对于 json 类文件, 格式化后打开更快捷,    如果未格式化, 则所有内容都在一行显示,    则打开十分hhh缓慢缓慢,因为 vim 要分析其结构</li><li>&nbsp;<code class="language-clike">:Tabmsg &lt;cmd&gt;</code>&nbsp; 在新的 tab 中捕获命令 &nbsp;<code class="language-clike">cmd</code>&nbsp; 的输出</li><li>&nbsp;<code class="language-clike">:Recent</code>&nbsp; 在新的 tab 中打开最近文件列表,    可以到该文件列表定位到所需文件后,按下 gf 即可打开文件.</li><li>&nbsp;<code class="language-clike">:Fmt</code>&nbsp; 一键将文件格式置为 unix, 编码方式为 utf-8</li></ul>
+<h1> 使用预览</h1>
+<p>安装完成后, 在 &nbsp;<code class="language-clike">$HOME/.vim/user.vim</code>&nbsp; 中配置变量, 变量说明如下</p>
+<ul><li>g:pyhome<p>    python 的主目录路径, 这个是必须要配置的.</p></li></ul>
+<ul><li>g:terminal<p>    终端程序的绝对路径, 在 normal 模式下可以使用 &nbsp;<code class="language-clike">sh</code>&nbsp; 打开终端.</p></li></ul>
+<ul><li>g:openex<p>    打开文件浏览器窗口的命令, normal 模式下可以使用 &nbsp;<code class="language-clike">ex</code>&nbsp; 调用.</p></li></ul>
+<ul><li>g:myplan, g:mybook, g:mytmp, g:myidea<p>    配置规划, 读书, 临时笔记, 思考的相关文档目录,    如果你需要则配置, 否则可忽略.</p></li></ul>
+<ul><li>g:idapro, g:idaprotag<p>    可忽略该配置</p></li></ul>
+<p>其他功能如下</p>
+<ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;man</code>&nbsp; 快速打开 &nbsp;<code class="language-clike">$HOME/.vim/manual.txt</code>&nbsp;, 即本手册</li></ul>
+<ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;&#39;</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;&#39;&#39;</code>&nbsp; 分别给当前单词加上单双引号</li></ul>
+<ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;ev</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;sv</code>&nbsp; 分别用于打开配置文件和重载配置文件</li></ul>
+<ul><li>自动监视 vimrc 以及 settings 目录下配置文件的更改, 并自动更新 vimrc.</li></ul>
+<ul><li>大文件优化打开, 超过 10 M 的文件自动启用大文件打开功能.<p>    对于 json 类文件, 格式化后打开更快捷, 如果未格式化, 则所有内容都在一行显示,    则打开十分缓慢,因为 vim 要分析其结构.</p></li></ul>
+<ul><li>修改窗口尺寸<ul><li>&lt;leader&gt;= 横向 +5</li><li>&lt;leader&gt;- 横向 -5</li><li>&lt;leader&gt;==  纵向 +15</li><li>&lt;leader&gt;--  纵向 -15</li></ul></li></ul>
+<ul><li>清楚 ^M 符号<p>    正常模式下输入 cM 命令即可</p></li></ul>
+<ul><li>时间助手<ul><li>&lt;F3&gt; 插入模式或者正常模式下插入年月日格式时间, 比如 2019-03-25</li><li>&lt;S-F3&gt; 插入模式或正常模式插入年月日时分秒格式时间, 如 2019-03-25 11:09:56</li></ul></li></ul>
+<ul><li>会话保存<p>    Ex 模式下输入 &nbsp;<code class="language-clike">:call MKS()</code>&nbsp; 即可保存会话, 保存到 &nbsp;<code class="language-clike">$HOME/ss.vim</code>&nbsp;,    使用 &nbsp;<code class="language-clike">gvim -S $HOME/ss.vim</code>&nbsp; 即可打开.</p></li></ul>
+<ul><li>标点符号转换<ul><li>中文标点符号转英文 &nbsp;<code class="language-clike">:call CNmark2ENmark()</code>&nbsp;</li><li>英文标点符号转中文 &nbsp;<code class="language-clike">:call ENmark2CNmark()</code>&nbsp;</li></ul></li></ul>
+<ul><li>清除行尾空格<p>    正常模式下输入 cS 命令即可.</p></li></ul>
+<ul><li>&nbsp;<code class="language-clike">:Tabmsg &lt;cmd&gt;</code>&nbsp; 在新的 tab 中捕获命令 &nbsp;<code class="language-clike">cmd</code>&nbsp; 的输出</li></ul>
+<ul><li>&nbsp;<code class="language-clike">:Recent</code>&nbsp; 在新的 tab 中打开最近文件列表,    可以到该文件列表定位到所需文件后,按下 gf 即可打开文件.</li></ul>
+<ul><li>&nbsp;<code class="language-clike">:FmtUU</code>&nbsp; 一键将文件格式置为 unix, 编码方式为 utf-8</li><li>&nbsp;<code class="language-clike">:FmtJSON</code>&nbsp; 一键将杂乱的 JSON 文件格式化.</li><li>&nbsp;<code class="language-clike">&lt;C-F11&gt;</code>&nbsp; 切换菜单栏</li><li>insert 模式下按 &nbsp;<code class="language-clike">jk</code>&nbsp; 进入 normal 模式</li></ul>
 <ul><li>pdf 转换插件<p>    提供一个将 vim 里面的内容高亮转换为 pdf 的插件,    位于 plugin 目录需要安装 wkhtmltopdf,    下载地址 https://wkhtmltopdf.org/downloads.html.</p><p>    如果安装到系统目录,则不需要任何设置,安装到其他地方,    则需要设置变量 &nbsp;<code class="language-clike">g:html2pdf_exepath</code>&nbsp; 的值, 指定路径,    需要时绝对路径.</p><p>    转换命令 &nbsp;<code class="language-clike">:TOpdf</code>&nbsp;, 生成的文件名为 &nbsp;<code class="language-clike">PDF@xxx.pdf</code>&nbsp;,    xxx 为你当前转换的文件名称, 保存路径为当前路径.</p></li></ul>
 <ul><li>实时预览 html<p>    安装 browser-sync 来同步预览 html</p><pre><code class="language-clike">brew install npm
 npm install -g browser-sync
@@ -27,6 +49,8 @@ npm install -g browser-sync
 </code></pre><p>    杀死进程:</p><pre><code class="language-clike">:call KillPre()
 </code></pre></li></ul>
 <ul><li>代码高亮到网页<p>    vim 自带了一个 TOhtml 命令,但是它生成的是一个完整的网页,所以在此命令基础上,    我编写了一个插件,让其生成一个单独的 div并将其内容放置到 0 号寄存器中,    插件位于 &nbsp;<code class="language-clike">~/.vim/plugin/code.vim</code>&nbsp;, 依赖 bs4 python 包,    使用 &nbsp;<code class="language-clike">pip3 install bs4</code>&nbsp; 即可对于指定文件, 执行 &nbsp;<code class="language-clike">:TOCode</code>&nbsp; 即可.    然后使用 &nbsp;<code class="language-clike">&#34;0p</code>&nbsp; 粘贴.</p><p>    代码边框样式我修改为了圆角边框,感觉好看点,    也可以使用可是模式选择指定行转换为高亮删除单词</p></li></ul>
+<h1> TODO</h1>
+<ul><li>vim 自动刷新 PDF 预览窗口<p>    可参考的有</p><ul><li>Configure Preview to auto reload pdf and stay at the same location <a href="https://apple.stackexchange.com/questions/155753/configure-preview-to-auto-reload-pdf-and-stay-at-the-same-location">https://apple.stackexchange.com/...</a></li><li>Automatically Refreshing Mac Preview when the PDF file is modified <a href="https://stackoverflow.com/questions/28315585/automatically-refreshing-mac-preview-when-the-pdf-file-is-modified">https://stackoverflow.com/questi...</a></li></ul></li></ul>
 
     <script src="./js/prism.js"></script>
   </div>

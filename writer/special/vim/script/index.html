@@ -12,7 +12,7 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 脚本编程 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-18</div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-03-25</div>
     </section>
     
 <h1> 基本语法</h1>
@@ -36,15 +36,19 @@ v:varname/The variable is one that Vim predefines
 @varname	: vim 寄存器
 $varname	: 环境变量
 </code></pre></li></ul>
-<ul><li>表达式<p>    常见的表达式有如下几种, 参考模仿即可</p><pre><code class="language-clike">let var=expr let var+=expr let var-=expr let var.=expr
-bool?expr-if-true:expr-if-false
-bool||bool bool&amp;&amp;bool !bool
-expr==expr expr!=expr expr&gt;expr expr&gt;=expr expr&lt;expr expr&lt;=expr
+<ul><li>表达式<p>    常见的表达式有如下几种, 参考模仿即可</p><ul><li>let var=expr let var+=expr let var-=expr let var.=expr</li><li>三元操作符号<pre><code class="language-clike">bool?expr-if-true:expr-if-false
+</code></pre></li><li>逻辑运算<pre><code class="language-clike">bool||bool bool&amp;&amp;bool !bool
+</code></pre></li><li>算术运算<pre><code class="language-clike">expr==expr expr!=expr expr&gt;expr expr&gt;=expr expr&lt;expr expr&lt;=expr
 num+num num-num
-str.str
 num*num num/num num%num
 +num -num
-</code></pre></li></ul>
+</code></pre></li><li>字符串拼接<pre><code class="language-clike">&#34;hello&#34;.&#34;world&#34; =&gt; &#34;helloworld&#34;
+10 . &#34;foo&#34; =&gt; &#34;10foo&#34;
+
+let s = &#34;hello&#34;
+let s .= &#34;world&#34;
+echom s =&gt; &#34;helloworld&#34;
+</code></pre></li></ul></li></ul>
 <ul><li>控制流<ul><li> for 循环<pre><code class="language-clike">for i in [1, 2, 3, 4]
   let c += i
 endfor
@@ -64,16 +68,18 @@ else
     echom &#34;finally!&#34;
 endif
 </code></pre></li></ul></li></ul>
-<ul><li>输入输出<pre><code class="language-clike">echom total
-</code></pre></li></ul>
+<ul><li>输入输出<p>    在 vim 启动已经 &nbsp;<code class="language-clike">:messages</code>&nbsp; 中显示消息</p><pre><code class="language-clike">echom total
+</code></pre><p>    在脚本里面加入错误信息所在打文件和行号是一个不错的选择, 如下所示</p><pre><code class="language-clike">let s:scriptpath = expand(&#34;&lt;sfile&gt;:p&#34;)
+echomsg s:scriptpath . &#34;.&#34; . expand(&#34;&lt;slnum&gt;&#34;) . &#34; =&gt; No fcitx-remote is found!&#34;
+</code></pre><p>    其中 &nbsp;<code class="language-clike">s:</code>&nbsp; 开头打变量是脚本(script)变量, expand 里面用 &lt;sfile&gt; 表示 source 打当前文件,    然后 &nbsp;<code class="language-clike">:p</code>&nbsp; 来展开完整路径, 这样打我们就得到了当前 source 打文件路径,    然后我们还需要获取当前行号, 可以使用 &lt;slnum&gt; 得到.</p><p>    expand 功能很强大, 可以使用 &nbsp;<code class="language-clike">:h expand</code>&nbsp; 来查看.</p></li></ul>
 <ul><li>函数<ul><li>获取函数列表<pre><code class="language-clike">:help function-list
-</code></pre></li><li>expand 函数        假设当前文件为 ~/notes/python.txt<pre><code class="language-clike">:p		expand to full path
+</code></pre></li><li>expand 函数<p>        假设当前文件为 ~/notes/python.txt</p><pre><code class="language-clike">:p		expand to full path
 :h		head (last path component removed)
 :t		tail (last path component only), 比如 expand(&#34;%:t&#34;) 得到 python.txt
 :r		root (one extension removed)
 :e		extension only
 let @a=expand(&#34;%:p&#34;) ==&gt; 寄存器 a 的值为文件的完整路径
-</code></pre></li><li>定义函数,函数格式大致如下<pre><code class="language-clike">function! TheFunc()
+</code></pre><p>        expand 也可以用于展开环境变量, 如 echo expand(&#34;$HOME&#34;) 将会输出 home 目录.</p></li><li>定义函数,函数格式大致如下<pre><code class="language-clike">function! TheFunc()
     function body ...
 endfunction
 </code></pre><p>        函数名称以 &nbsp;<code class="language-clike">function!</code>&nbsp; 开始, 其后接着函数名称(函数名首字母必须为大写),        最后以 &nbsp;<code class="language-clike">endfunction</code>&nbsp; 结束, 调用函数使用 &nbsp;<code class="language-clike">:call TheFunc()</code>&nbsp;.</p><p>        一个样例函数如下:</p><pre><code class="language-clike">nnoremap &lt;F11&gt; :call MaxWindows(1, 23, 71, 239)&lt;CR&gt;
@@ -88,6 +94,10 @@ endfunction
 catch [pattern]
     [command]
 endtry
+</code></pre></li></ul>
+<h1> 编程常用</h1>
+<ul><li>source 命令<p>    更新一个配置文件用, 如果更新打文件路径是变量和字符串混合, 则需要使用 exec</p><pre><code class="language-clike">exec &#34;source &#34; . g:home . &#34;/user.vim&#34;
+</code></pre><p>    注意, 仅仅使用 source 命令, 比如下面这个是不行的</p><pre><code class="language-clike">source g:home . &#34;/user.vim&#34;
 </code></pre></li></ul>
 <h1> 正则表达式</h1>
 <p>替换语法如下</p>
@@ -166,6 +176,36 @@ Alternations
 - @[http://vimregex.com/]
 - @[https://github.com/johngrib/vimscript-cheatsheet]
 </code></pre>
+<h1> python 接口</h1>
+<p>自带文档看一下即可, 查看命令 &nbsp;<code class="language-clike">:h python-vim</code>&nbsp;.</p>
+<p>一般的在 vim 里面用 python 写一个函数的方法如下</p>
+<pre><code class="language-clike">function! FuncName()
+python &gt;&gt; EOF
+import vim
+// codes ...
+EOF
+endfunction
+</code></pre>
+<p>里面的 vim 模块是 python 和 vim 之间进行交互的唯一模块.用法示例</p>
+<ul><li>执行 vim 命令<pre><code class="language-clike">vim.command(cmd)
+</code></pre></li></ul>
+<ul><li> 窗口与鼠标<p>    索引为 n 的窗口</p><pre><code class="language-clike">w = vim.windows[n]
+</code></pre><p>    当前窗口</p><pre><code class="language-clike">cw = vim.current.window
+</code></pre><p>    其他</p><pre><code class="language-clike">w.height = lines		# sets the window height
+w.cursor = (row, col)	# sets the window cursor position
+pos = w.cursor		# gets a tuple (row, col)
+</code></pre></li></ul>
+<ul><li>buffer<p>    索引为 n 的 buffer</p><pre><code class="language-clike">b = vim.buffers[n]
+</code></pre><p>    当前 buffer</p><pre><code class="language-clike">cb = vim.current.buffer
+</code></pre><p>    buffer 的名称</p><pre><code class="language-clike">name = b.name		# gets the buffer file name
+</code></pre><p>    获取第 n 行</p><pre><code class="language-clike">line = b[n]			# gets a line from the buffer
+</code></pre><p>    其他常用操作</p><pre><code class="language-clike">lines = b[n:m]		# gets a list of lines
+num = len(b)		# gets the number of lines
+b[n] = str			# sets a line in the buffer
+b[n:m] = [str1, str2, str3]	# sets a number of lines at once
+del b[n]			# deletes a line
+del b[n:m]			# deletes a number of lines
+</code></pre></li></ul>
 <h1> 转 pdf 插件编写</h1>
 <p>这个插件借助 wkhtmltopdf 工具将 html 转换为 pdf,需要安装该工具并添加到环境变量中, 具体可以参考如下链接</p>
 <ul><li><a href="https://github.com/wkhtmltopdf/wkhtmltopdf/releases">https://github.com/wkhtmltopdf/w...</a></li><li><a href="https://wkhtmltopdf.org/usage/wkhtmltopdf.txt">https://wkhtmltopdf.org/usage/wk...</a></li></ul>
