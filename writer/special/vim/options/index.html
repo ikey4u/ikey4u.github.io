@@ -12,22 +12,32 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 自定义选项 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-17 Update → 2019-01-18</div>
+      <div id = "lastupdate"> Publish → 2019-01-17 Update → 2019-03-28</div>
     </section>
     
-<p>在 vimrc 文件开始处有如下几个选项需要自己配置一下</p>
+<p>安装完成后, 需要在 &nbsp;<code class="language-clike">$HOME/.vim</code>&nbsp; 下新建一个 user.vim 文件, 在该文件中配置几个选项,先看一个样例文件</p>
 <pre><code class="language-clike">let g:pyhome = &#34;/usr/local/opt/python/Frameworks/Python.framework/Versions/3.7&#34;
-let g:idapro = &#34;/Applications/IDAPro7.0/ida.app/Contents/MacOS/python&#34;
-let g:idaprotag = &#34;/Applications/IDAPro7.0/ida.app/Contents/MacOS/python/tags&#34;
+
 let g:terminal = &#34;/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal&#34;
 let g:openex = &#34;open&#34;
+let g:myplan = &#34;$HOME/Documents/sync/myplan.txt&#34;
+let g:mybook = &#34;$HOME/Documents/sync/mybook.txt&#34;
+let g:mytmp = &#34;$HOME/Documents/sync/mytmp.txt&#34;
+let g:myidea = &#34;$HOME/Documents/sync/myidea.txt&#34;
+
+let g:idapro = &#34;/Applications/IDAPro7.0/ida.app/Contents/MacOS/python&#34;
+let g:idaprotag = &#34;/Applications/IDAPro7.0/ida.app/Contents/MacOS/python/tags&#34;
 </code></pre>
-<ul><li>g:pyhome 是 python 的主目录, 可以通过如下命令获得<pre><code class="language-clike">python -c &#34;import sys; print(sys.executable)&#34;
+<p>你只需要修改各个选项的值即可(即等号后面的字符串), 各个选项的含义如下</p>
+<ul><li>g:pyhome<p>    是 python 的主目录, 可以通过如下命令获得</p><pre><code class="language-clike">python3 -c &#34;import sys; print(sys.executable)&#34;
 </code></pre><p>    比如它输出</p><pre><code class="language-clike">C:\Users\Administrator\AppData\Local\Programs\Python\Python37\python.exe
 </code></pre><p>    那么 python 主目录就是</p><pre><code class="language-clike">C:\Users\Administrator\AppData\Local\Programs\Python\Python37
 </code></pre><p>    然而在 windows 下你需要替换反斜线为斜线</p><pre><code class="language-clike">C:/Users/Administrator/AppData/Local/Programs/Python/Python37
-</code></pre></li></ul>
-<ul><li>&nbsp;<code class="language-clike">idapro</code>&nbsp;, &nbsp;<code class="language-clike">idaprotag</code>&nbsp; 如果你不知道是啥, 那么你不用管.</li><li>g:terminal<p>    终端命令路径</p><ul><li>windows &nbsp;<code class="language-clike">C:\Windows\system32\cmd.exe</code>&nbsp;</li><li>linux 自己找吧</li><li>mac 参考默认设置</li></ul></li><li>g:openex<p>    打开文件浏览器</p><ul><li>windows &nbsp;<code class="language-clike">start</code>&nbsp;</li><li>linux 自己找吧</li><li>mac &nbsp;<code class="language-clike">open</code>&nbsp;</li></ul></li></ul>
+</code></pre><p>    windows 用户也是一样的.</p></li></ul>
+<ul><li>g:terminal<p>    终端程序的绝对路径, 在 normal 模式下可以使用 &nbsp;<code class="language-clike">sh</code>&nbsp; 打开终端.</p><ul><li>windows &nbsp;<code class="language-clike">C:\Windows\system32\cmd.exe</code>&nbsp;</li><li>linux 自己找吧</li><li>mac 参考默认设置</li></ul></li></ul>
+<ul><li>g:openex<p>    打开文件浏览器窗口的命令, normal 模式下可以使用 &nbsp;<code class="language-clike">ex</code>&nbsp; 调用.</p><ul><li>windows &nbsp;<code class="language-clike">start</code>&nbsp;</li><li>linux 自己找吧</li><li>mac &nbsp;<code class="language-clike">open</code>&nbsp;</li></ul></li></ul>
+<ul><li>g:myplan, g:mybook, g:mytmp, g:myidea<p>    配置规划, 读书, 临时笔记, 思考的相关文档目录,    如果你需要则配置, 否则可忽略.</p></li></ul>
+<ul><li>&nbsp;<code class="language-clike">idapro</code>&nbsp;, &nbsp;<code class="language-clike">idaprotag</code>&nbsp;<p>    如果你不知道是啥, 那么你不用管.</p></li></ul>
 
     <script src="./js/prism.js"></script>
   </div>

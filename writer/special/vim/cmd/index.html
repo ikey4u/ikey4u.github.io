@@ -12,9 +12,14 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 命令 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-03-25</div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-03-28</div>
     </section>
     
+<ul><li>vim 终端/term<p>    vim 8.1 引入了终端功能. 即能在 vim 中划分出一个命令行窗口,    十分方便运行命令.</p><p>    将当期窗口划分为两个窗口, above 表示终端在上面的窗口,    below 表示终端在下面的窗口.</p><pre><code class="language-clike">:above term
+:below term
+</code></pre><p>    将当期终端窗口放在最上面或者最下面.</p><pre><code class="language-clike">:bot term
+:top term
+</code></pre><p>    打开一个终端后, 默认是插入模式, 可以输入命令并执行.</p><p>    如果要进入 normal 模式, 输入 &lt;c-\&gt; &lt;c-n&gt;.</p><p>    要进入插入模式, 直接按下 i 即可.</p></li></ul>
 <ul><li>打开光标下的文件<p>    假如说你有一个文件 about.txt, 当你把光标放到当前字符串 &nbsp;<code class="language-clike">about.txt</code>&nbsp; 中的任意一个位置时,    按下 &nbsp;<code class="language-clike">gf</code>&nbsp; 即可在当前窗口打开该文件.</p><p>    这个命令很有用, 总结一下(以下均是把鼠标放在文件名称处进行的操作)</p><ul><li>gf: 在当前窗口打开该文件, 当你想跳回原文件时, 使用 &nbsp;<code class="language-clike">b #</code>&nbsp;</li><li>&lt;c-w&gt;gf: 在新的 tab 中打开该文件</li><li>&lt;c-w&gt;f: 水平划分打开该文件</li></ul><p>    没有垂直划分打开文件的操作, 但是等价的, 你可以先 &nbsp;<code class="language-clike">:vsp</code>&nbsp;, 然后再 &nbsp;<code class="language-clike">gf</code>&nbsp;.</p></li></ul>
 <ul><li>输入 unicode 字符<p>    在插入模式下, 按下 ctrl+v, 然后以下三种方式任选其一</p><ul><li>按下 x, 然后输入一个十六进制数值</li><li>按下 u, 然后输入 4 个十六进制字符序列</li><li>按下 U, 然后输入 8 个十六进制字符序列</li></ul></li></ul>
 <ul><li>exec vs call<p>    exec 将一个字符串当做命令执行, 而 call 则是调用一个函数.</p></li></ul>

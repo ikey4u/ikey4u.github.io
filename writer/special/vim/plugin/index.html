@@ -12,7 +12,7 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 插件配置手册 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-03-07 Update → 2019-03-25</div>
+      <div id = "lastupdate"> Publish → 2019-03-07 Update → 2019-03-28</div>
     </section>
     
 <p>标志有 ~ 的是插件是工作良好, 如丝般顺化.标志有 x 的是插件是已经不再使用的或者禁用了的.标志有 ? 的是插件是目前有点问题, 但凑合还能用.</p>
@@ -74,6 +74,9 @@ let g:deoplete#enable_at_startup = 1
 <p>:FZF 在当前目录搜索</p>
 <p>:FZF ~ 在 ~ 目录搜索</p>
 <p>在搜索结果中, 可以使用 ctrl-j, ctrl-k 上下移动光标,使用 ctrl-t, ctrl-x, ctrl-v 分别在 tab, 水平, 垂直划分打开.</p>
+<h1> NERDTree (~)</h1>
+<ul><li>:NERDTreeFind<p>    打开当前文件所在的目录树, 可以定义一个快捷键.</p><p>    noremap &lt;leader&gt;r :NERDTreeFind&lt;cr&gt;</p></li></ul>
+<ul><li>增删改查预览<p>    打开目录树后, 定位到所在文件或目录, 按下 m,    即可打开 nerdtree 的菜单, 可以增删改查文件和目录.</p><p>    按下 m 后具体的选项有</p><ul><li>(a)dd a childnode</li><li>(m)ove the currnet node</li><li>(d)elete the current node</li><li>(r)eveal in Finder the current node</li><li>(o)pen the current node with system editor</li><li>(q)uicklook the current node</li><li>(c)opy the current node</li><li>(l)ist the current node</li></ul><p>    按下 ESC 退出.</p></li></ul>
 
     <script src="./js/prism.js"></script>
   </div>
