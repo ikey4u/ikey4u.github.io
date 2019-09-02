@@ -12,11 +12,101 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 插件配置手册 </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-03-07 Update → 2019-03-28</div>
+      <div id = "lastupdate"> Publish → 2019-03-07 Update → 2019-09-02</div>
     </section>
     
 <p>标志有 ~ 的是插件是工作良好, 如丝般顺化.标志有 x 的是插件是已经不再使用的或者禁用了的.标志有 ? 的是插件是目前有点问题, 但凑合还能用.</p>
-<h1> fcitx-vim-osx (~)</h1>
+<h1> fzf (~)</h1>
+<p>在系统上安装 fzf</p>
+<pre><code class="language-clike">git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install
+</code></pre>
+<p>安装完成后在 Plug 里面配置如下即可</p>
+<pre><code class="language-clike">Plug &#39;~/.fzf&#39;
+</code></pre>
+<p>用法</p>
+<p>:FZF 在当前目录搜索</p>
+<p>:FZF ~ 在 ~ 目录搜索</p>
+<p>在搜索结果中, 可以使用 ctrl-j, ctrl-k 上下移动光标,使用 ctrl-t, ctrl-x, ctrl-v 分别在 tab, 水平, 垂直划分打开.</p>
+<h1> NERDTree (~)</h1>
+<ul><li>:NERDTreeFind<p>    打开当前文件所在的目录树, 可以定义一个快捷键.</p><p>    noremap &lt;leader&gt;r :NERDTreeFind&lt;cr&gt;</p></li></ul>
+<ul><li>增删改查预览<p>    打开目录树后, 定位到所在文件或目录, 按下 m,    即可打开 nerdtree 的菜单, 可以增删改查文件和目录.</p><p>    按下 m 后具体的选项有</p><ul><li>(a)dd a childnode</li><li>(m)ove the currnet node</li><li>(d)elete the current node</li><li>(r)eveal in Finder the current node</li><li>(o)pen the current node with system editor</li><li>(q)uicklook the current node</li><li>(c)opy the current node</li><li>(l)ist the current node</li></ul><p>    按下 ESC 退出.</p></li></ul>
+<h1> vimtex</h1>
+<ul><li>let g:vimtex_quickfix_enabled=0<p>    禁用 quickfix 窗口</p></li></ul>
+<ul><li>vimtex 快捷键<p>    使用 &nbsp;<code class="language-clike">:help vimtex-default-mappings</code>&nbsp; 即可查看所有的快捷键.</p><ul><li>PDF 预览: &lt;leader&gt;ll</li><li>编译的配置信息: &lt;leader&gt;li</li><li>编译的输出信息: &lt;leader&gt;lo</li><li>vimtex  的编译日志: &lt;leader&gt;lq</li></ul></li></ul>
+<ul><li>自动编译 bibtex 的问题<p>    对于 bibtex 文件, vimtex 第一次会编译失败, 不要灰心, 再让 vimtex 执行一次即可.</p></li></ul>
+<ul><li>自动刷新预览 PDF<p>    在 macos 下需要下载安装 skim 阅读器, 安装完成后打开 skim 阅读器的设置,    然后打开 Sync 栏, 在 PDF-TeX Sync support 中的 Preset 里面选择    MacVim(我用的是 MacVim).</p><p>    skim 设置完毕后, 配置 vimtex 为如下选项</p><pre><code class="language-clike">let g:vimtex_view_method = &#39;skim&#39;
+let g:vimtex_compiler_latexmk = {
+      \ &#39;build_dir&#39;: &#39;out&#39;,
+      \ &#39;continuous&#39; : 1,
+      \ &#39;options&#39; : [
+      \   &#39;-xelatex&#39;,
+      \   &#39;-verbose&#39;,
+      \   &#39;-silent&#39;,
+      \   &#39;-synctex=1&#39;,
+      \   &#39;-interaction=nonstopmode&#39;,
+      \   &#39;-file-line-error&#39;,
+      \   &#39;-bibtex&#39;,
+      \ ],
+      \}
+</code></pre><p>    g:vimtex_view_method 用于设置使用的 PDF 程序名称,    g:vimtex_compiler_latexmk 用于设置 latexmk 程序编译 TEX 文件时的选项,    我们在这里设置输出目录为 out 目录.</p><p>    latexmk 的选项通过 options 来指定, latexmk 的编译引擎需要通过 TEX 指令来指定.</p><p>    TEX 指令就是在 .tex 文件的最前面几行, 用注释的方式指定一些变量. 如下</p><pre><code class="language-clike">%! TEX program = xelatex
+%! TEX root = main.tex
+</code></pre><p>    program 用于设置编译 TEX 文件时所用的编译引擎, root 用于设置整个 TEX 工程的主文件.</p><p>    除此之外, 可以设置文件预览的更新速度, 时间为毫秒, 方法如下</p><pre><code class="language-clike">autocmd Filetype tex setl updatetime=10
+</code></pre></li></ul>
+<ul><li>隐藏符号<p>    为了隐藏符号, 可以设置如下两行</p><pre><code class="language-clike">set conceallevel=2
+let g:tex_conceal=&#39;abdmg&#39;
+</code></pre><p>    conceallevel 用于设置隐藏特定文本的级别.    0 表示正常显示文本, 1 表示隐藏的文本用一个空格来替换,    2 表示完全不显示隐藏的文本.</p><p>    我们可以设置特定的文件类型中要隐藏的文本, 这里用 g:tex_conceal 来设定,    每个字符表示一种类型</p><pre><code class="language-clike">a = accents/ligatures
+b = bold and italic
+d = delimiters
+m = math symbols
+g = Greek
+s = superscripts/subscripts
+</code></pre></li></ul>
+<ul><li>错误排查<p>    如果一切配置正常, 但是使用 \ll 无法预览,    那么可能是文件写错了, 命令行用 xelatex 编译一下看看具体的错误.</p><p>    如果你卡在了 \ll 命令上, 全身不能动弹, 说明你的 tex 文件位于 ~/Downloads    目录, 这是一个神奇的问题, 至今不得其解, 只要把 tex 文件放在 ~/Downloads 目    录, \ll 就不能动态.</p></li></ul>
+<h1> ultisnips (~)</h1>
+<ul><li>自动补全快捷键<pre><code class="language-clike">let g:UltiSnipsExpandTrigger=&#34;&lt;leader&gt;i&#34;
+</code></pre></li></ul>
+<ul><li>跳转<pre><code class="language-clike">let g:UltiSnipsJumpForwardTrigger=&#34;&lt;c-j&gt;&#34;
+let g:UltiSnipsJumpBackwardTrigger=&#34;&lt;c-k&gt;&#34;
+</code></pre></li></ul>
+<ul><li>配置搜索路径<p>    在 3.3 Snippet Search Path  中提到了如何配置搜索路径,    如果只在下面变量中声明了一个绝对路径, 那么 ultiSnips 将不会加载第三方snippet 文件,    这将对性能有一个明显的提升,但是却导致了无法使用第三方文件,    然而你可以拷贝第三方文件到指定目录,这里指定目录为 ~/.vim/UltiSnips.    注意下面的方法会导致出错</p><pre><code class="language-clike">let g:UltiSnipsSnippetDirectories=$HOME.&#39;/.vim/UltiSnips&#39;
+</code></pre><p>    而可行的方法如下</p><pre><code class="language-clike">let g:UltiSnipsSnippetDirectories=[$HOME.&#39;/.vim/UltiSnips&#39;]
+</code></pre><p>    更加通用的写法是</p><pre><code class="language-clike">let g:UltiSnipsSnippetDirectories=[expand(g:home).&#39;/UltiSnips&#39;]
+</code></pre><p>    这里的 g:home 是定义的全局 vim 变量, 表示 vim 主目录,    该变量可跨平台使用.</p></li></ul>
+<ul><li>编辑 snip 文件<p>    如果你想编辑某个 Snippet 文件,使用 :UltiSnipsEdit 然后按下 tab    即可查看所有支持的类型, 另外可以修改 :UltiSnipsEdit 打开后的窗口布局,    比如设置为水平布局</p><pre><code class="language-clike">let g:UltiSnipsEditSplit=&#34;horizontal&#34;
+</code></pre></li></ul>
+<h2> snip 文件编写</h2>
+<p>一个 snippet 文件的格式如下</p>
+<pre><code class="language-clike">snippet trigger_word [ &#34;description&#34; [ options ] ]
+...
+endsnippet
+</code></pre>
+<p>snippet 和 endsnippet 中的所有行就是自动插入的行.</p>
+<p>可以使用反引号括起来来动态的执行命令, 如</p>
+<pre><code class="language-clike">snippet today &#34;Date&#34;
+`date +%F`
+endsnippet
+</code></pre>
+<p>也可以 &nbsp;<code class="language-clike">!p </code>&nbsp; 开头, 执行 python 命令</p>
+<pre><code class="language-clike">snippet box &#34;Box&#34;
+`!p snip.rv = &#39;┌&#39; + &#39;─&#39; * (len(t[1]) + 2) + &#39;┐&#39;`
+│ $1 │
+`!p snip.rv = &#39;└&#39; + &#39;─&#39; * (len(t[1]) + 2) + &#39;┘&#39;`
+$0
+endsnippet
+</code></pre>
+<p>设置使用的 python 版本</p>
+<pre><code class="language-clike">let g:UltiSnipsUsePythonVersion = 3
+</code></pre>
+<p>下面我们来看一下如何使用 python 来插入 snips</p>
+<p>参考</p>
+<ul><li>How I&#39;m able to take notes in mathematics lectures using LaTeX and Vim <a href="https://castel.dev/post/lecture-notes-1/">https://castel.dev/post/lecture-...</a></li></ul>
+<h1> semantic hightlight</h1>
+<p>语义高亮插件. 将每一个不同的关键字或者变量设置为不同颜色, 增加区分度.</p>
+<ul><li>特定文件自动启用<pre><code class="language-clike">let g:semanticEnableFileTypes = [&#39;javascript&#39;, &#39;vim&#39;, &#39;text&#39;, &#39;cpp&#39;, &#39;c&#39;, &#39;go&#39;, &#39;python&#39;, &#39;tex&#39;]
+</code></pre><p>    文件类型可以用 :set ft 来查看.</p></li></ul>
+<ul><li>手动启用<p>    运行 :SemanticHighlight 启用语义高亮, 运行 :SemanticHighlightRevert 取消.</p></li></ul>
+<h1> fcitx-vim-osx (x)</h1>
 <p>场景是这样的, 当位于插入模式时, 你在输入中文, 如果你想移动一下光标,于是你按下 &lt;ESC&gt; 进入正常模式, 而输入法仍然保持这中文输入法,这个时候你按键移动时就不会生效, 而是启动了输入法, 这就很蛋疼.</p>
 <p>所以这个时候就要用这个工具了, 这个工具的地址为 <a href="https://github.com/dangxuandev/fcitx-remote-for-osx.git">https://github.com/dangxuandev/f...</a>.</p>
 <p>不过我已经将其放到 &nbsp;<code class="language-clike">$HOME/.vim/plugin/fcitx-remote/mac</code>&nbsp; 里面了. 所以以下操作在这个目录里面进行.</p>
@@ -49,6 +139,12 @@
 <p>在这里 <a href="https://github.com/rime/squirrel/issues/292">https://github.com/rime/squirrel...</a> 有人也遇到了这个问题, 看来是 rime 输入法的问题.</p>
 <p>临时打解决方法是, 在 vim 里面, rime 虽然显示中文图标但是无法切换的时候,按两下 &lt;command-tab&gt; 快捷键, 就是说光标聚焦到其他程序, 再聚焦回来,可以临时解决.</p>
 <p>试用了几天后, 现在不打算使用 rime 了, 提了 issue 作者说是第三方软件的问题,但是明明我同样的配置, 搜狗输入法就没有问题.</p>
+<p>(2019-04-17) 我决定再一次转换为 rime 输入法, 熟悉一下这个牛逼的输入法.</p>
+<p>mac 下面使用 rime 输入法无需配置即可解决中英文切换问题, 具体效果如下</p>
+<pre><code class="language-clike">插入模式下进入输入法 rime, 默认时英文, 然后按下左 shift, 进入中文, 打字完毕后,
+按下 ESC 进入到正常模式, 这时 rime 自动切换到其英文模式, 可以正常使用 hjkl 等来移动,
+当移动完毕后, 进入插入模式, 此时 rime 仍然保持其英文模式, 按下 shift 即可进入中文模式继续打字.
+</code></pre>
 <h1> deoplete (x)</h1>
 <p>deoplete 自动补全插件, 需要安装 pip3 install neovim, 参考配置如下</p>
 <pre><code class="language-clike">let g:python3_host_prog = g:pybin
@@ -62,21 +158,58 @@ endif
 let g:deoplete#enable_at_startup = 1
 </code></pre>
 <p>其难以忍受打问题为: 新开一个窗口, 分屏打开两个文件, 第一次按下 &lt;c-w&gt; 会导致 &lt;c-w&gt; 失效.</p>
-<h1> fzf (~)</h1>
-<p>在系统上安装 fzf</p>
-<pre><code class="language-clike">git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
-</code></pre>
-<p>安装完成后在 Plug 里面配置如下即可</p>
-<pre><code class="language-clike">Plug &#39;~/.fzf&#39;
+<h1> ctags, gtags (~)</h1>
+<ul><li>编译安装<p>    安装 cmake 和 automake工具后, 执行如下命令编译 ctags, 程序前缀设置为 ex</p><pre><code class="language-clike">git clone https://github.com/universal-ctags/ctags.git
+cd ctags/
+./autogen.sh
+./configure --prefix=/usr/local/ --program-prefix=ex
+make &amp;&amp; sudo make install
+</code></pre><p>    执行如下命令安装 gtags</p><pre><code class="language-clike">curl -O https://ftp.gnu.org/pub/gnu/global/global-6.6.3.tar.gz
+tar zxvf global-6.6.3.tar.gz
+cd global-6.6.3
+./configure --with-universal-ctags=/usr/local/bin/exctags
+make &amp;&amp; sudo make install
+cp -f *.vim ~/.vim/plugin
+</code></pre></li></ul>
+<ul><li>生成 tags<pre><code class="language-clike">exctags -R *
+gtags --gtagslabel ctags 或者 gtags
+</code></pre></li></ul>
+<ul><li>ctags 用法<ul><li>&nbsp;<code class="language-clike">ctrl+]</code>&nbsp; 到定义处</li><li>&nbsp;<code class="language-clike">ctrl+t</code>&nbsp; 返回原位置</li><li>&nbsp;<code class="language-clike">ctrl+w+]</code>&nbsp; 在新窗口打开定义</li></ul></li></ul>
+<ul><li>gtags 用法<ul><li>查看某个 token 的定义或者引用<p>        光标移动到该 token 处, 执行 :GtagsCursor</p></li><li>何处定义了某函数 :Gtags &lt;function name&gt;, 或略大小写 :Gtags -i &lt;function name&gt;        Gtags 命令是可以自动补全的.</li><li>何处引用了某函数 :Gtags -r &lt;function name&gt;</li><li>quickfix 移动 :cn -&gt; 下一条 :cp -&gt; 上一条 :cl -&gt; 列出所有行</li></ul></li></ul>
+<ul><li>其他<p>    ctags 并不会自动更新,如何自动更新呢?</p><p>    安装 autotags.vim 插件, 然后在 .vimrc 中加入如下选项</p><pre><code class="language-clike">let g:autotagCtagsCmd=&#34;exctags&#34;
+let g:autotagTagsFile=&#34;tags&#34;
+</code></pre><p>    使用 gtags-cscope 取代默认的 cscope</p><pre><code class="language-clike">set cscopetag
+set cscopeprg=gtags-cscope
+</code></pre><p>    自动更新 gtags</p><pre><code class="language-clike">let GtagsCscope_Auto_Load = 1
+let GtagsCscope_Auto_Map = 1
+let GtagsCscope_Quiet = 1
+</code></pre><p>    条转到变量的定义处可以时光标定位到变量处, 然后按下 gd</p></li></ul>
+<h1> LeaderF (~)</h1>
+<p>配置 ctags 程序</p>
+<pre><code class="language-clike">let g:Lf_Ctags = &#34;exctags&#34;
 </code></pre>
 <p>用法</p>
-<p>:FZF 在当前目录搜索</p>
-<p>:FZF ~ 在 ~ 目录搜索</p>
-<p>在搜索结果中, 可以使用 ctrl-j, ctrl-k 上下移动光标,使用 ctrl-t, ctrl-x, ctrl-v 分别在 tab, 水平, 垂直划分打开.</p>
-<h1> NERDTree (~)</h1>
-<ul><li>:NERDTreeFind<p>    打开当前文件所在的目录树, 可以定义一个快捷键.</p><p>    noremap &lt;leader&gt;r :NERDTreeFind&lt;cr&gt;</p></li></ul>
-<ul><li>增删改查预览<p>    打开目录树后, 定位到所在文件或目录, 按下 m,    即可打开 nerdtree 的菜单, 可以增删改查文件和目录.</p><p>    按下 m 后具体的选项有</p><ul><li>(a)dd a childnode</li><li>(m)ove the currnet node</li><li>(d)elete the current node</li><li>(r)eveal in Finder the current node</li><li>(o)pen the current node with system editor</li><li>(q)uicklook the current node</li><li>(c)opy the current node</li><li>(l)ist the current node</li></ul><p>    按下 ESC 退出.</p></li></ul>
+<pre><code class="language-clike">:Leaderf &lt;subcommand&gt;
+</code></pre>
+<p>subcommand 有如下几个</p>
+<ul><li>file                search files</li><li>tag                 navigate tags using the tags file</li><li>rg                  grep using rg</li><li>function            navigate functions or methods in the buffer</li><li>mru                 search most recently used files</li><li>searchHistory       execute the search command in the history</li><li>cmdHistory          execute the command in the history</li><li>help                navigate the help tags</li><li>line                search a line in the buffer</li><li>colorscheme         switch between colorschemes</li><li>self                execute the commands of itself</li><li>bufTag              navigate tags in the buffer</li><li>buffer              search buffers</li></ul>
+<p>leaderf 的主要作用还是用来查找文件, 所以我们需要告诉 LeaderF 从哪里开始查找,定义如下变量(元素可以自己随便定义)</p>
+<pre><code class="language-clike">let g:Lf_RootMarkers = [&#39;.git&#39;, &#39;.svn&#39;, &#39;.leaderf&#39;]
+</code></pre>
+<p>只定义这个是不行的, 还需定义工作目录模式</p>
+<pre><code class="language-clike">let g:Lf_WorkingDirectoryMode = &#39;&lt;mode&gt;&#39;
+</code></pre>
+<p>&lt;mode&gt; 有如下几种</p>
+<pre><code class="language-clike">- c 设置工作目录为当前工作目录(默认)
+- a [当前工作目录] 的最近的包含了 RootMarkers 的祖先目录
+- A [  当前文件  ] 的最近的包含了 RootMarkers 的祖先目录
+- f 当前文件的目录
+</code></pre>
+<p>我们可以设置 mode 为 &#39;Ac&#39;.</p>
+<pre><code class="language-clike">let g:Lf_WorkingDirectoryMode = &#39;Ac&#39;
+</code></pre>
+<p>其常用的快捷键为</p>
+<ul><li>&lt;leader&gt;f 搜索 leaderf 的工作目录中的文件</li><li>&lt;leader&gt;b 搜索 buffer 中的文件</li><li>&lt;C-j&gt; &lt;C-k&gt; 在搜索结果中向下向上移动</li><li>&lt;ESC&gt; 或者 &lt;C-C&gt; 推出 LeaderF</li><li>&lt;C-R&gt; 在 fuzzy 搜索和 regex 搜索模式间切换</li><li>&lt;Tab&gt; 切换为 vim 的 normal 模式, 可以在结果中移动, 然后回车即可选择文件</li><li>&lt;C-V&gt; 从剪贴板粘贴</li><li>&lt;C-X&gt; 水平窗口打开</li><li>&lt;C-]&gt; 垂直窗口打开</li><li>&lt;C-T&gt; tab 中打开</li><li>&lt;C-P&gt; 预览结果</li></ul>
 
     <script src="./js/prism.js"></script>
   </div>

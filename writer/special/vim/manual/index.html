@@ -12,7 +12,7 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> vim 配置手册 by bugnofree </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-03-28</div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-09-02</div>
     </section>
     
 <h1> 手册中各文件说明</h1>
@@ -20,6 +20,10 @@
 <h1> 安装步骤</h1>
 <p>安装参见 install-overview.txt 或者 <a href="http://ahageek.com/writer/special/vim/install-overview/">http://ahageek.com/writer/specia...</a></p>
 <h1> 功能一览</h1>
+<ul><li>alt + c 复制到剪贴板, alt + p 粘贴剪贴板内容</li></ul>
+<ul><li>\P 拷贝当前文件路径到剪贴板</li></ul>
+<ul><li>当前目录打开命令<p>    终端程序的绝对路径, 在 normal 模式下可以使用 &nbsp;<code class="language-clike">&lt;leader&gt;os</code>&nbsp; 打开终端.    os 是 open shell 的缩写.</p></li></ul>
+<ul><li>当前目录打开文件浏览器<p>    打开文件浏览器窗口的命令, normal 模式下可以使用 &nbsp;<code class="language-clike">&lt;leader&gt;oe</code>&nbsp; 调用.    oe 是 open explorer 的缩写.</p></li></ul>
 <ul><li>&nbsp;<code class="language-clike">\r</code>&nbsp; 快速打开或刷新树形浏览器</li></ul>
 <ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;man</code>&nbsp; 快速打开 &nbsp;<code class="language-clike">$HOME/.vim/manual.txt</code>&nbsp;, 即本手册</li></ul>
 <ul><li>&nbsp;<code class="language-clike">&lt;leader&gt;&#39;</code>&nbsp; 和 &nbsp;<code class="language-clike">&lt;leader&gt;&#39;&#39;</code>&nbsp; 分别给当前单词加上单双引号</li></ul>
@@ -27,11 +31,10 @@
 <ul><li>自动监视 vimrc 以及 settings 目录下配置文件的更改, 并自动更新 vimrc.</li></ul>
 <ul><li>大文件优化打开, 超过 10 M 的文件自动启用大文件打开功能.<p>    对于 json 类文件, 格式化后打开更快捷, 如果未格式化, 则所有内容都在一行显示,    则打开十分缓慢,因为 vim 要分析其结构.</p></li></ul>
 <ul><li>修改窗口尺寸<ul><li>&lt;leader&gt;= 横向 +5</li><li>&lt;leader&gt;- 横向 -5</li><li>&lt;leader&gt;==  纵向 +15</li><li>&lt;leader&gt;--  纵向 -15</li></ul></li></ul>
-<ul><li>清楚 ^M 符号<p>    正常模式下输入 cM 命令即可</p></li></ul>
-<ul><li>时间助手<ul><li>&lt;F3&gt; 插入模式或者正常模式下插入年月日格式时间, 比如 2019-03-25</li><li>&lt;S-F3&gt; 插入模式或正常模式插入年月日时分秒格式时间, 如 2019-03-25 11:09:56</li></ul></li></ul>
 <ul><li>会话保存<p>    Ex 模式下输入 &nbsp;<code class="language-clike">:call MKS()</code>&nbsp; 即可保存会话, 保存到 &nbsp;<code class="language-clike">$HOME/ss.vim</code>&nbsp;,    使用 &nbsp;<code class="language-clike">gvim -S $HOME/ss.vim</code>&nbsp; 即可打开.</p></li></ul>
 <ul><li>标点符号转换<ul><li>中文标点符号转英文 &nbsp;<code class="language-clike">:call CNmark2ENmark()</code>&nbsp;</li><li>英文标点符号转中文 &nbsp;<code class="language-clike">:call ENmark2CNmark()</code>&nbsp;</li></ul></li></ul>
-<ul><li>清除行尾空格<p>    正常模式下输入 cS 命令即可.</p></li></ul>
+<ul><li>清除行尾空格<p>    正常模式下输入 Cs 命令即可.</p></li></ul>
+<ul><li>清除 ^M 符号<p>    正常模式下输入 Cm 命令即可</p></li></ul>
 <ul><li>&nbsp;<code class="language-clike">:Tabmsg &lt;cmd&gt;</code>&nbsp; 在新的 tab 中捕获命令 &nbsp;<code class="language-clike">cmd</code>&nbsp; 的输出</li></ul>
 <ul><li>&nbsp;<code class="language-clike">:Recent</code>&nbsp; 在新的 tab 中打开最近文件列表,    可以到该文件列表定位到所需文件后,按下 gf 即可打开文件.</li></ul>
 <ul><li>&nbsp;<code class="language-clike">:FmtUU</code>&nbsp; 一键将文件格式置为 unix, 编码方式为 utf-8</li></ul>
@@ -44,8 +47,19 @@ npm install -g browser-sync
 </code></pre><p>    下载地址 <a href="https://github.com/BrowserSync/browser-sync">https://github.com/BrowserSync/b...</a>,    编写一个脚本 livehtml 存放到系统路径中, 脚本内容如下:</p><pre><code class="language-clike">browser-sync start --server --files &#34;css/*.css, *.html
 </code></pre><p>    调用方法 &nbsp;<code class="language-clike">:call Pre()</code>&nbsp;, 杀死进程 &nbsp;<code class="language-clike">:call KillPre()</code>&nbsp;.</p></li></ul>
 <ul><li>代码高亮到网页<p>    vim 自带了一个 TOhtml 命令,但是它生成的是一个完整的网页,所以在此命令基础上,    我编写了一个插件,让其生成一个单独的 div并将其内容放置到 0 号寄存器中,    插件位于 &nbsp;<code class="language-clike">~/.vim/plugin/code.vim</code>&nbsp;, 依赖 bs4 python 包,    使用 &nbsp;<code class="language-clike">pip3 install bs4</code>&nbsp; 即可对于指定文件, 执行 &nbsp;<code class="language-clike">:TOCode</code>&nbsp; 即可.    然后使用 &nbsp;<code class="language-clike">&#34;0p</code>&nbsp; 粘贴.</p><p>    代码边框样式我修改为了圆角边框,感觉好看点,    也可以使用可是模式选择指定行转换为高亮删除单词</p></li></ul>
-<h1> TODO</h1>
-<ul><li>vim 自动刷新 PDF 预览窗口<p>    可参考的有</p><ul><li>Configure Preview to auto reload pdf and stay at the same location <a href="https://apple.stackexchange.com/questions/155753/configure-preview-to-auto-reload-pdf-and-stay-at-the-same-location">https://apple.stackexchange.com/...</a></li><li>Automatically Refreshing Mac Preview when the PDF file is modified <a href="https://stackoverflow.com/questions/28315585/automatically-refreshing-mac-preview-when-the-pdf-file-is-modified">https://stackoverflow.com/questi...</a></li></ul></li></ul>
+<ul><li>切换颜色主题<p>    通过 :SetColor &lt;colorname&gt;.&lt;light|dark&gt; 来设置颜色主题.    比如 :SetColor cosmic_latte.light 来设置高亮颜色.</p><p>    如果不指定参数, 则会打印支持的颜色主题. 样例输出如下</p><pre><code class="language-clike">Usage: SetColor &lt;colorname&gt;.&lt;light|dark&gt;
+Available color schemes:
+    desert.dark
+    diokai.dark
+    dracula.dark
+    perun.dark
+    rupza.dark
+    evening.dark
+    fruchtig.light
+    cosmic_latte.&lt;dark|light&gt;
+</code></pre><p>    你也可以仅仅传入一个参数, 此时将基于当前的背景色,    设置颜色主题, 如果有的颜色主题不支持当前背景色,    那么结果将可能十分丑.</p></li></ul>
+<ul><li>快速设置字体<p>    normal 模式下使用 &lt;leader&gt;font 即可打开字体设置窗口,    可以快速调整当前字体大小和样式.</p></li></ul>
+<ul><li>snippets<ul><li>data\i 插入日期, 类似于 &nbsp;<code class="language-clike">2019-04-19</code>&nbsp;</li><li>time\i 插入时间, 类似于 &nbsp;<code class="language-clike">10:51</code>&nbsp;</li><li>datetime\i 插入时间日期, 类似于 &nbsp;<code class="language-clike">2019-04-19 10:51</code>&nbsp;</li></ul></li></ul>
 
     <script src="./js/prism.js"></script>
   </div>

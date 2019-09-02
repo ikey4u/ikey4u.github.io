@@ -12,23 +12,17 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> macos 安装 vim </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-01-18</div>
+      <div id = "lastupdate"> Publish → 2019-01-15 Update → 2019-09-02</div>
     </section>
     
 <p>编译环境参考 <a href="./install-overview.txt">./install-overview.txt</a> 或 <a href="http://ahageek.com/writer/special/vim/install-overview">http://ahageek.com/writer/specia...</a></p>
-<p>配置完成后执行如下命令完成安装</p>
-<p>安装 xcode</p>
-<pre><code class="language-clike">xcode-select --install
-sudo xcode-select -switch /Library/Developer/CommandLineTools
+<p>从这里 <a href="https://github.com/macvim-dev/macvim/releases">https://github.com/macvim-dev/ma...</a> 下载二进制文件,安装完成后, 输入 :version 命令确认 python 为动态加载模式,也就是包含以下输出 +python/dyn +python3/dyn, 然后设置环境变量</p>
+<pre><code class="language-clike">export PATH=&#34;/Applications/MacVim.app/Contents/bin&#34;:$PATH
 </code></pre>
-<p>查看 vim 信息</p>
-<pre><code class="language-clike">brew search macvim
-brew info macvim
-</code></pre>
-<p>安装 macvim</p>
+<p>由于 YCM 依赖于 cmake , 所以安装一下 cmake</p>
 <pre><code class="language-clike">brew install cmake
-brew install macvim --with-lua --with-override-system-vim
 </code></pre>
+<p>克隆 vim 配置文件到 ~/.vim 并设置 user.vim 中的 python 路径.</p>
 
     <script src="./js/prism.js"></script>
   </div>

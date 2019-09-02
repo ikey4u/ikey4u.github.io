@@ -26,6 +26,20 @@ Author: bugnofree
 
 # 功能一览
 
+- alt + c 复制到剪贴板, alt + p 粘贴剪贴板内容
+
+- \P 拷贝当前文件路径到剪贴板
+
+- 当前目录打开命令
+
+    终端程序的绝对路径, 在 normal 模式下可以使用 `<leader>os` 打开终端.
+    os 是 open shell 的缩写.
+
+- 当前目录打开文件浏览器
+
+    打开文件浏览器窗口的命令, normal 模式下可以使用 `<leader>oe` 调用.
+    oe 是 open explorer 的缩写.
+
 - `\r` 快速打开或刷新树形浏览器
 
 - `<leader>man` 快速打开 `$HOME/.vim/manual.txt`, 即本手册
@@ -48,15 +62,6 @@ Author: bugnofree
     - <leader>==  纵向 +15
     - <leader>--  纵向 -15
 
-- 清楚 ^M 符号
-
-    正常模式下输入 cM 命令即可
-
-- 时间助手
-
-    - <F3> 插入模式或者正常模式下插入年月日格式时间, 比如 2019-03-25
-    - <S-F3> 插入模式或正常模式插入年月日时分秒格式时间, 如 2019-03-25 11:09:56
-
 - 会话保存
 
     Ex 模式下输入 `:call MKS()` 即可保存会话, 保存到 `$HOME/ss.vim`,
@@ -69,7 +74,11 @@ Author: bugnofree
 
 - 清除行尾空格
 
-    正常模式下输入 cS 命令即可.
+    正常模式下输入 Cs 命令即可.
+
+- 清除 ^M 符号
+
+    正常模式下输入 Cm 命令即可
 
 - `:Tabmsg <cmd>` 在新的 tab 中捕获命令 `cmd` 的输出
 
@@ -122,11 +131,35 @@ Author: bugnofree
     代码边框样式我修改为了圆角边框,感觉好看点,
     也可以使用可是模式选择指定行转换为高亮删除单词
 
-# TODO
+- 切换颜色主题
 
-- vim 自动刷新 PDF 预览窗口
+    通过 :SetColor <colorname>.<light|dark> 来设置颜色主题.
+    比如 :SetColor cosmic_latte.light 来设置高亮颜色.
 
-    可参考的有
+    如果不指定参数, 则会打印支持的颜色主题. 样例输出如下
 
-    - Configure Preview to auto reload pdf and stay at the same location @[https://apple.stackexchange.com/questions/155753/configure-preview-to-auto-reload-pdf-and-stay-at-the-same-location]
-    - Automatically Refreshing Mac Preview when the PDF file is modified @[https://stackoverflow.com/questions/28315585/automatically-refreshing-mac-preview-when-the-pdf-file-is-modified]
+        Usage: SetColor <colorname>.<light|dark>
+        Available color schemes:
+            desert.dark
+            diokai.dark
+            dracula.dark
+            perun.dark
+            rupza.dark
+            evening.dark
+            fruchtig.light
+            cosmic_latte.<dark|light>
+
+    你也可以仅仅传入一个参数, 此时将基于当前的背景色,
+    设置颜色主题, 如果有的颜色主题不支持当前背景色,
+    那么结果将可能十分丑.
+
+- 快速设置字体
+
+    normal 模式下使用 <leader>font 即可打开字体设置窗口,
+    可以快速调整当前字体大小和样式.
+
+- snippets
+
+    - data\i 插入日期, 类似于 `2019-04-19`
+    - time\i 插入时间, 类似于 `10:51`
+    - datetime\i 插入时间日期, 类似于 `2019-04-19 10:51`
