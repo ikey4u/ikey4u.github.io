@@ -28,11 +28,13 @@ Author: bugnofree
     mage vendor
     mage install
 
-
 我就没用这种方法安装. 然后我们选选看 hugo 的主题, 然后主题各种加载不上来,
 开了代理也不行, 看 了一下网页源码, 发现一个网站 http://cloudfront.net/,
 是亚马逊提供的 cdn 服务, 好吧, 把这个网 站加入到 ss 的代理名单里面,
 然后刷新网页就可以了.
+
+如果没有安装 go, 那么直接从官网下载即可, 注意下载 extended 版本, 这种版本支持
+Sass/SCSS 类型的 CSS 输出.
 
 hugo 的主要命令有如下几个
 
@@ -61,9 +63,9 @@ hugo 的主要命令有如下几个
             └── themes
 
     其中 archetypes 中存放的是工程模板, 什么意思呢,
-    就是使用 hugo new <document>的时候 向 document 中自动添加的内容.
-    config.toml 是 hugo 工程的配置文件,content 目录存我们网 站的所有内容,
-    在 content 目录下面的每一个顶级目录都被hugo 当成是一个内容节区 (content section).
+    就是使用 hugo new <document> 的时候 向 document 中自动添加的内容.
+    config.toml 是 hugo 工程的配置文件, content 目录存我们网站的所有内容,
+    在 content 目录下面的每一个顶级目录都被 hugo 当成是一个内容节区 (content section).
     data 目录存储 hugo 生成网站时所用到的配置文件. layouts 存放的是模板文件,
     也就是如何渲染生成你的静态网站的模板.  static 目录下面存放的是你网站用到的静态资源,
     比如图片,css,JavaScript 等等, 这些资源在生成静态网站时, 会原封不动的进行拷贝.
@@ -80,7 +82,7 @@ hugo 的主要命令有如下几个
 
 - 然后使用下面的命令启动, 可以修改页面, 动态显示.
 
-        screen -dm -S hugo hugo server -w --bind=0.0.0.0
+        hugo server -w --bind=0.0.0.0
 
     这样基本上一个文档网站的雏形就算完成了, 然后就是添加页面了, 在网站根目录下面执行下面的命令:
 
@@ -89,7 +91,6 @@ hugo 的主要命令有如下几个
     我们将会新建一个内容节区 simengine 目录以及其首页文件 _index.md.
     首页文件的名字必须是 _index.md, 其默认内容定义在archetypes/default.md 中.
 
-
 # 搭建个人博客
 
 以 just4tus.github.io 为例, 用户名为 just4tus.
@@ -97,10 +98,29 @@ hugo 的主要命令有如下几个
 申请 github 账号,新建两个 repo:
 
 - just4tuts.github.io
+
+    这个 repo 用来存储 hugo 编译后的静态网站.
+
 -  hugosite
 
-    - 将 hugosite 克隆到本地
-    - 使用 hugo 新建一个站点,然后拷贝其下的内容到 hugosite 中, 进入 hugosite
+    这个 repo 用来存储静态网站的原始文件.
+
+    - 在本地新建 hugosite 文件夹
+
+             hugo new site hugosite
+
+        进入该文件夹
+
+            cd hugosite
+
+        和远程 hugosite repo 关联
+
+            git init .
+            git remote add origin git@github.com:<username>/hugosite.git
+
+    - 配置主题
+
+        依旧是在本地的 hugosite 文件夹下面操作.
 
         - 克隆主题
 

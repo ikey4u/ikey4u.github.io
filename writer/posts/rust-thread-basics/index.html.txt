@@ -1,0 +1,259 @@
+---
+Title: rust 多线程基础
+Date: 2019-09-28
+Author: bugnofree
+---
+
+好久不写博客了, 忙里偷闲写一篇, 主要参考自 The Rust Programming Language @[https://doc.rust-lang.org/stable/book/].
+
+来说说 rust 中的多线程.
+
+# 线程, 进程, 多线程导致的问题
+
+一个磁盘上的可执行程序, 在操作系统中跑起来, 就变成了一个进程,
+这个进程包含了该程序的各种代码, 让不同代码同时跑, 就得到了多线程.
+
+多线程能导致的问题有
+
+- 竞争条件(race conditions)
+
+    什么是竞争条件? 举个例子 @[https://cs.gmu.edu/~astavrou/courses/CS_571_F09/CS571_Lecture3_synchronization.pdf],
+    假设有一个共享变量 balance, 进程 A 的操作为
+
+        balance = balance - 100
+
+    进程 B 的操作为
+
+        balance = balance - 200
+
+    这些编程语句最终都将转化为多条指令的执行, 比如减 100 的指令为
+
+        A1. LOAD R1, BALANCE
+        A2. SUB R1, 100
+        A3. STORE BALANCE, R1
+
+    那么类似的, 减 200 的指令为
+
+        B1. LOAD R1, BALANCE
+        B2. SUB R1, 200
+        B3. STORE BALANCE, R1
+
+    然而要知道 cpu 在执行指令时, 某一时刻具体执行那条指令并不是确定的,
+    因为会有上下文切换发生, 比如说上面六条指令的执行可能是这样的
+
+        A1. LOAD R1, BALANCE
+        A2. SUB R1, 100
+        A3. STORE BALANCE, R1
+            Context Switch!
+            B1. LOAD R1, BALANCE
+            B2. SUB R1, 200
+            B3. STORE BALANCE, R1
+
+    这个是正确的, balance 最终被减去了 300. 但是也有可能是这样的
+
+        A1. LOAD R1, BALANCE
+        A2. SUB R1, 100
+            Context Switch!
+            B1. LOAD R1, BALANCE
+            B2. SUB R1, 200
+            B3. STORE BALANCE, R1
+        Context Switch!
+        A3. STORE BALANCE, R1
+
+    这里 balance 实际上只减去了 200.
+
+- 死锁(Deadlock)
+
+    死锁就是: 你要进屋, 但是门被锁死了(只能从外面打开), 屋里的人给不了你钥匙,
+    你也没钥匙开锁, 双方常规情况下, 只能无穷无尽的等待.
+
+- 神秘的 bug
+
+    多线程条件下指令的执行顺序是无法准确被预测的, 有点那么任性,
+    因此 bug 的出现可能是因为某种随机顺序而造成的, 但是下次可能就不会出现,
+    这种诡异的 bug 一般会让人痛不欲生, 十分酸爽.
+
+# 线程模型
+
+通常的, 直接调用系统提供的线程 API 接口来实现线程的方式称之为 `1:1` 线程模型,
+也就是说, 一个编程语言线程对应于一个系统级别的线程.
+
+许多编程语言会在这些 API 接口的基础之上, 实现自己的线程模型. 这样子的话,
+看线程就会有两个侧, 一侧是编程语言级别的, 一个是操作系统级别的,
+称之为 `M:N` 线程模型, 也就是说编程语言中的 M 个线程实际上对应于操作系统中的 N 条线程.
+
+在 `M:N` 模型中, 编程语言提供的线程也称之为绿色线程(green thread).
+
+由于 `M:N` 模型中, 编程语言需要提供一个尺寸比较大的运行时(Runtime)来管理线程,
+Rust 作为一种系统级编程语言, 标准库里面只实现了 `1:1` 的线程模型实现,
+以使得 Runtime 尺寸尽可能小. 不过不要担心, 已经有 crate 实现了 `M:N` 线程模型.
+
+# 在 Rust 中创建线程
+
+好了, 上面瞎 bb 了半天, 怎么在 rust 中创建新的线程呢?
+
+rust 给我们提供了接口 thread::spawn 来创建线程, 看一下秒懂
+
+    use std::thread;
+    use std::time::Duration;
+
+    fn main() {
+        thread::spawn(|| {
+            for i in 1..10 {
+                println!("hi number {} from the spawned thread!", i);
+                thread::sleep(Duration::from_millis(1));
+            }
+        });
+
+        for i in 11..15 {
+            println!("hi number {} from the main thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    }
+
+这里有几个线程? 答 1 个的都是学渣.
+
+主线程使用 thread::spawn 启动了一个子线程.
+
+spawn 之后子线程就立马启动了, 然后代码立即回到了主线程,
+子线程和主线程就开始双兔傍地走, 一起走哦.
+
+在我这里一次输出看起来是这样子的
+
+    hi number 11 from the main thread!
+    hi number 1 from the spawned thread!
+    hi number 12 from the main thread!
+    hi number 2 from the spawned thread!
+    hi number 13 from the main thread!
+    hi number 3 from the spawned thread!
+    hi number 14 from the main thread!
+    hi number 4 from the spawned thread!
+
+因为控制台 IO 肯定是加锁了的, 一次只能有一个输出,
+所以尽管子线程和主线程同时运行, 我们看到的还是子线程和主线程交替输出.
+
+我们突然发现子线程好像没执行完就挂掉了, 只输出了 1, 2, 3, 4 死在 5 上面,
+当然不是如来佛祖一巴掌拍死的, 而是主线程结束了, 所以子线程就凉凉了.
+
+很好理解对不对. 可爱的你托起小脸蛋问, 那子线程怎么才能不凉凉呢?
+
+# 让所有线程执行完毕,一家人就要整整齐齐的
+
+实际上 thread::spawn 的函数声明是这样子的
+
+    pub fn spawn<F, T>(f: F) -> JoinHandle<T>
+    where
+        F: FnOnce() -> T,
+        F: Send + 'static,
+        T: Send + 'static,
+
+哇, 这是什么鬼东西, 看不懂. 看不懂没关系, 返回值总能看到吧, 是一个
+JoinHandler, 当然了 JoinHandler 又是个什么鬼!
+
+行了, 先不管那么多, 不过就从名字来看, 差不多可以知道是线程的句柄(嗯, 事实就是这样).
+
+通过 JoinHandler 的 join 方法我们可以阻塞宿主线程, 让子线程执行完毕. 能不能说人话?
+
+在上面这个例子中, 宿主线程就是主线程, 所以我们只需要在主线程中执行 join 方法,
+那么宿主线程就会等待子线程执行完毕后, 才回自己再开始执行.
+
+所以程序员只需要这么悄悄该上那么一笔, 如下所示
+
+    use std::thread;
+    use std::time::Duration;
+
+    fn main() {
+        let handle = thread::spawn(|| {
+            for i in 1..10 {
+                println!("hi number {} from the spawned thread!", i);
+                thread::sleep(Duration::from_millis(1));
+            }
+        });
+
+        handle.join().unwrap();
+
+        for i in 11..15 {
+            println!("hi number {} from the main thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    }
+
+然后就可以让井然有序的执行起来, 输出如下所示
+
+    hi number 1 from the spawned thread!
+    hi number 2 from the spawned thread!
+    hi number 3 from the spawned thread!
+    hi number 4 from the spawned thread!
+    hi number 5 from the spawned thread!
+    hi number 6 from the spawned thread!
+    hi number 7 from the spawned thread!
+    hi number 8 from the spawned thread!
+    hi number 9 from the spawned thread!
+    hi number 11 from the main thread!
+    hi number 12 from the main thread!
+    hi number 13 from the main thread!
+    hi number 14 from the main thread!
+
+# 线程中的 move 闭包
+
+上一节中我们看到 spawn 的参数 F 是一个 FnOnce 的闭包类型,
+这种闭包类型通过 move 可以获得, 也就是一次性获取捕获的对象的所有权.
+
+怎么用呢, 也是很容易啦
+
+    use std::thread;
+
+    fn main() {
+        let v = vec![1, 2, 3];
+
+        let handle = thread::spawn(|| {
+            println!("Here's a vector: {:?}", v);
+        });
+
+        handle.join().unwrap();
+    }
+
+程序员说要有光, 上帝嘿嘿一笑关了灯. 于是黑暗来了, 编译报错
+
+    error[E0373]: closure may outlive the current function, but it borrows `v`, which is owned by the current function
+     --> main.rs:6:32
+      |
+    6 |     let handle = thread::spawn(|| {
+      |                                ^^ may outlive borrowed value `v`
+    7 |         println!("Here's a vector: {:?}", v);
+      |                                           - `v` is borrowed here
+    help: to force the closure to take ownership of `v` (and any other referenced variables), use the `move` keyword
+      |
+    6 |     let handle = thread::spawn(move || {
+      |                                ^^^^^^^
+
+    error: aborting due to previous error
+
+    For more information about this error, try `rustc --explain E0373`.
+
+看着貌似怪不好理解的, 直白的翻译大概是
+
+    闭包可能在当前函数之外还会继续生存下去, 但是闭包借用了一个变量 v,
+    然而变量 v 被当前函数所拥有.
+
+就是说子线程里面用一根线牵到主线程一侧, 最开始呢宿主线程那边可能绑了一个锤子,
+子线程还能拿着这个锤子敲敲打打, 但是随着两个线程各干各的, 可能过了一段时间,
+锤子就被主线程给扔掉了, 子线程就还用个 '锤子'?(没啥可用了).
+
+所以编译报错就是说, 宿主线程还是直接把锤子给子线程好了, 提示加一个 move 关键字.
+
+    use std::thread;
+
+    fn main() {
+        let v = vec![1, 2, 3];
+
+        let handle = thread::spawn(move || {
+            println!("Here's a vector: {:?}", v);
+        });
+
+        handle.join().unwrap();
+    }
+
+上帝笑了笑, 说道: 生活就是这么朴实无华且枯燥.
+
+该洗洗睡了孩子.
