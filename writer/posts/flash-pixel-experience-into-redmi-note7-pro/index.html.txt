@@ -1,0 +1,203 @@
+---
+Title: Redmi Note 7 Pro 刷入 Pixel Experience
+Date: 2019-11-07
+Author: bugnofree
+---
+
+# 背景
+
+今年六月份换了个红米 Note 7 pro, 一直用着小米自带的系统, 用到现在.
+
+信号不怎么好, 导航时好时坏, 拿去小米维修点修理了一次,
+修完后, 大夏天的,和我女票来回走了两公里测试 gps 是否准确,
+结果导航还是不那么准确, 挺让人恼火的, 手机信号是好了点.
+
+不过, 转念一想, 不到 2k 的手机, 要求过份高了.
+
+之后就慢悠悠的用着, 后来不知道怎么回事, 往上划手机的时候,
+老是出现 miui 的广告推送, 很多震惊体新闻, 还有好多那种打擦边球的新闻图片,
+可是又找不到关闭的地方, 而且 miui 看着那么丑, 于是就开始刷机了...
+
+# 谈一谈备份
+
+Android 系统中, 各个大厂针对自己的手机, 备份做的还算不错,
+但是一旦你要到换成其他手机或者第三方 ROM, 那就有点惨了.
+
+备份主要考虑的有如下几个
+
+- 聊天记录
+
+    我用微信用的比较多, 这是所有备份中体验最糟糕的地方.
+
+    最糟糕的地方, 妈的, 真是最糟糕的地方.
+
+    傻 x 微信, 傻 x.
+
+    傻 x 在什么地方呢? 你只能用局域无线网来备份.
+
+    这是什么傻 x 设计啊.
+
+    好吧, 那既然要无线局域网, 那我手机开热点可以吧,
+    实际情况是不可以! 它检测到你的手机用的是窝峰网络!
+    然后它就提示你了, 电脑和手机不在同一个局域网, 因此不能传输哦~
+
+    于是我又试了试 usb 给电脑提供网络, 依旧不行, 提示两者不在同一个局域网.
+
+    只能是, 一个路由器, 手机和电脑同时这个路由器, 然后才行.
+
+    唉.
+
+    而且微信对这个网络质量要求极高, 时不时出现 poor network, 我特么....
+
+    好吧.
+
+    不管怎样, 总算是把最重要的聊天记录给备份了, 剩下的不要了.
+
+    忘记说了, 我是先把聊天记录备份到电脑上, 之后再恢复到新手机上.
+
+- 照片
+
+    这个好说, 找到相机的默认目录, 一般是 `/sdcard/DCIM`,
+    在电脑上直接用 adb 把这个目录拖到电脑上就好了,
+    后续我打算把这个目录也用 syncthing 同步了.
+
+- 沙雕图
+
+    平常上微博或者知乎, 会遇到一些沙雕图, 大笑一番然后保存到本地,
+    这个就需要你自己找一下这些图保存到那里了, 然后手动备份一下,
+    比较麻烦, 我就直接放弃了.
+
+- 文档
+
+    一些主要的文档, 我都通过 syncthing 同步了, 所以这个我不需要担心.
+
+# 刷机
+
+## 解锁 BootLoader
+
+这个网上常见的说法是解锁 BL, BL 就是 bootloader 的缩写,
+在你备份完手机上的资料后, 关闭 wifi, 插入 sim 卡, 打开流量.
+
+打开手机开发者选项, 在设备解锁状态菜单中选择绑定帐号和设备.
+
+手机关机.
+
+关机后, 按下音量下键, 然后按住电源键重启手机, 进入 fastboot 模式,
+如果 fastboot devices 没有显示出设备设备, 那...再来一遍.
+
+下载解锁工具 @[http://www.miui.com/unlock/done.html], 打开解锁工具,
+在 windows 或者 Windows 虚拟机中使用小米官方解锁工具解锁即可.
+
+## 刷入 recovery 镜像
+
+recovery 来这里下载 @[https://forum.xda-developers.com/redmi-note-7-pro/how-to/guide-recover-destroyed-screen-note-7-t3956097]
+
+下载得到 rar 压缩包中包含两个镜像: recovery.img, vbmeta.img.
+
+在 fastboot 模式中依次执行下面的命令
+
+    fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img
+    fastboot flash recovery recovery.img
+
+recovery 一定要使用这里的, 其他的都是不行的, 这其中的曲折经历, 太惨了.
+
+怎么个惨法?
+
+比如这里的
+@[https://github.com/TwrpBuilder/android_device_xiaomi_violet/releases] 和这
+里的 @[https://twrp.me/xiaomi/xiaomiredminote7pro.html].
+
+这些 recovery 有一个啥特色呢? 假设现在你的手机是小米官方镜像,
+在第一次刷 recovery 的时候, 是可以正常进入 recovery 的,
+进入 recovery 我们格式化分区, 双清后刷入第三方 ROM 以及 magisk,
+重启系统.
+
+目前为止, 一切完美, 你可以正常进入你刷入的 ROM 系统, 并成功的安装了 magisk,
+但是一旦你的手机有问题了, 启动不了了, 当你想再次进入 recovery 的时候,
+你发现你已经无路可走了, 具体表现为, recovery 进不去, 重新刷入 recovery 也还是
+进不去 recovery.
+
+惨死.
+
+这个时候你唯一的做法就是下载原厂镜像, 重新在 fastboot 模式下刷机.
+
+当然你的手机资料是保存不了了. 蛋疼.
+
+几乎把 xda 上的所有帖子给翻了个遍, 弄到凌晨三点, 才找到了上面正确的解决方法.
+
+## 解密 /data 分区并刷入系统
+
+在上面一步中刷入 recovery 之后, 关机.
+
+按住开机键和音量加键开机, 出现小米动画的时候, 松开开机键, 进入 recovery 模式.
+
+### 第一次进入 recovery
+
+这是第一次进入 recovery 模式, 执行下面的操作
+
+    依次 Wipe/Format Data, 这将格式化 /data 分区.
+    依次 Advanced Wipe, 选择 cache 和 system 分区, wipe 掉
+    依次 Reboot/Recovery, 记住必须启动到 Recovery, 不要启动到系统, 否则数据分区会再次被加密.
+
+### 第二次进入 recovery
+
+重启之后, 是第二次进入 recovery 模式
+
+依次 Advanced/Adb Sideload, 刷入 PE 镜像, 下载地址 @[https://download.pixelexperience.org/violet/],
+当前(2019-11-06)的最新版本为 PixelExperience_violet-10.0-20191021-1744-BETA-OFFICIAL.zip.
+
+刷入 Magisk, 注意从这里下载 @[https://github.com/solohsu/magisk_files],
+我选择的是 https://github.com/solohsu/magisk_files/blob/master/custom_builds/Magisk-v20.0.zip
+
+刷入 DM, 最重要的一个卡刷包, 用于禁用数据加密, 从这里下载 @[https://androidfilehost.com/?fid=1899786940962604362]
+
+这三个文件刷入后, 就可以关机进入系统了, recovery 也是好使的了(也就是说你不会出现上面的惨剧了).
+
+进入系统后打开 Magisk, 可以看到 Preserve force encryption 选项没有被勾选且
+在手机的设置安全中能看到手机未加密.
+
+重新进入 twrp, 在 advanced 中的文件管理器中, 进入 /data/adb 目录, 能看到该目录下的文件名称不是乱码.
+
+# 安装 edxposed
+
+## 安装 Riru 和 Sandhook
+
+进入手机后, 在 magisk 中搜索安装 Riru 模块安装.
+
+来到这里 @[https://github.com/ElderDrivers/EdXposed/pull/354#issue-317628252],
+下载 magisk-EdXposed-SandHook-v0.4.6.0_beta-release.zip, 放入手机中.
+在 magisk 中安装该文件.
+
+这两个安装完成后, 重启手机.
+
+## 安装 edxposed manager
+
+下载地址 @[https://github.com/ElderDrivers/EdXposedManager/releases],
+下载安装即可. 但是这个 manager 不是很稳定, 安装老版本
+@[https://github.com/solohsu/XposedInstaller/releases], 测试了一下稳定许多.
+
+## 微信模块
+
+下载地址, https://github.com/firesunCN/WechatEnhancement,
+建议自己编译安装.
+
+在 edxposed manager 中启用, 然后重启手机.
+
+# 手机设置
+
+- 消除 x 号
+
+    执行以下命令
+
+        adb shell settings put global captive_portal_http_url http://google.cn/generate_204
+        adb shell settings put global captive_portal_https_url https://google.cn/generate_204
+
+    然后开启离线模式, 再启用.
+
+- 已知的 bug
+
+    热点和 usb tethering 无法使用, 不过还好, 能忍受.
+
+# 体验
+
+牛逼! 体验舒服! 一千元的手机用出了四千元手机的感觉!
