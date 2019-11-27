@@ -196,7 +196,13 @@ recovery 一定要使用这里的, 其他的都是不行的, 这其中的曲折�
 
 - 已知的 bug
 
-    热点和 usb tethering 无法使用, 不过还好, 能忍受.
+    usb tethering 无法使用, 不过还好, 能忍受.
+
+    热点无法使用的修复方法: 打开开发者选项, 在 Networking 一栏中关闭
+    Tethering hardware acceleration, 然后就可以使用了,
+    亲测 2.4GHz 和 5GHz 都可以使用.
+
+    这个解决方法来自 @[https://forum.xda-developers.com/showpost.php?p=80631043&postcount=912].
 
 # 体验
 

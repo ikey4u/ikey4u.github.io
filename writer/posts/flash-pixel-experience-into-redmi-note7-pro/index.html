@@ -12,7 +12,7 @@
     <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
       <div id = "headtitle"> Redmi Note 7 Pro 刷入 Pixel Experience </div>
       <div id = "headinfo"> by bugnofree </div>
-      <div id = "lastupdate"> Publish → 2019-11-07 Update → 2019-11-07</div>
+      <div id = "lastupdate"> Publish → 2019-11-07 Update → 2019-11-27</div>
     </section>
     
 <h1> 背景</h1>
@@ -81,7 +81,7 @@ fastboot flash recovery recovery.img
 <ul><li>消除 x 号<p>    执行以下命令</p><pre><code class="language-clike">adb shell settings put global captive_portal_http_url http://google.cn/generate_204
 adb shell settings put global captive_portal_https_url https://google.cn/generate_204
 </code></pre><p>    然后开启离线模式, 再启用.</p></li></ul>
-<ul><li>已知的 bug<p>    热点和 usb tethering 无法使用, 不过还好, 能忍受.</p></li></ul>
+<ul><li>已知的 bug<p>    usb tethering 无法使用, 不过还好, 能忍受.</p><p>    热点无法使用的修复方法: 打开开发者选项, 在 Networking 一栏中关闭    Tethering hardware acceleration, 然后就可以使用了,    亲测 2.4GHz 和 5GHz 都可以使用.</p><p>    这个解决方法来自 <a href="https://forum.xda-developers.com/showpost.php?p=80631043&postcount=912">https://forum.xda-developers.com...</a>.</p></li></ul>
 <h1> 体验</h1>
 <p>牛逼! 体验舒服! 一千元的手机用出了四千元手机的感觉!</p>
 
