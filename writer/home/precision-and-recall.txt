@@ -1,0 +1,11 @@
+---
+Title: precision and recall
+Date: 2020-01-09
+Author: bugnofree
+---
+
+统计学中的 precison 和 recall 含义图解
+
+@[./images/precision-and-recall.svg]
+
+根据 P, R 的值可以进一步得出 F1-Score 为 F1 = 2PR/(P+R)
