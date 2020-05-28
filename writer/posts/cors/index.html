@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <title>Cross Origin Resouce Sharing</title>
+  <link href="../pigger/css/prism.css" rel="stylesheet" />
+  <link href="../pigger/css/normalize.css" rel="stylesheet" />
+  <link href="../pigger/css/pigger.css" rel="stylesheet" />
+  </head>
+  <body>
+  <div style="padding:1% 5% 1% 5%">
+    <section style="padding-top: 20px; padding-bottom: 5px; color: #fff; text-align: center; background-image: linear-gradient(120deg, #224a73, #0d4027);">
+      <div id = "headtitle"> Cross Origin Resouce Sharing </div>
+      <div id = "headinfo"> by bugnofree </div>
+      <div id = "lastupdate"> Publish → 2020-05-28 Update → 2020-05-28</div>
+    </section>
+    
+<h1> 跨域基本概念</h1>
+<p>在 CORS 中, 以三元组 &nbsp;<code class="language-clike">&lt;协议, 二级域, 端口&gt;</code>&nbsp; 唯一标记一个访问域,当三元组中的任意一个发生变化时, 就发生了跨域. 协议比较好理解, 比如 http, https等, 二级域就是紧接着顶级域后的域, 比如 &nbsp;<code class="language-clike">ahageek.com</code>&nbsp; 其顶级域是 &nbsp;<code class="language-clike">com</code>&nbsp;, 二级域就是 &nbsp;<code class="language-clike">ahageek</code>&nbsp;, 端口也比较好理解, 就不说了.</p>
+<p>浏览器中 CORS 分为两类: 简单请求和非简单请求.</p>
+<ul><li>简单请求<p>    符合以下要求的是简单请求</p><ul><li>使用的方法: GET, HEAD 或者 POST</li><li>请求头中使用的字段<pre><code class="language-clike">Accept
+Accept-Language
+Content-Language
+Content-Type(仅限于 text/plain, multipart/form-data, application/x-www-form-urlencoded)
+DPR
+Downlink
+Save-Data
+Viewport-Width
+Width
+</code></pre></li></ul><p>    当使用上述方法以及对应的请求头字段时, 就是简单请求. 当前浏览器发现是简单请求时,    就在请求头中自动添加一个 Origin 字段, 加入请求源.</p><p>    服务器接收到这个请求时, 如果接收, 那么会返回响应头, 包含 &nbsp;<code class="language-clike">Access-Control-*</code>&nbsp; 相关的字段.</p></li></ul>
+<ul><li>非简单请求<p>    当浏览器发现请求是非简单请求时, 会先发送一个预检请求(preflight),    主要是探测一下看看服务器是否支持这样的请求.    预检请求所采用的方法是 OPTIONS, 请求头中包含两个字段</p><pre><code class="language-clike">Access-Control-Request-Method: 浏览器将用到的请求方法
+Access-Control-Request-Headers: 浏览器会额外发送的请求头字段, 逗号分割
+</code></pre></li></ul>
+<p>不管哪种方式, 只要服务器允许跨域, 响应头中必定包含 Access-Control-Allow-Origin 字段,在该字段中指明允许的源.</p>
+<h1> 解决跨域问题</h1>
+<p>在写前端的时候, 通常会遇到跨域问题, 一个比较通用的方法是使用 nginx 反向代理,在 nginx 配置文件目录中添加如下配置文件</p>
+<pre><code class="language-clike">server {
+    listen  3456;
+    server_name _;
+    client_max_body_size 200M;
+    location ~ /api/ {
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods &#39;GET, POST, OPTIONS&#39;;
+            add_header Access-Control-Allow-Headers &#39;DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization&#39;;
+
+            if ($request_method = &#39;OPTIONS&#39;) {
+                return 204;
+            }
+            rewrite ^/api/(.*)$ /$1  break;
+            proxy_pass http://127.0.0.1:1024;
+    }
+}
+</code></pre>
+<p>假设你服务器地址为 &lt;IP&gt; 那么访问 &nbsp;<code class="language-clike">&lt;IP&gt;:3456/api</code>&nbsp; 就相当于访问内网 &nbsp;<code class="language-clike">http://127.0.0.1:1024</code>&nbsp;.</p>
+<p>这里有一个地方要注意就是设置 nginx 的 client_max_body_size 的大小, 默认情况下为 1M, 如果你要上传文件超过了 1M, 那么也会出现 CORS 访问错误, 这个是个坑, 需要注意.</p>
+
+    <script src="../pigger/js/prism.js"></script>
+  </div>
+  </body>
+</html>
+

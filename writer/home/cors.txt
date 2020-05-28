@@ -1,0 +1,78 @@
+---
+Title: Cross Origin Resouce Sharing
+Date: 2020-05-28
+Author: bugnofree
+---
+
+# 跨域基本概念
+
+在 CORS 中, 以三元组 `<协议, 二级域, 端口>` 唯一标记一个访问域,
+当三元组中的任意一个发生变化时, 就发生了跨域. 协议比较好理解, 比如 http, https
+等, 二级域就是紧接着顶级域后的域, 比如 `ahageek.com` 其顶级域是 `com`, 二级域
+就是 `ahageek`, 端口也比较好理解, 就不说了.
+
+浏览器中 CORS 分为两类: 简单请求和非简单请求.
+
+- 简单请求
+
+    符合以下要求的是简单请求
+
+    - 使用的方法: GET, HEAD 或者 POST
+    - 请求头中使用的字段
+
+            Accept
+            Accept-Language
+            Content-Language
+            Content-Type(仅限于 text/plain, multipart/form-data, application/x-www-form-urlencoded)
+            DPR
+            Downlink
+            Save-Data
+            Viewport-Width
+            Width
+
+    当使用上述方法以及对应的请求头字段时, 就是简单请求. 当前浏览器发现是简单请求时,
+    就在请求头中自动添加一个 Origin 字段, 加入请求源.
+
+    服务器接收到这个请求时, 如果接收, 那么会返回响应头, 包含 `Access-Control-*` 相关的字段.
+
+- 非简单请求
+
+
+    当浏览器发现请求是非简单请求时, 会先发送一个预检请求(preflight),
+    主要是探测一下看看服务器是否支持这样的请求.
+    预检请求所采用的方法是 OPTIONS, 请求头中包含两个字段
+
+        Access-Control-Request-Method: 浏览器将用到的请求方法
+        Access-Control-Request-Headers: 浏览器会额外发送的请求头字段, 逗号分割
+
+
+不管哪种方式, 只要服务器允许跨域, 响应头中必定包含 Access-Control-Allow-Origin 字段,
+在该字段中指明允许的源.
+
+# 解决跨域问题
+
+在写前端的时候, 通常会遇到跨域问题, 一个比较通用的方法是使用 nginx 反向代理,
+在 nginx 配置文件目录中添加如下配置文件
+
+    server {
+        listen  3456;
+        server_name _;
+        client_max_body_size 200M;
+        location ~ /api/ {
+                add_header Access-Control-Allow-Origin *;
+                add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+                add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+
+                if ($request_method = 'OPTIONS') {
+                    return 204;
+                }
+                rewrite ^/api/(.*)$ /$1  break;
+                proxy_pass http://127.0.0.1:1024;
+        }
+    }
+
+
+假设你服务器地址为 <IP> 那么访问 `<IP>:3456/api` 就相当于访问内网 `http://127.0.0.1:1024`.
+
+这里有一个地方要注意就是设置 nginx 的 client_max_body_size 的大小, 默认情况下
+为 1M, 如果你要上传文件超过了 1M, 那么也会出现 CORS 访问错误, 这个是个坑, 需要注意.
